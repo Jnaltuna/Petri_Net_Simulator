@@ -86,7 +86,11 @@ public class Arc extends ArcEdge implements Cloneable {
         } else {
             if (this.type.equals(Arc.RESET)) { //TODO agregar aca para el lector
                 drawArrowDouble(g, arrowTip);
-            } else {
+            }
+            else if (this.type.equals(Arc.READER)){
+                drawLine(g, arrowTip);
+            }
+            else {
                 drawArrow(g, arrowTip);
             }
         }

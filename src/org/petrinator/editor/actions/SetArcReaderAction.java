@@ -19,7 +19,7 @@
 package org.petrinator.editor.actions;
 
 import org.petrinator.editor.Root;
-import org.petrinator.editor.commands.SetArcResetCommand;
+import org.petrinator.editor.commands.SetArcReaderCommand;
 import org.petrinator.petrinet.Arc;
 import org.petrinator.util.GraphicsTools;
 
@@ -41,7 +41,7 @@ public class SetArcReaderAction extends AbstractAction {
         putValue(NAME, name);
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/setarcresetaction.gif"));
         putValue(SHORT_DESCRIPTION, name);
-        putValue(MNEMONIC_KEY, KeyEvent.VK_I);
+        //putValue(MNEMONIC_KEY, KeyEvent.VK_I);
         setEnabled(false);
     }
 
@@ -49,8 +49,8 @@ public class SetArcReaderAction extends AbstractAction {
         if (root.getClickedElement() != null) {
             if (root.getClickedElement() instanceof Arc) {
                 Arc arc = (Arc) root.getClickedElement();
-                boolean isReader = arc.getType().equals(Arc.RESET);
-                root.getUndoManager().executeCommand(new SetArcResetCommand(arc, !isReader));
+                boolean isReader = arc.getType().equals(Arc.READER);
+                root.getUndoManager().executeCommand(new SetArcReaderCommand(arc, !isReader));
             }
         }
     }
