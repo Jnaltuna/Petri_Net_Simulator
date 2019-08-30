@@ -103,6 +103,11 @@ public abstract class ArcEdge extends Edge implements Cloneable {
         GraphicsTools.drawArrowDouble(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);
     }
 
+    protected void drawLine(Graphics g, Point arrowTip) {
+        Point lastBreakPoint = getLastBreakPoint();
+        GraphicsTools.drawLine(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);
+    }
+
     protected void drawCircle(Graphics g, Point arrowTip) {
         Point lastBreakPoint = getLastBreakPoint();
         GraphicsTools.drawCircle(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);
