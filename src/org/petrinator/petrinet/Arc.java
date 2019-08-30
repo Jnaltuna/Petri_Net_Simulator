@@ -32,6 +32,7 @@ public class Arc extends ArcEdge implements Cloneable {
     public static String REGULAR = "regular";
     public static String INHIBITOR = "inhibitor";
     public static String RESET = "reset";
+    public static String READER = "reader";
     
     public Arc(Node sourceNode) {
         setSource(sourceNode);
@@ -83,7 +84,7 @@ public class Arc extends ArcEdge implements Cloneable {
         if (this.type.equals(Arc.INHIBITOR)) {
             drawCircle(g, arrowTip);
         } else {
-            if (this.type.equals(Arc.RESET)) {
+            if (this.type.equals(Arc.RESET)) { //TODO agregar aca para el lector
                 drawArrowDouble(g, arrowTip);
             } else {
                 drawArrow(g, arrowTip);
