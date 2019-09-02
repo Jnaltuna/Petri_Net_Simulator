@@ -150,12 +150,10 @@ public class MatricesAction extends AbstractAction
                             "Inhibition matrix <i>H</i>",
                             renderMatrix(data, root.getDocument().getPetriNet().inhibitionMatrix())
                     }, 1, false, false, true, false);
-                    /*s += ResultsHTMLPane.makeTable(new String[]{
+                    s += ResultsHTMLPane.makeTable(new String[]{
                             "Reader matrix <i>H</i>",
-                            renderMatrix(data, data.getActiveTokenView().getInhibitionMatrix(
-                                    data.getInhibitorsArrayList(), data.getTransitionsArrayList(),
-                                    data.getPlacesArrayList()))
-                    }, 1, false, false, true, false);*/
+                            renderMatrix(data, root.getDocument().getPetriNet().readerMatrix())
+                    }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Marking",
                             renderMarkingMatrices(data)

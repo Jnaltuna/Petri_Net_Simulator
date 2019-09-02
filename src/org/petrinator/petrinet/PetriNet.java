@@ -349,7 +349,44 @@ public class PetriNet {
         
         return R;
     }
-    
+
+    public int[][] readerMatrix()
+    {
+        Set<Place> allPlaces = getRootSubnet().getPlaces();
+        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
+        ArrayList<Node> places = new ArrayList<Node>();
+        ArrayList<Node> transitions = new ArrayList<Node>();
+
+        for(Place p : allPlaces)
+        {
+            places.add(p);
+        }
+
+        for(Transition t : allTransitions)
+        {
+            transitions.add(t);
+        }
+
+        MergeSort merge = new MergeSort();
+        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
+        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+        /*
+         * C�lculo R
+         */
+        int R [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
+        for (Node n : allPlaces)
+        {
+            HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
+            for(Arc a : arcsFromNode)
+            {
+                if(a.getType().equals("read"))
+                    R[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+            }
+        }
+
+        return R;
+    }
     /*
      * Reconstruye el grafo con elementos Plaza y Transiciones a partir de las matrices I+ e I-.
      * Falta agregar inhibici�n y reset.
