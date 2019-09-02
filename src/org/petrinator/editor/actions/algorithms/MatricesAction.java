@@ -136,27 +136,19 @@ public class MatricesAction extends AbstractAction
 
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Forwards incidence matrix <i>I<sup>+</sup></i>",
-                            renderMatrix(data, data.getActiveTokenView().getForwardsIncidenceMatrix(
-                                    data.getArcsArrayList(), data.getTransitionsArrayList(),
-                                    data.getPlacesArrayList()))
+                            renderMatrix(data, root.getDocument().getPetriNet().forwardIMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Backwards incidence matrix <i>I<sup>-</sup></i>",
-                            renderMatrix(data, data.getActiveTokenView().getBackwardsIncidenceMatrix(
-                                    data.getArcsArrayList(), data.getTransitionsArrayList(),
-                                    data.getPlacesArrayList()))
+                            renderMatrix(data, root.getDocument().getPetriNet().backwardsIMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Combined incidence matrix <i>I</i>",
-                            renderMatrix(data, data.getActiveTokenView().getIncidenceMatrix(
-                                    data.getArcsArrayList(), data.getTransitionsArrayList(),
-                                    data.getPlacesArrayList()))
+                            renderMatrix(data, root.getDocument().getPetriNet().incidenceMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Inhibition matrix <i>H</i>",
-                            renderMatrix(data, data.getActiveTokenView().getInhibitionMatrix(
-                                    data.getInhibitorsArrayList(), data.getTransitionsArrayList(),
-                                    data.getPlacesArrayList()))
+                            renderMatrix(data, root.getDocument().getPetriNet().inhibitionMatrix())
                     }, 1, false, false, true, false);
                     /*s += ResultsHTMLPane.makeTable(new String[]{
                             "Reader matrix <i>H</i>",
