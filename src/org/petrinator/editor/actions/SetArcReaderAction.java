@@ -49,7 +49,7 @@ public class SetArcReaderAction extends AbstractAction {
         if (root.getClickedElement() != null) {
             if (root.getClickedElement() instanceof Arc) {
                 Arc arc = (Arc) root.getClickedElement();
-                boolean isReader = arc.getType().equals(Arc.READER);
+                boolean isReader = arc.getType().equals(Arc.READ);
                 root.getUndoManager().executeCommand(new SetArcReaderCommand(arc, !isReader));
             }
         }

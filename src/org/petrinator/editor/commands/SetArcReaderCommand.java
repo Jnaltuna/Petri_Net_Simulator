@@ -16,6 +16,7 @@ public class SetArcReaderCommand implements Command {
     private Arc arc;
     private boolean isReader;
     private String oldType;
+    private int oldMult;
 
     public SetArcReaderCommand(Arc arc, boolean reader) {
         this.arc = arc;
@@ -25,7 +26,8 @@ public class SetArcReaderCommand implements Command {
     public void execute() {
         oldType = arc.getType();
         if (isReader) {
-            arc.setType(Arc.READER);
+            arc.setType(Arc.READ);
+
         }
         else {
             arc.setType(Arc.REGULAR);
