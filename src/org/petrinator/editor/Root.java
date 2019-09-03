@@ -311,7 +311,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
 
     //per application
     private JToggleButton select, place, transition, arc, token;
-    private Action setLabel, setBehavior, setTokens, setArcMultiplicity, setArcInhibitory, setArcReset, delete;
+    private Action setLabel, setBehavior, setTokens, setArcMultiplicity, setArcInhibitory, setArcReset, setArcReader, delete;
     private Action setPlaceStatic;
     private Action addSelectedTransitionsToSelectedRoles;
     private Action removeSelectedTransitionsFromSelectedRoles;
@@ -386,6 +386,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         setArcMultiplicity.setEnabled(isArc);
         setArcInhibitory.setEnabled(isPtoT);
         setArcReset.setEnabled(isPtoT); //TODO
+        setArcReader.setEnabled(isPtoT);
         //setArcReset.setEnabled(false);
         setTokens.setEnabled(isPlaceNode);
         setLabel.setEnabled(isPlaceNode || isTransitionNode);
@@ -503,6 +504,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         setArcMultiplicity = new SetArcMultiplicityAction(this);
         setArcInhibitory = new SetArcInhibitoryAction(this);
         setArcReset = new SetArcResetAction(this);
+        setArcReader = new SetArcReaderAction(this);
         addSelectedTransitionsToSelectedRoles = new AddSelectedTransitionsToSelectedRolesAction(this);
         removeSelectedTransitionsFromSelectedRoles = new RemoveSelectedTransitionsFromSelectedRolesAction(this);
         convertTransitionToSubnet = new ConvertTransitionToSubnetAction(this);
@@ -664,6 +666,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         elementMenu.add(setArcMultiplicity);
         elementMenu.add(setArcInhibitory);
         elementMenu.add(setArcReset);
+        elementMenu.add(setArcReader);
 
         // rolesMenu.add(addSelectedTransitionsToSelectedRoles);
         // rolesMenu.add(removeSelectedTransitionsFromSelectedRoles);
@@ -729,6 +732,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
 
         arcEdgePopup.add(setArcInhibitory);
         arcEdgePopup.add(setArcReset);
+        arcEdgePopup.add(setArcReader);
 
         arcEdgePopup.add(delete);
 

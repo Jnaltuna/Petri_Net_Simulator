@@ -183,38 +183,10 @@ public class PetriNet {
     	MergeSort merge = new MergeSort();
     	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
     	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
-   	 
-    	/*
-    	 * Cálculo I+
-    	 */
-    	int iPlus [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-        		HashSet<Arc> arcstoNode = (HashSet<Arc>) n.getConnectedArcsToNode();
-        		for(Arc a : arcstoNode)
-        		{
-        			if(a.getType().equals("regular"))
-        			iPlus[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getSource())] = a.getMultiplicity();
-        		}
-        } 
-        
-        /*
-         * Cálculo I-
-         */
-        int iMinus [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-        		HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
-        		for(Arc a : arcsFromNode)
-        		{
-        			if(a.getType().equals("regular"))
-        			iMinus[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
-        		}
-        } 
-        
-        /*
-         * Cálculo I (e impresión)
-         */
+
+        int iMinus [][] = backwardsIMatrix().clone();
+        int iPlus [][] = forwardIMatrix().clone();
+
         int I [][] = new int [sortedPlaces.size()][sortedTransitions.size()];
         for(int i=0; i<getRootSubnet().getPlaces().size(); i++)
         {
@@ -222,6 +194,84 @@ public class PetriNet {
        		 I[i][j] = iPlus[i][j] - iMinus[i][j];
         }
         return I;
+    }
+
+    public int[][] forwardIMatrix(){
+
+        Set<Place> allPlaces = getRootSubnet().getPlaces();
+        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
+        ArrayList<Node> places = new ArrayList<Node>();
+        ArrayList<Node> transitions = new ArrayList<Node>();
+
+        for(Place p : allPlaces)
+        {
+            places.add(p);
+        }
+
+        for(Transition t : allTransitions)
+        {
+            transitions.add(t);
+        }
+
+        MergeSort merge = new MergeSort();
+        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
+        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+        /*
+         * Calculo I+
+         */
+        int iPlus [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
+        for (Node n : allPlaces)
+        {
+            HashSet<Arc> arcstoNode = (HashSet<Arc>) n.getConnectedArcsToNode();
+            for(Arc a : arcstoNode)
+            {
+                if(a.getType().equals("regular"))
+                    iPlus[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getSource())] = a.getMultiplicity();
+            }
+        }
+
+        return iPlus;
+
+    }
+
+    public int[][] backwardsIMatrix(){
+
+        Set<Place> allPlaces = getRootSubnet().getPlaces();
+        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
+        ArrayList<Node> places = new ArrayList<Node>();
+        ArrayList<Node> transitions = new ArrayList<Node>();
+
+        for(Place p : allPlaces)
+        {
+            places.add(p);
+        }
+
+        for(Transition t : allTransitions)
+        {
+            transitions.add(t);
+        }
+
+        MergeSort merge = new MergeSort();
+        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
+        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+        /*
+         * Calculo I-
+         */
+        int iMinus [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
+        for (Node n : allPlaces)
+        {
+            HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
+            for(Arc a : arcsFromNode)
+            {
+                if(a.getType().equals("regular"))
+                    iMinus[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+            }
+        }
+
+        return iMinus;
+
     }
     
     public int[][] inhibitionMatrix()
@@ -246,7 +296,7 @@ public class PetriNet {
     	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
    	 
     	/*
-         * Cálculo H
+         * Cï¿½lculo H
          */
         int H [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
         for (Node n : allPlaces)
@@ -284,7 +334,7 @@ public class PetriNet {
     	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
    	 
     	/*
-         * Cálculo R
+         * Cï¿½lculo R
          */
         int R [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
         for (Node n : allPlaces)
@@ -299,10 +349,47 @@ public class PetriNet {
         
         return R;
     }
-    
+
+    public int[][] readerMatrix()
+    {
+        Set<Place> allPlaces = getRootSubnet().getPlaces();
+        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
+        ArrayList<Node> places = new ArrayList<Node>();
+        ArrayList<Node> transitions = new ArrayList<Node>();
+
+        for(Place p : allPlaces)
+        {
+            places.add(p);
+        }
+
+        for(Transition t : allTransitions)
+        {
+            transitions.add(t);
+        }
+
+        MergeSort merge = new MergeSort();
+        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
+        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+        /*
+         * Cï¿½lculo R
+         */
+        int R [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
+        for (Node n : allPlaces)
+        {
+            HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
+            for(Arc a : arcsFromNode)
+            {
+                if(a.getType().equals("read"))
+                    R[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+            }
+        }
+
+        return R;
+    }
     /*
      * Reconstruye el grafo con elementos Plaza y Transiciones a partir de las matrices I+ e I-.
-     * Falta agregar inhibición y reset.
+     * Falta agregar inhibiciï¿½n y reset.
      */
     public void reconstructFromMatrix(int [][] matrixIPlus, int [][] matrixIMinus)
     {

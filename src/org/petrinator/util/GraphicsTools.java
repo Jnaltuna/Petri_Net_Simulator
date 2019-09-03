@@ -170,6 +170,23 @@ public class GraphicsTools {
         g2d.fillPolygon(tmpPoly);                       // remove this line to leave arrow head unpainted
     }
 
+    // Used by reader arcs
+    public static void drawLine(Graphics g, int xCenter, int yCenter, int x, int y) {
+        Graphics2D g2d = (Graphics2D) g;
+        double aDir = Math.atan2(xCenter - x, yCenter - y);
+        g2d.setStroke(new BasicStroke(1f));                 // make the arrow head solid even if dash pattern has been specified
+        Polygon tmpPoly = new Polygon();
+        int i1 = 15;
+        int i2 = 10;                         // make the arrow head the same size regardless of the length length
+        tmpPoly.addPoint(x + xCor(i1, aDir + 0.5), y + yCor(i1, aDir + 0.5));
+        tmpPoly.addPoint(x + xCor(i2, aDir), y + yCor(i2, aDir));
+        tmpPoly.addPoint(x + xCor(i1, aDir - 0.5), y + yCor(i1, aDir - 0.5));
+        tmpPoly.addPoint(x, y);
+        g2d.drawPolygon(tmpPoly);
+        g2d.setColor(Color.white);
+        g2d.fillPolygon(tmpPoly);
+    }
+
     //Jan Tancibok Reset arc
     public static void drawArrowDouble(Graphics g, int xCenter, int yCenter, int x, int y) {
         Graphics2D g2d = (Graphics2D) g;
