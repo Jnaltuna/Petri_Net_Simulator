@@ -151,6 +151,10 @@ public class MatricesAction extends AbstractAction
                             renderMatrix(data, root.getDocument().getPetriNet().inhibitionMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
+                            "Reset matrix <i>H</i>",
+                            renderMatrix(data, root.getDocument().getPetriNet().resetMatrix())
+                    }, 1, false, false, true, false);
+                    s += ResultsHTMLPane.makeTable(new String[]{
                             "Reader matrix <i>H</i>",
                             renderMatrix(data, root.getDocument().getPetriNet().readerMatrix())
                     }, 1, false, false, true, false);

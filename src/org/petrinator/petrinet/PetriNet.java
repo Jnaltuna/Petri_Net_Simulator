@@ -169,7 +169,7 @@ public class PetriNet {
     	Set<Transition>  allTransitions = getRootSubnet().getTransitions();
     	ArrayList<Node> places = new ArrayList<Node>();
     	ArrayList<Node> transitions = new ArrayList<Node>();
-    	
+
     	for(Place p : allPlaces)
     	{
     		places.add(p);
@@ -183,6 +183,19 @@ public class PetriNet {
     	MergeSort merge = new MergeSort();
     	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
     	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+        System.out.println("Label");
+    	for(Node p : sortedPlaces){
+    	    System.out.println(p.getLabel());
+        }
+    	System.out.println("ID");
+        for(Node p : sortedPlaces){
+            System.out.println(p.getId());
+        }
+        System.out.println("IDT");
+        for(Node t : sortedTransitions){
+            System.out.println(t.getId());
+        }
 
         int iMinus [][] = backwardsIMatrix().clone();
         int iPlus [][] = forwardIMatrix().clone();
