@@ -24,7 +24,7 @@ import java.util.Set;
  */
 
 /*
- * Modificado: hice que extienda de NodeIdGenerator para usar su método P1 P2 T3 -> P1 P2 T1
+ * Modificado: hice que extienda de NodeIdGenerator para usar su mï¿½todo P1 P2 T3 -> P1 P2 T1
  */
 public class NodeSimpleIdGenerator extends NodeIdGenerator{
 
@@ -49,13 +49,13 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
        	*/
     	
     	/*
-    	 * Modificado:  para usar método ya creado en NodeIdGenerator.
+    	 * Modificado:  para usar mï¿½todo ya creado en NodeIdGenerator.
     	 */
     		
     	super.setUniqueId(node);
         
         /*
-         * Modificado, mi versión:
+         * Modificado, mi versiï¿½n:
          */
     /*    
         Set<Node> allNodes = petriNet.getRootSubnet().getNodesRecursively();
@@ -103,6 +103,6 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
 
     public void resetUniqueIds() 
     {
-    	
+        	super.resetUniqueIds();
     }
 }

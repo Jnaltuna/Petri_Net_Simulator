@@ -81,7 +81,7 @@ public class MergeSort
         // or right.get(rightIndex) and adding it at both.get(bothIndex).
         while (leftIndex < left.size() && rightIndex < right.size()) 
         {
-            if (Integer.parseInt(left.get(leftIndex).getLabel().substring(1)) < Integer.parseInt(right.get(rightIndex).getLabel().substring(1)))
+            if (Integer.parseInt(left.get(leftIndex).getId().substring(1)) < Integer.parseInt(right.get(rightIndex).getId().substring(1)))
             {
                 whole.set(wholeIndex, left.get(leftIndex));
                 leftIndex++;

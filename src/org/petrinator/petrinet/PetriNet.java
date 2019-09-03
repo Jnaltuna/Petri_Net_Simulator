@@ -184,19 +184,6 @@ public class PetriNet {
     	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
     	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
 
-        System.out.println("Label");
-    	for(Node p : sortedPlaces){
-    	    System.out.println(p.getLabel());
-        }
-    	System.out.println("ID");
-        for(Node p : sortedPlaces){
-            System.out.println(p.getId());
-        }
-        System.out.println("IDT");
-        for(Node t : sortedTransitions){
-            System.out.println(t.getId());
-        }
-
         int iMinus [][] = backwardsIMatrix().clone();
         int iPlus [][] = forwardIMatrix().clone();
 
