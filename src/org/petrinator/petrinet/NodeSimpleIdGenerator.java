@@ -94,7 +94,7 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
     public void ensureNumberIds() {
         for (Node node : petriNet.getRootSubnet().getNodesRecursively()) {
             try {
-                Integer.parseInt(node.getId());
+                Integer.parseInt(node.getId().substring(1));
             } catch (NumberFormatException ex) {
                 setUniqueId(node);
             }

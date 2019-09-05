@@ -24,19 +24,13 @@ import org.petrinator.editor.Root;
 import org.petrinator.editor.filechooser.*;
 
 import org.petrinator.petrinet.Document;
-import org.petrinator.petrinet.Element;
 import org.petrinator.petrinet.Transition;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
-import pipe.gui.ApplicationSettings;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.EscapableDialog;
-import pipe.gui.widgets.PetriNetChooserPanel;
 import pipe.gui.widgets.ResultsHTMLPane;
-import pipe.views.MarkingView;
 import pipe.views.PetriNetView;
-import pipe.views.PlaceView;
-import pipe.views.TransitionView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -68,39 +62,12 @@ public class MatricesAction extends AbstractAction
 
     public void actionPerformed(ActionEvent e)
     {
-         /*
-         * Create tmp.pnml file
-         */
-        FileChooserDialog chooser = new FileChooserDialog();
-
-        if (root.getCurrentFile() != null)
-        {
-            chooser.setSelectedFile(root.getCurrentFile());
-        }
-
-        chooser.addChoosableFileFilter(new PipePnmlFileType());
-        chooser.setAcceptAllFileFilterUsed(false);
-        chooser.setCurrentDirectory(root.getCurrentDirectory());
-        chooser.setDialogTitle("Save as...");
-
-        File file = new File("tmp/" + "tmp" + "." + "pnml");
-        FileType chosenFileType = (FileType) chooser.getFileFilter();
-        try
-        {
-            chosenFileType.save(root.getDocument(), file);
-        }
-        catch (FileTypeException e1)
-        {
-            e1.printStackTrace();
-        }
-
         /*
          * Show initial pane
          */
         EscapableDialog guiDialog = new EscapableDialog(root.getParentFrame(), "Petri net matrices and marking", true);
         Container contentPane = guiDialog.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-        //sourceFilePanel = new PetriNetChooserPanel("Source net", null);
         results = new ResultsHTMLPane("");
         contentPane.add(results);
         contentPane.add(new ButtonBar("Calculate", calculateButtonClick, guiDialog.getRootPane()));
@@ -113,21 +80,17 @@ public class MatricesAction extends AbstractAction
     {
         public void actionPerformed(ActionEvent arg0)
         {
-            /*
-             * Read tmp file
-             */
-            PetriNetView data = new PetriNetView("tmp/tmp.pnml");
 
             /*
              *  Create HTML file with data
              */
             String s = "<h2>Petri Net Matrices</h2>";
 
-            //String s = "<h3>Petri net matrices and marking</h3>"; // Do we REALLY need a third title? Let's think about that...
-            if(data == null)
+            /*if(data == null) //TODO: Ver equivalencia
             {
                 return;
-            }
+            }*/
+
             if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
             {
                 s += "Invalid net!";
@@ -136,7 +99,7 @@ public class MatricesAction extends AbstractAction
             {
                 try
                 {
-                    //PNMLWriter.saveTemporaryFile(data, this.getClass().getName());
+
                     ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
                     ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
 
@@ -166,11 +129,11 @@ public class MatricesAction extends AbstractAction
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Marking",
-                            renderMarkingMatrices(root.getDocument())
+                            renderMarkingMatrices(pnames, root.getDocument())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Enabled transitions",
-                            renderTransitionStates(root.getDocument())
+                            renderTransitionStates(tnames, root.getDocument())
                     }, 1, false, false, true, false);
                 }
                 catch(OutOfMemoryError oome)
@@ -229,19 +192,19 @@ public class MatricesAction extends AbstractAction
    * @brief Format array as HTML
    * @param data petri net as read from the .pnml file, used to get places names
    */
-    private String renderMarkingMatrices(Document doc)
+    private String renderMarkingMatrices(ArrayList<String> pnames, Document doc)
     {
-        //Marking marca = doc.getPetriNet().getInitialMarking();
+
         Marking mark = doc.getPetriNet().getInitialMarking();
-        int marca [][] =  mark.getMarkingAsArray();
-        if(marca == null)
+        int markingMatrix [][] =  mark.getMarkingAsArray();
+        if(markingMatrix == null)
         {
             return "n/a";
         }
 
         ArrayList result = new ArrayList();
         // add headers t o table
-        ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
+
         result.add("");
         for(String name : pnames)
         {
@@ -249,12 +212,12 @@ public class MatricesAction extends AbstractAction
         }
 
         result.add("Initial");
-        for(int i = 0; i< marca[mark.INITIAL].length; i++){
-            result.add(Integer.toString(marca[mark.INITIAL][i]));
+        for(int i = 0; i< markingMatrix[mark.INITIAL].length; i++){
+            result.add(Integer.toString(markingMatrix[mark.INITIAL][i]));
         }
         result.add("Current");
-        for(int j = 0; j< marca[mark.CURRENT].length; j++){
-            result.add(Integer.toString(marca[mark.CURRENT][j]));
+        for(int j = 0; j< markingMatrix[mark.CURRENT].length; j++){
+            result.add(Integer.toString(markingMatrix[mark.CURRENT][j]));
         }
 
         return ResultsHTMLPane.makeTable(
@@ -265,17 +228,15 @@ public class MatricesAction extends AbstractAction
    * @brief Format transitions states as HTML
    * @param data petri net as read from the .pnml file, used to get transitions names and properties
    */
-    private String renderTransitionStates(Document doc)
+    private String renderTransitionStates(ArrayList<String> sortedNames, Document doc)
     {
-        
+
         ArrayList<Transition> enabledArray = new ArrayList<Transition>(doc.getPetriNet().getInitialMarking().getAllEnabledTransitions());
         ArrayList<String> enabledNamesArray = new ArrayList<>();
 
         for (Transition transition : enabledArray) {
             enabledNamesArray.add(transition.getLabel());
         }
-
-        ArrayList<String> sortedNames = doc.getPetriNet().getSortedTransitionsNames();
 
         if(sortedNames.size() == 0)
         {
