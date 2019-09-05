@@ -21,7 +21,6 @@
 package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.editor.Root;
-import org.petrinator.editor.filechooser.*;
 
 import org.petrinator.petrinet.Document;
 import org.petrinator.petrinet.Transition;
@@ -30,28 +29,20 @@ import org.petrinator.util.GraphicsTools;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.EscapableDialog;
 import pipe.gui.widgets.ResultsHTMLPane;
-import pipe.views.PetriNetView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 
-/**
- * @author Joaquin Felici <joaquinfelici at gmail.com>
- * @brief
- */
+
 public class MatricesAction extends AbstractAction
 {
-    Root root;
+    private Root root;
     private ResultsHTMLPane results;
 
-    public MatricesAction(Root root)
-    {
+    public MatricesAction(Root root) {
         this.root = root;
 
         String name = "Matrices";
@@ -60,8 +51,7 @@ public class MatricesAction extends AbstractAction
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/matrices16.png"));
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         /*
          * Show initial pane
          */
@@ -76,8 +66,8 @@ public class MatricesAction extends AbstractAction
         guiDialog.setVisible(true);
     }
 
-    private final ActionListener calculateButtonClick = new ActionListener()
-    {
+    private final ActionListener calculateButtonClick = new ActionListener() {
+
         public void actionPerformed(ActionEvent arg0)
         {
 
@@ -85,11 +75,6 @@ public class MatricesAction extends AbstractAction
              *  Create HTML file with data
              */
             String s = "<h2>Petri Net Matrices</h2>";
-
-            /*if(data == null) //TODO: Ver equivalencia
-            {
-                return;
-            }*/
 
             if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
             {
@@ -159,7 +144,13 @@ public class MatricesAction extends AbstractAction
         }
     };
 
-    private String renderMatrix(ArrayList<String> pnames, ArrayList<String> tnames, int[][] matrix){
+    /**
+     * Format a matrix as HTML
+     *
+     * @param pnames arraylist with the net's places names
+     * @param tnames arraylist with the net's transitions names
+     */
+    private String renderMatrix(ArrayList<String> pnames, ArrayList<String> tnames, int[][] matrix) {
 
         if((matrix.length == 0) || (matrix[0].length == 0))
         {
@@ -188,12 +179,13 @@ public class MatricesAction extends AbstractAction
 
     }
 
-    /*
-   * @brief Format array as HTML
-   * @param data petri net as read from the .pnml file, used to get places names
-   */
-    private String renderMarkingMatrices(ArrayList<String> pnames, Document doc)
-    {
+    /**
+     * Format an arraylist as HTML
+     *
+     * @param pnames arraylist with the net's places names
+     * @param doc current Document
+     */
+    private String renderMarkingMatrices(ArrayList<String> pnames, Document doc) {
 
         Marking mark = doc.getPetriNet().getInitialMarking();
         int markingMatrix [][] =  mark.getMarkingAsArray();
@@ -225,12 +217,13 @@ public class MatricesAction extends AbstractAction
                 result.toArray(), pnames.size() + 1, false, true, true, true);
     }
 
-    /*
-   * @brief Format transitions states as HTML
-   * @param data petri net as read from the .pnml file, used to get transitions names and properties
-   */
-    private String renderTransitionStates(ArrayList<String> sortedNames, Document doc)
-    {
+    /**
+     * Format transitions states as HTML
+     *
+     * @param sortedNames array list with the transitions labels
+     * @param doc current Document
+     */
+    private String renderTransitionStates(ArrayList<String> sortedNames, Document doc) {
 
         ArrayList<Transition> enabledArray = new ArrayList<Transition>(doc.getPetriNet().getInitialMarking().getAllEnabledTransitions());
         ArrayList<String> enabledNamesArray = new ArrayList<>();

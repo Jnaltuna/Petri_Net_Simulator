@@ -18,66 +18,27 @@ package org.petrinator.petrinet;
 
 import java.util.Set;
 
-/**
- *
- * @author Martin Riesz <riesz.martin at gmail.com>
- */
 
-/*
- * Modificado: hice que extienda de NodeIdGenerator para usar su m�todo P1 P2 T3 -> P1 P2 T1
- */
 public class NodeSimpleIdGenerator extends NodeIdGenerator{
 
-    private int nextUniqueId = 1; //rootSubnet has already id == 0
+    //private int nextUniqueId = 1; //rootSubnet has already id == 0
     private PetriNet petriNet;
 
     public NodeSimpleIdGenerator(PetriNet petriNet) {
         this.petriNet = petriNet;
     }
 
-    public void setUniqueId(Node node) 
-    {
-    	
-    	/*
-    	 * Original:
-    	 */
-    	
-        /*
-           	String id;
-        	id = Integer.toString(nextUniqueId++);
-       		node.setId(id);
-       	*/
-    	
-    	/*
-    	 * Modificado:  para usar m�todo ya creado en NodeIdGenerator.
-    	 */
-    		
+    public void setUniqueId(Node node) {
     	super.setUniqueId(node);
-        
-        /*
-         * Modificado, mi versi�n:
-         */
-    /*    
-        Set<Node> allNodes = petriNet.getRootSubnet().getNodesRecursively();
-        allNodes.add(petriNet.getRootSubnet());
-        int aux = 0;
-        for (Node n : allNodes)
-        {
-        	if(n.getClass().equals(node.getClass()))
-        	{
-        		if(Integer.parseInt(n.getId()) > aux)
-        			aux = Integer.parseInt(n.getId());
-        	}
-        } 
-        String id = Integer.toString(aux+1);
-        node.setId(id);*/
-        
     }
 
     public void fixFutureUniqueIds() {
+
         int maxId = 0;
+
         Set<Node> allNodes = petriNet.getRootSubnet().getNodesRecursively();
         allNodes.add(petriNet.getRootSubnet());
+
         for (Node node : allNodes) {
             try {
                 int id = Integer.parseInt(node.getId());
@@ -88,7 +49,8 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
                 //do nothing
             }
         }
-        nextUniqueId = maxId + 1;
+
+        //nextUniqueId = maxId + 1;
     }
 
     public void ensureNumberIds() {
@@ -101,8 +63,7 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
         }
     }
 
-    public void resetUniqueIds() 
-    {
-        	super.resetUniqueIds();
+    public void resetUniqueIds() {
+        super.resetUniqueIds();
     }
 }

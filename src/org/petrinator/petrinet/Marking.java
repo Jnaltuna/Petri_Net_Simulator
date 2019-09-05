@@ -516,12 +516,14 @@ public class Marking {
         return hash;
     }
     
-    /*
-     * Agregado, devolver marcado como arreglo:
+    /**
+     * Returns the sorted marking as a two-dimensional matrix,
+     * where the first row corresponds to the initial marking
+     * and the second one, to the current marking.
      */
-    public int[][] getMarkingAsArray()
-    {
-    	Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
+    public int[][] getMarkingAsArray() {
+
+        Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
     	ArrayList<Node> places = new ArrayList<Node>();
     	
     	for(Place p : allPlaces)
@@ -540,6 +542,7 @@ public class Marking {
         } 
 
     	return array;
+
     }
 
 
