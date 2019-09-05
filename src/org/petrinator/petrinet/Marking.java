@@ -109,6 +109,26 @@ public class Marking {
         return marking.map.get(place);
     }
 
+    public int getTokensInit(PlaceNode placeNode) {
+        Place place = placeNode.getPlace();
+        if (place == null) { // In case of disconnected ReferencePlace, we want it to appear with zero tokens. Disconnected ReferencePlaces can be found in stored subnets.
+            return 0;
+        }
+
+        Marking marking;
+        if (place.isStatic()) {
+            marking = petriNet.getInitialMarking();
+        } else {
+            marking = this;
+        }
+
+        if (marking.mapinit.get(place) == null) { // Place has zero tokens in the beginning. Not every place is in map. Only those previously edited.
+            return 0;
+        }
+
+        return marking.mapinit.get(place);
+    }
+
     /**
      * Sets the number of tokens to the specified PlaceNode (Place or
      * ReferencePlace). If specified PlaceNode is ReferencePlace, it will set
@@ -515,7 +535,7 @@ public class Marking {
 
         for (Node n : sortedPlaces)
         {
-            array[INITIAL][sortedPlaces.indexOf(n)] = getTokens((Place) n);
+            array[INITIAL][sortedPlaces.indexOf(n)] = getTokensInit((Place) n);
         	array[CURRENT][sortedPlaces.indexOf(n)] = getTokens((Place) n);
         } 
 

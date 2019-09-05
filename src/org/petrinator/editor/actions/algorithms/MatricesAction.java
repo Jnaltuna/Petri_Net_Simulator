@@ -165,7 +165,7 @@ public class MatricesAction extends AbstractAction
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Marking",
-                            renderMarkingMatrices(data)
+                            renderMarkingMatrices(root.getDocument())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Enabled transitions",
@@ -248,14 +248,12 @@ public class MatricesAction extends AbstractAction
         }
 
         result.add("Initial");
-        for(int anInitial : marca[mark.INITIAL][])
-        {
-            result.add(Integer.toString(anInitial));
+        for(int i = 0; i< marca[mark.INITIAL].length; i++){
+            result.add(Integer.toString(marca[mark.INITIAL][i]));
         }
         result.add("Current");
-        for(int aCurrent : marca[mark.CURRENT][])
-        {
-            result.add(Integer.toString(aCurrent));
+        for(int j = 0; j< marca[mark.CURRENT].length; j++){
+            result.add(Integer.toString(marca[mark.CURRENT][j]));
         }
 
         return ResultsHTMLPane.makeTable(
