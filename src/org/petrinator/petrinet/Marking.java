@@ -36,6 +36,9 @@ import org.petrinator.util.CollectionTools;
  */
 public class Marking {
 
+    public static final int INITIAL = 0;
+    public static final int CURRENT = 1;
+
     protected Map<Place, Integer> map = new ConcurrentHashMap<Place, Integer>();
     protected Map<Place, Integer> mapinit = new ConcurrentHashMap<>();
     private PetriNet petriNet;
@@ -168,7 +171,7 @@ public class Marking {
             for (Arc arc : transition.getConnectedArcs()) {
                 if (arc.isPlaceToTransition()) {
                     if (arc.getType().equals(Arc.RESET)) {//reset arc is always fireable
-                        continue;      //but can be blocked by other arcs 
+                        continue;      //but can be blocked by other arcs
                     } else {
                         if (!arc.getType().equals(Arc.INHIBITOR)) {
                             if (getTokens(arc.getPlaceNode()) < arc.getMultiplicity()) {  //normal arc
@@ -496,7 +499,7 @@ public class Marking {
     /*
      * Agregado, devolver marcado como arreglo:
      */
-    public int[] getMarkingAsArray()
+    public int[][] getMarkingAsArray()
     {
     	Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
     	ArrayList<Node> places = new ArrayList<Node>();
@@ -508,11 +511,12 @@ public class Marking {
     	
     	MergeSort merge = new MergeSort();
     	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-    	int [] array = new int[sortedPlaces.size()];
+    	int [][] array = new int[2][sortedPlaces.size()];
 
         for (Node n : sortedPlaces)
         {
-        	array[sortedPlaces.indexOf(n)] = getTokens((Place) n);
+            array[INITIAL][sortedPlaces.indexOf(n)] = getTokens((Place) n);
+        	array[CURRENT][sortedPlaces.indexOf(n)] = getTokens((Place) n);
         } 
 
     	return array;
