@@ -166,8 +166,8 @@ public class PetriNet {
 
         ArrayList<Node> places = getSortedPlaces(); //TODO
 
-        for(Node p : places){
-            sortednames.add(p.getLabel());
+        for(int i=0; i<places.size(); i++){
+            sortednames.add(places.get(i).getLabel());
         }
 
         return sortednames;
@@ -179,8 +179,8 @@ public class PetriNet {
 
         ArrayList<Node> transitions = getSortedTransitions(); //TODO
 
-        for(Node t : transitions){
-            sortednames.add(t.getLabel());
+        for(int i=0; i<transitions.size(); i++){
+            sortednames.add(transitions.get(i).getLabel());
         }
 
         return sortednames;

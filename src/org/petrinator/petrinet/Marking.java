@@ -335,7 +335,7 @@ public class Marking {
         return enabledTransitions;
     }
 
-    private List<Transition> getAllEnabledTransitionsByList() {
+    public List<Transition> getAllEnabledTransitionsByList() {
         List<Transition> fireableTransitions = new ArrayList<Transition>();
         lock.readLock().lock();
         try {
