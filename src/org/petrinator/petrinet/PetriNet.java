@@ -165,24 +165,9 @@ public class PetriNet {
      */
     public int[][] incidenceMatrix()
     {
-    	Set<Place> allPlaces = getRootSubnet().getPlaces();
-    	Set<Transition>  allTransitions = getRootSubnet().getTransitions();
-    	ArrayList<Node> places = new ArrayList<Node>();
-    	ArrayList<Node> transitions = new ArrayList<Node>();
 
-    	for(Place p : allPlaces)
-    	{
-    		places.add(p);
-    	}
-    	
-    	for(Transition t : allTransitions)
-    	{
-    		transitions.add(t);
-    	}
-    	
-    	MergeSort merge = new MergeSort();
-    	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-    	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+    	ArrayList<Node> sortedPlaces = getSortedPlaces();
+    	ArrayList<Node> sortedTransitions = getSortedTransitions();
 
         int iMinus [][] = backwardsIMatrix().clone();
         int iPlus [][] = forwardIMatrix().clone();
@@ -193,42 +178,29 @@ public class PetriNet {
        	 for(int j=0; j<getRootSubnet().getTransitions().size(); j++)
        		 I[i][j] = iPlus[i][j] - iMinus[i][j];
         }
+
         return I;
     }
 
     public int[][] forwardIMatrix(){
 
-        Set<Place> allPlaces = getRootSubnet().getPlaces();
-        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
-        ArrayList<Node> places = new ArrayList<Node>();
-        ArrayList<Node> transitions = new ArrayList<Node>();
-
-        for(Place p : allPlaces)
-        {
-            places.add(p);
-        }
-
-        for(Transition t : allTransitions)
-        {
-            transitions.add(t);
-        }
-
-        MergeSort merge = new MergeSort();
-        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+        ArrayList<Node> sortedPlaces = getSortedPlaces();
+        ArrayList<Node> sortedTransitions = getSortedTransitions();
 
         /*
          * Calculo I+
          */
         int iPlus [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-            HashSet<Arc> arcstoNode = (HashSet<Arc>) n.getConnectedArcsToNode();
+
+        for (int i=0; i<sortedPlaces.size(); i++) {
+
+            HashSet<Arc> arcstoNode = (HashSet<Arc>) sortedPlaces.get(i).getConnectedArcsToNode();
             for(Arc a : arcstoNode)
             {
                 if(a.getType().equals("regular"))
-                    iPlus[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getSource())] = a.getMultiplicity();
+                    iPlus[i][sortedTransitions.indexOf(a.getSource())] = a.getMultiplicity();
             }
+
         }
 
         return iPlus;
@@ -237,36 +209,20 @@ public class PetriNet {
 
     public int[][] backwardsIMatrix(){
 
-        Set<Place> allPlaces = getRootSubnet().getPlaces();
-        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
-        ArrayList<Node> places = new ArrayList<Node>();
-        ArrayList<Node> transitions = new ArrayList<Node>();
-
-        for(Place p : allPlaces)
-        {
-            places.add(p);
-        }
-
-        for(Transition t : allTransitions)
-        {
-            transitions.add(t);
-        }
-
-        MergeSort merge = new MergeSort();
-        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+        ArrayList<Node> sortedPlaces = getSortedPlaces();
+        ArrayList<Node> sortedTransitions = getSortedTransitions();
 
         /*
          * Calculo I-
          */
         int iMinus [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-            HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
+        for (int i=0; i<sortedPlaces.size(); i++) {
+
+            HashSet<Arc> arcsFromNode = (HashSet<Arc>) sortedPlaces.get(i).getConnectedArcsFromNode();
             for(Arc a : arcsFromNode)
             {
                 if(a.getType().equals("regular"))
-                    iMinus[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+                    iMinus[i][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
             }
         }
 
@@ -276,36 +232,22 @@ public class PetriNet {
     
     public int[][] inhibitionMatrix()
     {
-    	Set<Place> allPlaces = getRootSubnet().getPlaces();
-    	Set<Transition>  allTransitions = getRootSubnet().getTransitions();
-    	ArrayList<Node> places = new ArrayList<Node>();
-    	ArrayList<Node> transitions = new ArrayList<Node>();
-    	
-    	for(Place p : allPlaces)
-    	{
-    		places.add(p);
-    	}
-    	
-    	for(Transition t : allTransitions)
-    	{
-    		transitions.add(t);
-    	}
-    	
-    	MergeSort merge = new MergeSort();
-    	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-    	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+    	ArrayList<Node> sortedPlaces = getSortedPlaces();
+    	ArrayList<Node> sortedTransitions = getSortedTransitions();
    	 
     	/*
-         * C�lculo H
+         * Calculo H
          */
         int H [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-        		HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
+
+        for (int i=0; i<sortedPlaces.size(); i++) {
+
+        		HashSet<Arc> arcsFromNode = (HashSet<Arc>) sortedPlaces.get(i).getConnectedArcsFromNode();
         		for(Arc a : arcsFromNode)
         		{
         			if(a.getType().equals("inhibitor"))
-        			H[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+        			H[i][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
         		}
         } 
         
@@ -314,36 +256,20 @@ public class PetriNet {
     
     public int[][] resetMatrix()
     {
-    	Set<Place> allPlaces = getRootSubnet().getPlaces();
-    	Set<Transition>  allTransitions = getRootSubnet().getTransitions();
-    	ArrayList<Node> places = new ArrayList<Node>();
-    	ArrayList<Node> transitions = new ArrayList<Node>();
-    	
-    	for(Place p : allPlaces)
-    	{
-    		places.add(p);
-    	}
-    	
-    	for(Transition t : allTransitions)
-    	{
-    		transitions.add(t);
-    	}
-    	
-    	MergeSort merge = new MergeSort();
-    	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-    	ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
+
+    	ArrayList<Node> sortedPlaces = getSortedPlaces();
+    	ArrayList<Node> sortedTransitions = getSortedTransitions();
    	 
     	/*
-         * C�lculo R
+         * Calculo R
          */
         int R [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-        		HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
+        for (int i=0; i<sortedPlaces.size(); i++) {
+        		HashSet<Arc> arcsFromNode = (HashSet<Arc>) sortedPlaces.get(i).getConnectedArcsFromNode();
         		for(Arc a : arcsFromNode)
         		{
         			if(a.getType().equals("reset"))
-        			R[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+        			R[i][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
         		}
         } 
         
@@ -352,15 +278,46 @@ public class PetriNet {
 
     public int[][] readerMatrix()
     {
+
+
+
+        ArrayList<Node> sortedPlaces = getSortedPlaces();
+        ArrayList<Node> sortedTransitions = getSortedTransitions();
+
+        /*
+         * Calculo R
+         */
+        int R [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
+        for (int i=0; i<sortedPlaces.size(); i++) {
+            HashSet<Arc> arcsFromNode = (HashSet<Arc>) sortedPlaces.get(i).getConnectedArcsFromNode();
+            for(Arc a : arcsFromNode)
+            {
+                if(a.getType().equals("read"))
+                    R[i][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
+            }
+        }
+
+        return R;
+    }
+
+    private ArrayList<Node> getSortedPlaces(){
+
         Set<Place> allPlaces = getRootSubnet().getPlaces();
-        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
         ArrayList<Node> places = new ArrayList<Node>();
-        ArrayList<Node> transitions = new ArrayList<Node>();
 
         for(Place p : allPlaces)
         {
             places.add(p);
         }
+
+        MergeSort merge = new MergeSort();
+        return merge.mergeSort(places);
+    }
+
+    private ArrayList<Node> getSortedTransitions(){
+
+        Set<Transition>  allTransitions = getRootSubnet().getTransitions();
+        ArrayList<Node> transitions = new ArrayList<Node>();
 
         for(Transition t : allTransitions)
         {
@@ -368,24 +325,7 @@ public class PetriNet {
         }
 
         MergeSort merge = new MergeSort();
-        ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-        ArrayList<Node> sortedTransitions = merge.mergeSort(transitions);
-
-        /*
-         * C�lculo R
-         */
-        int R [][]  = new int [sortedPlaces.size()][sortedTransitions.size()];
-        for (Node n : allPlaces)
-        {
-            HashSet<Arc> arcsFromNode = (HashSet<Arc>) n.getConnectedArcsFromNode();
-            for(Arc a : arcsFromNode)
-            {
-                if(a.getType().equals("read"))
-                    R[sortedPlaces.indexOf((Place) n)][sortedTransitions.indexOf(a.getDestination())] = a.getMultiplicity();
-            }
-        }
-
-        return R;
+        return merge.mergeSort(transitions);
     }
     /*
      * Reconstruye el grafo con elementos Plaza y Transiciones a partir de las matrices I+ e I-.
