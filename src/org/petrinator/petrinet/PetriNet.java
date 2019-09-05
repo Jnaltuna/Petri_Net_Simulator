@@ -159,6 +159,32 @@ public class PetriNet {
         }
         return false;
     }
+
+    public ArrayList<String> getSortedPlacesNames(){
+
+        ArrayList<String> sortednames = new ArrayList<>();
+
+        ArrayList<Node> places = getSortedPlaces(); //TODO
+
+        for(Node p : places){
+            sortednames.add(p.getLabel());
+        }
+
+        return sortednames;
+    }
+
+    public ArrayList<String> getSortedTransitionsNames(){
+
+        ArrayList<String> sortednames = new ArrayList<>();
+
+        ArrayList<Node> transitions = getSortedTransitions(); //TODO
+
+        for(Node t : transitions){
+            sortednames.add(t.getLabel());
+        }
+
+        return sortednames;
+    }
     
     /*
      * Agregado. Calcular matriz de incidencia a partir de la subnet.

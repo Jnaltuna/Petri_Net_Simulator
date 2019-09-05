@@ -136,27 +136,27 @@ public class MatricesAction extends AbstractAction
 
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Forwards incidence matrix <i>I<sup>+</sup></i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().forwardIMatrix())
+                            renderMatrixTest(root.getDocument().getPetriNet().forwardIMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Backwards incidence matrix <i>I<sup>-</sup></i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().backwardsIMatrix())
+                            renderMatrixTest(root.getDocument().getPetriNet().backwardsIMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Combined incidence matrix <i>I</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().incidenceMatrix())
+                            renderMatrixTest(root.getDocument().getPetriNet().incidenceMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Inhibition matrix <i>H</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().inhibitionMatrix())
+                            renderMatrixTest(root.getDocument().getPetriNet().inhibitionMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Reset matrix <i>H</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().resetMatrix())
+                            renderMatrixTest(root.getDocument().getPetriNet().resetMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Reader matrix <i>H</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().readerMatrix())
+                            renderMatrixTest(root.getDocument().getPetriNet().readerMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Marking",
@@ -190,6 +190,37 @@ public class MatricesAction extends AbstractAction
         }
     };
 
+    public String renderMatrixTest(int[][] matrix){
+
+        ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
+        ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
+
+        if((matrix.length == 0) || (matrix[0].length == 0))
+        {
+            return "n/a";
+        }
+
+        ArrayList result = new ArrayList();
+        result.add("");
+        for(int i = 0; i < matrix[0].length; i++)
+        {
+            result.add(tnames.get(i));
+        }
+
+        for(int i = 0; i < matrix.length; i++)
+        {
+            result.add(pnames.get(i));
+            for(int j = 0; j < matrix[i].length; j++)
+            {
+                result.add(Integer.toString(matrix[i][j]));
+            }
+        }
+
+        return ResultsHTMLPane.makeTable(
+                result.toArray(), matrix[0].length + 1, false, true, true, true);
+
+
+    }
     /*
      * @brief Format matrix as HTML
      * @param data petri net as read from the .pnml file, used to get transitions and places names
