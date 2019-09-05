@@ -248,12 +248,12 @@ public class MatricesAction extends AbstractAction
         }
 
         result.add("Initial");
-        for(int i = 0; i< marca[mark.INITIAL].length; i++){
-            result.add(Integer.toString(marca[mark.INITIAL][i]));
+        for(int i = 0; i< marca[Marking.INITIAL].length; i++){
+            result.add(Integer.toString(marca[Marking.INITIAL][i]));
         }
         result.add("Current");
-        for(int j = 0; j< marca[mark.CURRENT].length; j++){
-            result.add(Integer.toString(marca[mark.CURRENT][j]));
+        for(int j = 0; j< marca[Marking.CURRENT].length; j++){
+            result.add(Integer.toString(marca[Marking.CURRENT][j]));
         }
 
         return ResultsHTMLPane.makeTable(
