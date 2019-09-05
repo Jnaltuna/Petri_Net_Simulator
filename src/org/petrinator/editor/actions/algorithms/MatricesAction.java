@@ -24,6 +24,8 @@ import org.petrinator.editor.Root;
 import org.petrinator.editor.filechooser.*;
 
 import org.petrinator.petrinet.Document;
+import org.petrinator.petrinet.Element;
+import org.petrinator.petrinet.Transition;
 import org.petrinator.util.GraphicsTools;
 import pipe.gui.ApplicationSettings;
 import pipe.gui.widgets.ButtonBar;
@@ -42,8 +44,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * @author Joaquin Felici <joaquinfelici at gmail.com>
@@ -168,7 +169,7 @@ public class MatricesAction extends AbstractAction
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Enabled transitions",
-                            renderTransitionStates(data)
+                            renderTransitionStates(root.getDocument())
                     }, 1, false, false, true, false);
                 }
                 catch(OutOfMemoryError oome)
@@ -280,29 +281,44 @@ public class MatricesAction extends AbstractAction
    * @brief Format transitions states as HTML
    * @param data petri net as read from the .pnml file, used to get transitions names and properties
    */
-    private String renderTransitionStates(PetriNetView data)
+    private String renderTransitionStates(Document doc)
     {
-        TransitionView[] transitionViews = data.getTransitionViews();
-        if(transitionViews.length == 0)
+
+
+        ArrayList<Transition> enabledArray = new ArrayList<Transition>(doc.getPetriNet().getInitialMarking().getAllEnabledTransitions());
+        ArrayList<String> enabledNamesArray = new ArrayList<>();
+
+        for (Transition transition : enabledArray) {
+            enabledNamesArray.add(transition.getLabel());
+        }
+
+        ArrayList<String> sortedNames = doc.getPetriNet().getSortedTransitionsNames();
+
+        if(sortedNames.size() == 0)
         {
             return "n/a";
         }
 
         ArrayList result = new ArrayList();
-        data.setEnabledTransitions();
+
+
         result.add("");
-        for(TransitionView transitionView1 : transitionViews)
-        {
-            result.add(transitionView1.getName());
+        for(int i=0; i<sortedNames.size(); i++){
+            result.add(sortedNames.get(i));
         }
         result.add("Enabled");
-        for(TransitionView transitionView : transitionViews)
-        {
-            result.add((transitionView.isEnabled() ? "yes" : "no"));
+        for(int i=0; i<sortedNames.size(); i++){
+
+            if(enabledNamesArray.contains(sortedNames.get(i))){
+                result.add("yes");
+            }
+            else{
+                result.add("no");
+            }
+
         }
-        data.resetEnabledTransitions();
 
         return ResultsHTMLPane.makeTable(
-                result.toArray(), transitionViews.length + 1, false, false, true, true);
+                result.toArray(), sortedNames.size() + 1, false, false, true, true);
     }
 }
