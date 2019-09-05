@@ -117,22 +117,5 @@ public class MergeSort
             System.out.println(strList.get(i));
         }
     }
- 
-  //  public static void main(String[] args) 
-    {
-      /*  ArrayList<String> input = new ArrayList<String>();
-        Scanner sc = new Scanner(System.in);
- 
-        System.out.println("Enter your text, type done for exit:");
-        String strin = sc.nextLine();
- 
-        while(!strin.equals("done")) {
-            input.add(strin);
-            strin = sc.nextLine();
-        }
-        System.out.println("************************");
-        MergeSort test = new MergeSort(input);
-        test.sort();
-        test.show();*/
-    }
+
 }
