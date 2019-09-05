@@ -37,6 +37,7 @@ import org.petrinator.util.CollectionTools;
 public class Marking {
 
     protected Map<Place, Integer> map = new ConcurrentHashMap<Place, Integer>();
+    protected Map<Place, Integer> mapinit = new ConcurrentHashMap<>();
     private PetriNet petriNet;
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true); //fair
 
@@ -49,6 +50,7 @@ public class Marking {
         marking.getLock().readLock().lock();
         try {
             this.map = new ConcurrentHashMap<Place, Integer>(marking.map);
+            this.mapinit = new ConcurrentHashMap<Place, Integer>(marking.mapinit);
         } finally {
             marking.getLock().readLock().unlock();
         }
@@ -130,6 +132,26 @@ public class Marking {
             petriNet.getInitialMarking().map.put(place, tokens);
         } else {
             this.map.put(place, tokens);
+        }
+    }
+
+    public void setTokensInit(PlaceNode placeNode, int tokens){
+        if (tokens < 0) {
+            //throw new RuntimeException("Number of tokens must be non-negative");
+            throw new IllegalStateException("Number of tokens must be non-negative");
+        }
+
+        Place place = placeNode.getPlace();
+
+        if (place == null) {
+            //throw new RuntimeException("setTokens() to disconnected ReferencePlace");
+            throw new IllegalStateException("setTokens() to disconnected ReferencePlace");
+        }
+
+        if (place.isStatic()) {
+            petriNet.getInitialMarking().mapinit.put(place, tokens);
+        } else {
+            this.mapinit.put(place, tokens);
         }
     }
 
@@ -495,5 +517,7 @@ public class Marking {
 
     	return array;
     }
+
+
 
 }

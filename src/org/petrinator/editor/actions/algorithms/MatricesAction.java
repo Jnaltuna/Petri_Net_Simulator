@@ -24,6 +24,7 @@ import org.petrinator.editor.Root;
 import org.petrinator.editor.filechooser.*;
 
 import org.petrinator.petrinet.Document;
+import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
 import pipe.gui.ApplicationSettings;
 import pipe.gui.widgets.ButtonBar;
@@ -227,53 +228,38 @@ public class MatricesAction extends AbstractAction
    * @brief Format array as HTML
    * @param data petri net as read from the .pnml file, used to get places names
    */
-    private String renderMarkingMatrices(PetriNetView data)
+    private String renderMarkingMatrices(Document doc)
     {
-        PlaceView[] placeViews = data.places();
-        if(placeViews.length == 0)
+        //Marking marca = doc.getPetriNet().getInitialMarking();
+        Marking mark = doc.getPetriNet().getInitialMarking();
+        int marca [][] =  mark.getMarkingAsArray();
+        if(marca == null)
         {
             return "n/a";
         }
 
-        LinkedList<MarkingView>[] markings = data.getInitialMarkingVector();
-        int[] initial = new int[markings.length];
-        for(int i = 0; i < markings.length; i++)
-        {
-            if(markings[i].size()==0){
-                initial[i] = 0;
-            }else{
-                initial[i] = markings[i].getFirst().getCurrentMarking();
-            }
-        }
-
-        markings = data.getCurrentMarkingVector();
-        int[] current = new int[markings.length];
-        for(int i = 0; i < markings.length; i++)
-        {
-            current[i] = markings[i].getFirst().getCurrentMarking();
-        }
-
         ArrayList result = new ArrayList();
         // add headers t o table
+        ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
         result.add("");
-        for(PlaceView placeView : placeViews)
+        for(String name : pnames)
         {
-            result.add(placeView.getName());
+            result.add(name);
         }
 
         result.add("Initial");
-        for(int anInitial : initial)
+        for(int anInitial : marca[mark.INITIAL][])
         {
             result.add(Integer.toString(anInitial));
         }
         result.add("Current");
-        for(int aCurrent : current)
+        for(int aCurrent : marca[mark.CURRENT][])
         {
             result.add(Integer.toString(aCurrent));
         }
 
         return ResultsHTMLPane.makeTable(
-                result.toArray(), placeViews.length + 1, false, true, true, true);
+                result.toArray(), pnames.size() + 1, false, true, true, true);
     }
 
     /*

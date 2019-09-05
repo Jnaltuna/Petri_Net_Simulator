@@ -166,6 +166,7 @@ public class DocumentImporter {
     private void constructInitialMarkingRecursively(Marking marking, XmlSubnet xmlSubnet) {
         for (XmlPlace xmlPlace : xmlSubnet.places) {
             marking.setTokens((PlaceNode) getObject(xmlPlace), xmlPlace.tokens);
+            marking.setTokensInit((PlaceNode) getObject(xmlPlace), xmlPlace.tokens);
         }
         for (XmlSubnet xmlSubSubnet : xmlSubnet.subnets) {
             constructInitialMarkingRecursively(marking, xmlSubSubnet);
