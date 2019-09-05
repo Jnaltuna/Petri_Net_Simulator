@@ -283,8 +283,7 @@ public class MatricesAction extends AbstractAction
    */
     private String renderTransitionStates(Document doc)
     {
-
-
+        
         ArrayList<Transition> enabledArray = new ArrayList<Transition>(doc.getPetriNet().getInitialMarking().getAllEnabledTransitions());
         ArrayList<String> enabledNamesArray = new ArrayList<>();
 
