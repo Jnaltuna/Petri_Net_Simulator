@@ -132,12 +132,12 @@ public class GraphicsTools {
     }
 
     //Jan Tancibok Inhibitor arc, Taken from http://stackoverflow.com/questions/21465570/two-points-and-then-finds-the-smallest-circle-and-the-smallest-rectangle-contain?rq=1
-    public static void drawCircle(Graphics g, int xCenter, int yCenter, int x2, int y2) {
+    public static void drawCircle(Graphics g, int xCenter, int yCenter, int x2, int y2, boolean fill) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(1f));
 
         double aDir = Math.atan2(xCenter - x2, yCenter - y2);
-        int i2 = 9; //diameter
+        int i2 = 11; //diameter
 
         int x1 = x2 + xCor(i2, aDir);
         int y1 = y2 + yCor(i2, aDir);
@@ -148,8 +148,16 @@ public class GraphicsTools {
         int tlCornerx = (int) (cx - diameter / 2);
         int tlCornery = (int) (cy - diameter / 2);
 
-        g2d.drawOval(tlCornerx, tlCornery, (int) diameter, (int) diameter);
+        if(!fill){
+            g2d.setColor(Color.white);
+        }
+
         g2d.fillOval(tlCornerx, tlCornery, (int) diameter, (int) diameter);
+
+        g2d.setColor(Color.black);
+
+        g2d.drawOval(tlCornerx, tlCornery, (int) diameter, (int) diameter);
+
     }
 
     //Taken from http://forum.java.sun.com/thread.jspa?threadID=378460&tstart=135

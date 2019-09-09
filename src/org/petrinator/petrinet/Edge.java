@@ -249,4 +249,16 @@ public abstract class Edge extends Element implements Cloneable {
         }
         g.drawLine(previous.x, previous.y, getEnd().x, getEnd().y);
     }
+
+    protected void drawDoubleLine(Graphics g){
+        g.setColor(color);
+        Point previous = getStart();
+        for (Point breakPoint : breakPoints) {
+            g.drawLine(previous.x, previous.y-2, breakPoint.x-2, breakPoint.y-2);
+            g.drawLine(previous.x, previous.y+1, breakPoint.x-2, breakPoint.y+1);
+            previous = breakPoint;
+        }
+        g.drawLine(previous.x, previous.y-2, getEnd().x-2, getEnd().y-2);
+        g.drawLine(previous.x, previous.y+1, getEnd().x-2, getEnd().y+1);
+    }
 }

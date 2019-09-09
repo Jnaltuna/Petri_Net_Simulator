@@ -79,16 +79,21 @@ public class Arc extends ArcEdge implements Cloneable {
         this.color = Color.BLACK;
         
         g.setColor(color);
-        drawSegmentedLine(g);
         Point arrowTip = computeArrowTipPoint();
-        if (this.type.equals(Arc.INHIBITOR)) {
-            drawCircle(g, arrowTip);
-        } else {
-            if (this.type.equals(Arc.RESET)) { //TODO agregar aca para el lector
-                drawArrowDouble(g, arrowTip);
+
+        if(this.type.equals(Arc.RESET)){
+            drawDoubleLine(g);
+            drawArrowDouble(g, arrowTip);
+        }
+        else{
+
+            drawSegmentedLine(g);
+
+            if(this.type.equals(Arc.INHIBITOR)){
+                drawCircle(g, arrowTip, false);
             }
-            else if (this.type.equals(Arc.READ)){
-                drawLine(g, arrowTip);
+            else if(this.type.equals(Arc.READ)){
+                drawCircle(g, arrowTip, true);
             }
             else {
                 drawArrow(g, arrowTip);

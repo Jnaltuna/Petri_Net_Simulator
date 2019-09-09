@@ -95,11 +95,6 @@ public abstract class ArcEdge extends Edge implements Cloneable {
 
     protected void drawArrowDouble(Graphics g, Point arrowTip) {
         Point lastBreakPoint = getLastBreakPoint();
-        /*int dx =lastBreakPoint.x - arrowTip.x;
-         int dy =lastBreakPoint.y - arrowTip.y;
-         int px = 8;
-         int py = (int) ((dy/dx) * px);
-         GraphicsTools.drawArrow(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);*/
         GraphicsTools.drawArrowDouble(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);
     }
 
@@ -108,9 +103,9 @@ public abstract class ArcEdge extends Edge implements Cloneable {
         GraphicsTools.drawLine(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);
     }
 
-    protected void drawCircle(Graphics g, Point arrowTip) {
+    protected void drawCircle(Graphics g, Point arrowTip, boolean fill) {
         Point lastBreakPoint = getLastBreakPoint();
-        GraphicsTools.drawCircle(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y);
+        GraphicsTools.drawCircle(g, lastBreakPoint.x, lastBreakPoint.y, arrowTip.x, arrowTip.y, fill);
     }
 
     protected void drawMultiplicityLabel(Graphics g, Point arrowTip, int multiplicity) {
