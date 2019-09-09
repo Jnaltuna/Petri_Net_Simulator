@@ -21,39 +21,28 @@
 package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.editor.Root;
-import org.petrinator.editor.filechooser.*;
 
+import org.petrinator.petrinet.Document;
+import org.petrinator.petrinet.Transition;
+import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
-import pipe.gui.ApplicationSettings;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.EscapableDialog;
-import pipe.gui.widgets.PetriNetChooserPanel;
 import pipe.gui.widgets.ResultsHTMLPane;
-import pipe.views.MarkingView;
-import pipe.views.PetriNetView;
-import pipe.views.PlaceView;
-import pipe.views.TransitionView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 
-/**
- * @author Joaquin Felici <joaquinfelici at gmail.com>
- * @brief
- */
+
 public class MatricesAction extends AbstractAction
 {
-    Root root;
+    private Root root;
     private ResultsHTMLPane results;
 
-    public MatricesAction(Root root)
-    {
+    public MatricesAction(Root root) {
         this.root = root;
 
         String name = "Matrices";
@@ -62,41 +51,13 @@ public class MatricesAction extends AbstractAction
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/matrices16.png"));
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
-         /*
-         * Create tmp.pnml file
-         */
-        FileChooserDialog chooser = new FileChooserDialog();
-
-        if (root.getCurrentFile() != null)
-        {
-            chooser.setSelectedFile(root.getCurrentFile());
-        }
-
-        chooser.addChoosableFileFilter(new PipePnmlFileType());
-        chooser.setAcceptAllFileFilterUsed(false);
-        chooser.setCurrentDirectory(root.getCurrentDirectory());
-        chooser.setDialogTitle("Save as...");
-
-        File file = new File("tmp/" + "tmp" + "." + "pnml");
-        FileType chosenFileType = (FileType) chooser.getFileFilter();
-        try
-        {
-            chosenFileType.save(root.getDocument(), file);
-        }
-        catch (FileTypeException e1)
-        {
-            e1.printStackTrace();
-        }
-
+    public void actionPerformed(ActionEvent e) {
         /*
          * Show initial pane
          */
         EscapableDialog guiDialog = new EscapableDialog(root.getParentFrame(), "Petri net matrices and marking", true);
         Container contentPane = guiDialog.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-        //sourceFilePanel = new PetriNetChooserPanel("Source net", null);
         results = new ResultsHTMLPane("");
         contentPane.add(results);
         contentPane.add(new ButtonBar("Calculate", calculateButtonClick, guiDialog.getRootPane()));
@@ -105,25 +66,16 @@ public class MatricesAction extends AbstractAction
         guiDialog.setVisible(true);
     }
 
-    private final ActionListener calculateButtonClick = new ActionListener()
-    {
+    private final ActionListener calculateButtonClick = new ActionListener() {
+
         public void actionPerformed(ActionEvent arg0)
         {
-            /*
-             * Read tmp file
-             */
-            PetriNetView data = new PetriNetView("tmp/tmp.pnml");
 
             /*
              *  Create HTML file with data
              */
             String s = "<h2>Petri Net Matrices</h2>";
 
-            //String s = "<h3>Petri net matrices and marking</h3>"; // Do we REALLY need a third title? Let's think about that...
-            if(data == null)
-            {
-                return;
-            }
             if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
             {
                 s += "Invalid net!";
@@ -132,35 +84,41 @@ public class MatricesAction extends AbstractAction
             {
                 try
                 {
-                    //PNMLWriter.saveTemporaryFile(data, this.getClass().getName());
+
+                    ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
+                    ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
 
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Forwards incidence matrix <i>I<sup>+</sup></i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().forwardIMatrix())
+                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().forwardIMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Backwards incidence matrix <i>I<sup>-</sup></i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().backwardsIMatrix())
+                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().backwardsIMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Combined incidence matrix <i>I</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().incidenceMatrix())
+                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().incidenceMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Inhibition matrix <i>H</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().inhibitionMatrix())
+                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().inhibitionMatrix())
+                    }, 1, false, false, true, false);
+                    s += ResultsHTMLPane.makeTable(new String[]{
+                            "Reset matrix <i>H</i>",
+                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().resetMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Reader matrix <i>H</i>",
-                            renderMatrix(data, root.getDocument().getPetriNet().readerMatrix())
+                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().readerMatrix())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Marking",
-                            renderMarkingMatrices(data)
+                            renderMarkingMatrices(pnames, root.getDocument())
                     }, 1, false, false, true, false);
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Enabled transitions",
-                            renderTransitionStates(data)
+                            renderTransitionStates(tnames, root.getDocument())
                     }, 1, false, false, true, false);
                 }
                 catch(OutOfMemoryError oome)
@@ -186,13 +144,14 @@ public class MatricesAction extends AbstractAction
         }
     };
 
-    /*
-     * @brief Format matrix as HTML
-     * @param data petri net as read from the .pnml file, used to get transitions and places names
-     * @param matrix the matrix that wants to be formatted into HTML
+    /**
+     * Format a matrix as HTML
+     *
+     * @param pnames arraylist with the net's places names
+     * @param tnames arraylist with the net's transitions names
      */
-    public String renderMatrix(PetriNetView data, int[][] matrix)
-    {
+    private String renderMatrix(ArrayList<String> pnames, ArrayList<String> tnames, int[][] matrix) {
+
         if((matrix.length == 0) || (matrix[0].length == 0))
         {
             return "n/a";
@@ -202,12 +161,12 @@ public class MatricesAction extends AbstractAction
         result.add("");
         for(int i = 0; i < matrix[0].length; i++)
         {
-            result.add(data.getTransition(i).getName());
+            result.add(tnames.get(i));
         }
 
         for(int i = 0; i < matrix.length; i++)
         {
-            result.add(data.getPlace(i).getName());
+            result.add(pnames.get(i));
             for(int j = 0; j < matrix[i].length; j++)
             {
                 result.add(Integer.toString(matrix[i][j]));
@@ -216,88 +175,88 @@ public class MatricesAction extends AbstractAction
 
         return ResultsHTMLPane.makeTable(
                 result.toArray(), matrix[0].length + 1, false, true, true, true);
+
+
     }
 
-    /*
-   * @brief Format array as HTML
-   * @param data petri net as read from the .pnml file, used to get places names
-   */
-    private String renderMarkingMatrices(PetriNetView data)
-    {
-        PlaceView[] placeViews = data.places();
-        if(placeViews.length == 0)
+    /**
+     * Format an arraylist as HTML
+     *
+     * @param pnames arraylist with the net's places names
+     * @param doc current Document
+     */
+    private String renderMarkingMatrices(ArrayList<String> pnames, Document doc) {
+
+        Marking mark = doc.getPetriNet().getInitialMarking();
+        int markingMatrix [][] =  mark.getMarkingAsArray();
+        if(markingMatrix == null)
         {
             return "n/a";
-        }
-
-        LinkedList<MarkingView>[] markings = data.getInitialMarkingVector();
-        int[] initial = new int[markings.length];
-        for(int i = 0; i < markings.length; i++)
-        {
-            if(markings[i].size()==0){
-                initial[i] = 0;
-            }else{
-                initial[i] = markings[i].getFirst().getCurrentMarking();
-            }
-        }
-
-        markings = data.getCurrentMarkingVector();
-        int[] current = new int[markings.length];
-        for(int i = 0; i < markings.length; i++)
-        {
-            current[i] = markings[i].getFirst().getCurrentMarking();
         }
 
         ArrayList result = new ArrayList();
         // add headers t o table
+
         result.add("");
-        for(PlaceView placeView : placeViews)
+        for(String name : pnames)
         {
-            result.add(placeView.getName());
+            result.add(name);
         }
 
         result.add("Initial");
-        for(int anInitial : initial)
-        {
-            result.add(Integer.toString(anInitial));
+
+        for(int i = 0; i< markingMatrix[Marking.INITIAL].length; i++){
+            result.add(Integer.toString(markingMatrix[mark.INITIAL][i]));
         }
         result.add("Current");
-        for(int aCurrent : current)
-        {
-            result.add(Integer.toString(aCurrent));
+        for(int j = 0; j< markingMatrix[Marking.CURRENT].length; j++){
+            result.add(Integer.toString(markingMatrix[mark.CURRENT][j]));
         }
 
         return ResultsHTMLPane.makeTable(
-                result.toArray(), placeViews.length + 1, false, true, true, true);
+                result.toArray(), pnames.size() + 1, false, true, true, true);
     }
 
-    /*
-   * @brief Format transitions states as HTML
-   * @param data petri net as read from the .pnml file, used to get transitions names and properties
-   */
-    private String renderTransitionStates(PetriNetView data)
-    {
-        TransitionView[] transitionViews = data.getTransitionViews();
-        if(transitionViews.length == 0)
+    /**
+     * Format transitions states as HTML
+     *
+     * @param sortedNames array list with the transitions labels
+     * @param doc current Document
+     */
+    private String renderTransitionStates(ArrayList<String> sortedNames, Document doc) {
+
+        ArrayList<Transition> enabledArray = new ArrayList<Transition>(doc.getPetriNet().getInitialMarking().getAllEnabledTransitions());
+        ArrayList<String> enabledNamesArray = new ArrayList<>();
+
+        for (Transition transition : enabledArray) {
+            enabledNamesArray.add(transition.getLabel());
+        }
+
+        if(sortedNames.size() == 0)
         {
             return "n/a";
         }
 
         ArrayList result = new ArrayList();
-        data.setEnabledTransitions();
+
+
         result.add("");
-        for(TransitionView transitionView1 : transitionViews)
-        {
-            result.add(transitionView1.getName());
+        for(int i=0; i<sortedNames.size(); i++){
+            result.add(sortedNames.get(i));
         }
         result.add("Enabled");
-        for(TransitionView transitionView : transitionViews)
-        {
-            result.add((transitionView.isEnabled() ? "yes" : "no"));
+        for(int i=0; i<sortedNames.size(); i++){
+
+            if(enabledNamesArray.contains(sortedNames.get(i))){
+                result.add("yes");
+            }
+            else{
+                result.add("no");
+            }
+
         }
-        data.resetEnabledTransitions();
 
         return ResultsHTMLPane.makeTable(
-                result.toArray(), transitionViews.length + 1, false, false, true, true);
+                result.toArray(), sortedNames.size() + 1, false, false, true, true);
     }
 }

@@ -36,7 +36,11 @@ import org.petrinator.util.CollectionTools;
  */
 public class Marking {
 
+    public static final int INITIAL = 0;
+    public static final int CURRENT = 1;
+
     protected Map<Place, Integer> map = new ConcurrentHashMap<Place, Integer>();
+    protected Map<Place, Integer> mapinit = new ConcurrentHashMap<>();
     private PetriNet petriNet;
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true); //fair
 
@@ -49,6 +53,7 @@ public class Marking {
         marking.getLock().readLock().lock();
         try {
             this.map = new ConcurrentHashMap<Place, Integer>(marking.map);
+            this.mapinit = new ConcurrentHashMap<Place, Integer>(marking.mapinit);
         } finally {
             marking.getLock().readLock().unlock();
         }
@@ -104,6 +109,26 @@ public class Marking {
         return marking.map.get(place);
     }
 
+    public int getTokensInit(PlaceNode placeNode) {
+        Place place = placeNode.getPlace();
+        if (place == null) { // In case of disconnected ReferencePlace, we want it to appear with zero tokens. Disconnected ReferencePlaces can be found in stored subnets.
+            return 0;
+        }
+
+        Marking marking;
+        if (place.isStatic()) {
+            marking = petriNet.getInitialMarking();
+        } else {
+            marking = this;
+        }
+
+        if (marking.mapinit.get(place) == null) { // Place has zero tokens in the beginning. Not every place is in map. Only those previously edited.
+            return 0;
+        }
+
+        return marking.mapinit.get(place);
+    }
+
     /**
      * Sets the number of tokens to the specified PlaceNode (Place or
      * ReferencePlace). If specified PlaceNode is ReferencePlace, it will set
@@ -133,6 +158,26 @@ public class Marking {
         }
     }
 
+    public void setTokensInit(PlaceNode placeNode, int tokens){
+        if (tokens < 0) {
+            //throw new RuntimeException("Number of tokens must be non-negative");
+            throw new IllegalStateException("Number of tokens must be non-negative");
+        }
+
+        Place place = placeNode.getPlace();
+
+        if (place == null) {
+            //throw new RuntimeException("setTokens() to disconnected ReferencePlace");
+            throw new IllegalStateException("setTokens() to disconnected ReferencePlace");
+        }
+
+        if (place.isStatic()) {
+            petriNet.getInitialMarking().mapinit.put(place, tokens);
+        } else {
+            this.mapinit.put(place, tokens);
+        }
+    }
+
     /**
      * Determines if a transition is enabled in this marking
      *
@@ -146,7 +191,7 @@ public class Marking {
             for (Arc arc : transition.getConnectedArcs()) {
                 if (arc.isPlaceToTransition()) {
                     if (arc.getType().equals(Arc.RESET)) {//reset arc is always fireable
-                        continue;      //but can be blocked by other arcs 
+                        continue;      //but can be blocked by other arcs
                     } else {
                         if (!arc.getType().equals(Arc.INHIBITOR)) {
                             if (getTokens(arc.getPlaceNode()) < arc.getMultiplicity()) {  //normal arc
@@ -290,7 +335,7 @@ public class Marking {
         return enabledTransitions;
     }
 
-    private List<Transition> getAllEnabledTransitionsByList() {
+    public List<Transition> getAllEnabledTransitionsByList() {
         List<Transition> fireableTransitions = new ArrayList<Transition>();
         lock.readLock().lock();
         try {
@@ -471,12 +516,14 @@ public class Marking {
         return hash;
     }
     
-    /*
-     * Agregado, devolver marcado como arreglo:
+    /**
+     * Returns the sorted marking as a two-dimensional matrix,
+     * where the first row corresponds to the initial marking
+     * and the second one, to the current marking.
      */
-    public int[] getMarkingAsArray()
-    {
-    	Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
+    public int[][] getMarkingAsArray() {
+
+        Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
     	ArrayList<Node> places = new ArrayList<Node>();
     	
     	for(Place p : allPlaces)
@@ -486,14 +533,18 @@ public class Marking {
     	
     	MergeSort merge = new MergeSort();
     	ArrayList<Node> sortedPlaces = merge.mergeSort(places);
-    	int [] array = new int[sortedPlaces.size()];
+    	int [][] array = new int[2][sortedPlaces.size()];
 
         for (Node n : sortedPlaces)
         {
-        	array[sortedPlaces.indexOf(n)] = getTokens((Place) n);
+            array[INITIAL][sortedPlaces.indexOf(n)] = getTokensInit((Place) n);
+        	array[CURRENT][sortedPlaces.indexOf(n)] = getTokens((Place) n);
         } 
 
     	return array;
+
     }
+
+
 
 }

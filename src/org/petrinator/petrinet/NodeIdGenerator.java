@@ -21,11 +21,11 @@ package org.petrinator.petrinet;
  * @author Martin Riesz <riesz.martin at gmail.com>
  */
 public class NodeIdGenerator {
-
-    static private int nextUniquePlaceNumber = 1;
-    static private int nextUniqueTransitionNumber = 1;
-    static private int nextUniqueSubnetNumber = 1;
-    static private int nextUniqueReferencePlaceNumber = 1;
+    //TODO estaban static, ver si hay algun error al sacarlo
+    private int nextUniquePlaceNumber = 1;
+    private int nextUniqueTransitionNumber = 1;
+    private int nextUniqueSubnetNumber = 1;
+    private int nextUniqueReferencePlaceNumber = 1;
 
     public void setUniqueId(Node node)
     {
@@ -42,6 +42,13 @@ public class NodeIdGenerator {
             throw new RuntimeException("Node which is not Place, Transition, Subnet neither ReferencePlace");
         }
         node.setId(id);
+    }
+
+    public void resetUniqueIds(){
+        nextUniquePlaceNumber = 1;
+        nextUniqueReferencePlaceNumber = 1;
+        nextUniqueSubnetNumber = 1;
+        nextUniqueTransitionNumber = 1;
     }
 
     public void fixFutureUniqueIds(Subnet rootSubnet) {
