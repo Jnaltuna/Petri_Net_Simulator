@@ -196,7 +196,7 @@ public class SimulateAction extends AbstractAction
         }
 
         TransitionsPolicy policy = new FirstInLinePolicy();
-        PetriMonitor monitor = new PetriMonitor(petri, policy);
+        PetriMonitor monitor = new PetriMonitor(petri, policy, numberOfTransitions);
         monitor.simulationRunning = true;
 
         petri.initializePetriNet();
