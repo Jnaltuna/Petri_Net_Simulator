@@ -82,7 +82,7 @@ public class Arc extends ArcEdge implements Cloneable {
         Point arrowTip = computeArrowTipPoint();
 
         if(this.type.equals(Arc.RESET)){
-            drawDoubleLine(g);
+            drawSegmentedLine(g);
             drawArrowDouble(g, arrowTip);
         }
         else{

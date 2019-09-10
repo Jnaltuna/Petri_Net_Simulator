@@ -47,6 +47,12 @@ public class PetriNet {
      */
     public PetriNet() {
         clear();
+        /*int[][] ip = {{0},{0},{1},{0},{0}};
+        int[][] im = {{1},{0},{0},{0},{0}};
+        int[][] rd = {{0},{0},{0},{1},{0}};
+        int[][] in = {{0},{1},{0},{0},{0}};
+        int[][] rs = {{0},{0},{0},{0},{1}};
+        reconstructFromMatrix(ip, im, in, rd, rs);*/
     }
 
     /**
@@ -357,8 +363,10 @@ public class PetriNet {
      * Reconstruye el grafo con elementos Plaza y Transiciones a partir de las matrices I+ e I-.
      * Falta agregar inhibici�n y reset.
      */
-    public void reconstructFromMatrix(int [][] matrixIPlus, int [][] matrixIMinus)
-    {
+    public void reconstructFromMatrix(int [][] matrixIPlus, int [][] matrixIMinus, int [][] matrixInhibition, int [][] matrixReader, int [][] matrixReset) {
+
+        //TODO: chequear que las matrices son coherentes entre sí
+
     	/*
     	 * Create nodes
     	 */
@@ -390,8 +398,30 @@ public class PetriNet {
     				a1.execute();
     				a1.getCreatedArc().setMultiplicity(matrixIMinus[i][j]);
     			}
+    			if(matrixInhibition[i][j] !=0){
+                    AddArcCommand a1 = new AddArcCommand((Place) rootSubnet.getNodeById("P"+(i+1)), (Transition) rootSubnet.getNodeById("T"+(j+1)),true);
+                    a1.execute();
+                    a1.getCreatedArc().setType(Arc.INHIBITOR);
+                    a1.getCreatedArc().setMultiplicity(matrixInhibition[i][j]);
+                }
+    			if(matrixReader[i][j] != 0){
+                    AddArcCommand a1 = new AddArcCommand((Place) rootSubnet.getNodeById("P"+(i+1)), (Transition) rootSubnet.getNodeById("T"+(j+1)),true);
+                    a1.execute();
+                    a1.getCreatedArc().setType(Arc.READ);
+                    a1.getCreatedArc().setMultiplicity(matrixReader[i][j]);
+                }
+                if(matrixReset[i][j] != 0){
+                    AddArcCommand a1 = new AddArcCommand((Place) rootSubnet.getNodeById("P"+(i+1)), (Transition) rootSubnet.getNodeById("T"+(j+1)),true);
+                    a1.execute();
+                    a1.getCreatedArc().setType(Arc.RESET);
+                    a1.getCreatedArc().setMultiplicity(matrixReset[i][j]);
+                }
     		}
     	}
+
     }
+
+
+
 }
 
