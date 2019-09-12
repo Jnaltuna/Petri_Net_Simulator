@@ -240,6 +240,8 @@ public class SimulateAction extends AbstractAction
         ProgressBarDialog dialog = new ProgressBarDialog(root, "Simulating...");
         dialog.show(true);
 
+        boolean blocked = false;
+        long simTime = -1;
 		 /*
 		  * Wait for the number of events to occur
 		  */
@@ -261,13 +263,18 @@ public class SimulateAction extends AbstractAction
                     e1.printStackTrace();
                 }
                 // System.out.println(""); // Need at least one instruction in while, otherwise it will explode
+
                 if(checkAllAre(petri.getEnabledTransitions(),false))   // We need to check if the net is blocked and no more transitions can be fored
                 {
+                    blocked = true;
+                    simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + ((ConcreteObserver) observer).getEvents().size() + " transitions were fired.");
                     break;
                 }
                 else if(blockedMonitor(threads, petri))
                 {
+                    blocked = true;
+                    simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), " \n The net is blocked. Make sure that at least one \n fired transition comes before the automatic ones.      \n ");
                     System.out.println(" > Monitor blocked");
                     break;
@@ -292,6 +299,16 @@ public class SimulateAction extends AbstractAction
          * will be shown in green.
          */
         new TokenSelectToolAction(root).actionPerformed(e);
+
+        /*
+        *   Display simulation time
+        * */
+        if(!blocked){
+            simTime = monitor.getSimulationTime();
+        }
+
+        JOptionPane.showMessageDialog(root.getParentFrame(), "Tiempo de simulacion: " + simTime + " ms");
+        //TODO ver si hace falta dejar o si ponemos que se cierre solo
 
         /*
          * We fire the net graphically
