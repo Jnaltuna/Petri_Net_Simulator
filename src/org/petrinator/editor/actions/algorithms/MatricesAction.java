@@ -76,7 +76,7 @@ public class MatricesAction extends AbstractAction
              */
             String s = "<h2>Petri Net Matrices</h2>";
 
-            if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
+            if(!root.getDocument().getPetriNet().getRootSubnet().isValid())
             {
                 s += "Invalid net!";
             }

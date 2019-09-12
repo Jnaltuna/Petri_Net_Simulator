@@ -28,9 +28,6 @@ import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
 import org.petrinator.editor.commands.FireTransitionCommand;
 import org.petrinator.auxiliar.*;
-import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.*;
 
 import org.unc.lac.javapetriconcurrencymonitor.errors.DuplicatedNameError;
@@ -82,6 +79,11 @@ public class SimulateAction extends AbstractAction
     {
         stop = false;
 
+        if(!root.getDocument().getPetriNet().getRootSubnet().isValid()){
+            JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
+            return;
+        }
+
         /*
          * Create tmp.pnml file
          */
@@ -114,7 +116,7 @@ public class SimulateAction extends AbstractAction
         /*
          * Ask user to insert times
          */
-        int numberOfTransitions = 1, timeBetweenTransitions = 1000;
+        int numberOfTransitions = 1, timeBetweenTransitions = 100;
 
         JTextField number = new JTextField(8);
         JTextField time = new JTextField(8);
@@ -140,17 +142,24 @@ public class SimulateAction extends AbstractAction
         {
             try
             {
-                numberOfTransitions = Integer.valueOf(number.getText());
-                timeBetweenTransitions = Integer.valueOf(time.getText());
+                int _transitions = Integer.parseInt(number.getText());
+                int _time = Integer.parseInt(time.getText());
+
+                if(_transitions < numberOfTransitions || _time < timeBetweenTransitions){
+                    throw new NumberFormatException();
+                }
+                else {
+                    numberOfTransitions = _transitions;
+                    timeBetweenTransitions = _time;
+                }
             }
             catch(NumberFormatException e1)
             {
-                JOptionPane.showMessageDialog(null, "Invalid number");
+                String title = "Invalid Input!";
+                String message = String.format("Number of transitions must be at least: %d\n Time between transitions must be at least: %d ms  \n", numberOfTransitions, timeBetweenTransitions);
+                JOptionPane.showMessageDialog(null, message, title, JOptionPane.WARNING_MESSAGE, null);
                 return; // Don't execute further code
             }
-        }
-        else {
-            return; // Don't execute further code
         }
 
         setEnabled(false);
