@@ -116,7 +116,8 @@ public class SimulateAction extends AbstractAction
         /*
          * Ask user to insert times
          */
-        int numberOfTransitions = 1, timeBetweenTransitions = 100;
+        int numberOfTransitions = 1;
+        int timeBetweenTransitions = 10;
 
         JTextField number = new JTextField(8);
         JTextField time = new JTextField(8);
@@ -162,7 +163,8 @@ public class SimulateAction extends AbstractAction
             }
         }
 
-        setEnabled(false);
+        //setEnabled(false);
+        root.disableWhileSimulating();
 
         /*
          * Run a single thread to fire the transitions graphically
@@ -258,7 +260,7 @@ public class SimulateAction extends AbstractAction
             {
                 try
                 {
-                    Thread.currentThread().sleep(10);
+                    Thread.sleep(10);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
@@ -277,6 +279,7 @@ public class SimulateAction extends AbstractAction
                     simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), " \n The net is blocked. Make sure that at least one \n fired transition comes before the automatic ones.      \n ");
                     System.out.println(" > Monitor blocked");
+                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
                     break;
                 }
             }
@@ -325,7 +328,8 @@ public class SimulateAction extends AbstractAction
 
         running = false;
         System.out.println(" > Simulation ended");
-        setEnabled(true);
+        //setEnabled(true);
+        root.enableAfterStop();
     }
 
     /*

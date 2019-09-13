@@ -46,5 +46,6 @@ public class StopSimulationAction extends AbstractAction
     {
         SimulateAction simulation = new SimulateAction(root, null);
         simulation.stop = true;
+        root.enableAfterStop();
     }
 }
