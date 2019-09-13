@@ -47,11 +47,28 @@ public class PetriNet {
      */
     public PetriNet() {
         clear();
-        /*int[][] ip = {{0},{0},{1},{0},{0}};
-        int[][] im = {{1},{0},{0},{0},{0}};
-        int[][] rd = {{0},{0},{0},{1},{0}};
-        int[][] in = {{0},{1},{0},{0},{0}};
-        int[][] rs = {{0},{0},{0},{0},{1}};
+    //Generar matrix de S*S
+        /*int S = 400;
+        int[][] ip = new int[S][S];
+        int[][] im = new int[S][S];
+        int[][] rd = new int[S][S];
+        int[][] in = new int[S][S];
+        int[][] rs = new int[S][S];
+        for(int i = 0; i< S; i++){
+            for(int j = 0; j<S; j++){
+                ip[i][j] = 0;
+                im[i][j] = 0;
+                rd[i][j] = 0;
+                in[i][j] = 0;
+                rs[i][j] = 0;
+                if(i==j){
+                    im[i][j]= 1;
+                    if(i>0)
+                        ip[i-1][j] = 1;
+                }
+            }
+        }
+        ip[S-1][0] = 1;
         reconstructFromMatrix(ip, im, in, rd, rs);*/
     }
 

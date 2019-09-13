@@ -276,7 +276,7 @@ public class SimulateAction extends AbstractAction
                     blocked = true;
                     simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), " \n The net is blocked. Make sure that at least one \n fired transition comes before the automatic ones.      \n ");
-                    System.out.println(" > Monitor blocked");
+                    System.out.println(" > Monitor blocked " + ((ConcreteObserver) observer).getEvents().size());
                     break;
                 }
             }
@@ -344,6 +344,7 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
+                        //Thread.sleep(10);
                         Thread.sleep(new Random().nextInt(50)); // Random value between 0 and 50 ms
                         m.fireTransition(id);
                     } catch (IllegalTransitionFiringError | IllegalArgumentException | PetriNetException e) {
