@@ -118,6 +118,7 @@ public class SimulateAction extends AbstractAction
          */
         int numberOfTransitions = 1;
         int timeBetweenTransitions = 10;
+        boolean skipGraphicalFire = false;
 
         JTextField number = new JTextField(8);
         JTextField time = new JTextField(8);
@@ -152,12 +153,15 @@ public class SimulateAction extends AbstractAction
                 int _transitions = Integer.parseInt(number.getText());
                 int _time = Integer.parseInt(time.getText());
 
+                skipGraphicalFire = skip.isSelected();
+
                 if(_transitions < numberOfTransitions || _time < timeBetweenTransitions){
                     throw new NumberFormatException();
                 }
                 else {
                     numberOfTransitions = _transitions;
                     timeBetweenTransitions = _time;
+
                 }
             }
             catch(NumberFormatException e1)
@@ -178,14 +182,14 @@ public class SimulateAction extends AbstractAction
         /*
          * Run a single thread to fire the transitions graphically
          */
-        boolean skipGraphicalFire = true;
+        final boolean c = skipGraphicalFire;
         final int a = numberOfTransitions; final int b= timeBetweenTransitions;
         Thread t = new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                runInMonitor(a, b, skipGraphicalFire);
+                runInMonitor(a, b, c);
             }
         });
         t.start();
