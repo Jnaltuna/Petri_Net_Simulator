@@ -168,6 +168,9 @@ public class SimulateAction extends AbstractAction
                 return; // Don't execute further code
             }
         }
+        else if(result == JOptionPane.CANCEL_OPTION){
+            return;
+        }
 
         //setEnabled(false);
         root.disableWhileSimulating();
@@ -175,13 +178,14 @@ public class SimulateAction extends AbstractAction
         /*
          * Run a single thread to fire the transitions graphically
          */
+        boolean skipGraphicalFire = true;
         final int a = numberOfTransitions; final int b= timeBetweenTransitions;
         Thread t = new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                runInMonitor(a, b);
+                runInMonitor(a, b, skipGraphicalFire);
             }
         });
         t.start();
@@ -193,7 +197,7 @@ public class SimulateAction extends AbstractAction
      * @detail After getting all the firings the user set, it creates a thread that
      * will "fire" the transitions within our editor every x millis.
      */
-    public void runInMonitor(int numberOfTransitions, int timeBetweenTransitions)
+    public void runInMonitor(int numberOfTransitions, int timeBetweenTransitions, boolean skipGraphicalFire)
     {
         /*
          * Create monitor, petri net, and all related variables.
@@ -331,7 +335,7 @@ public class SimulateAction extends AbstractAction
             place.clearValues();
         }
         analyzePlaces(timeBetweenTransitions);
-        fireGraphically(((ConcreteObserver) observer).getEvents(), timeBetweenTransitions, numberOfTransitions);
+        fireGraphically(((ConcreteObserver) observer).getEvents(), timeBetweenTransitions, numberOfTransitions, skipGraphicalFire);
         new SelectionSelectToolAction(root).actionPerformed(e);
 
         running = false;
@@ -376,7 +380,7 @@ public class SimulateAction extends AbstractAction
      * @param timeBetweenTransitions milliseconds to wait between events performed
      * @return
      */
-    void fireGraphically(List<String> list, int timeBetweenTransitions, int numberOfTransitions)
+    void fireGraphically(List<String> list, int timeBetweenTransitions, int numberOfTransitions,boolean skipGraphicalFire)
     {
         /*
          * If we wanna keep track of the current iteration, we need to do it with a separate variable,
@@ -423,28 +427,32 @@ public class SimulateAction extends AbstractAction
             Marking marking = root.getDocument().petriNet.getInitialMarking();
 
             //System.out.println(transition.getLabel() + " was fired!");
-            root.getEventList().addEvent((transition.getLabel() + " was fired!"));
+            if(!skipGraphicalFire)
+                root.getEventList().addEvent((transition.getLabel() + " was fired!"));
 
             if(transition.isTimed())
             {
                 transition.setTime((int) time);
                 transition.setWaiting(true);
-                countDown(transition);
 
-                try
-                {
-                    System.out.println("Sleeping " + (int) time);
-                    Thread.currentThread().sleep((int) time);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                if(!skipGraphicalFire) {
+                    countDown(transition);
+
+                    try {
+                        System.out.println("Sleeping " + (int) time);
+                        Thread.currentThread().sleep((int) time);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
-
                 transition.setWaiting(false);
             }
 
             FireTransitionCommand fire = new FireTransitionCommand(transition, marking);
             fire.execute();
-            root.refreshAll();
+
+            if(!skipGraphicalFire)
+                root.refreshAll();
 
             /*
              * Maybe, if several threads executed multiple transitions concurrently,
@@ -457,24 +465,29 @@ public class SimulateAction extends AbstractAction
                 return;
             }
 
-            if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
-            {
-                try
+            if(!skipGraphicalFire){
+                if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
                 {
-                    Thread.currentThread().sleep(timeBetweenTransitions);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    try
+                    {
+                        Thread.currentThread().sleep(timeBetweenTransitions);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        Thread.currentThread().sleep(50);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
             }
-            else
-            {
-                try
-                {
-                    Thread.currentThread().sleep(50);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-            }
+        }
+        if(skipGraphicalFire){
+            root.refreshAll();
         }
     }
 
