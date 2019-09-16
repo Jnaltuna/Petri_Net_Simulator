@@ -119,6 +119,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
+
+        /* No events allowed during simulation time */
+        if(root.isSimulating()){
+            return;
+        }
+
         if (e.getWheelRotation() == 1) {
             if (PNEditor.getRoot().isSelectedTool_Place()) {
                 PNEditor.getRoot().selectTool_Transition();
@@ -149,6 +155,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     }
 
     public void mousePressed(MouseEvent event) {
+
+        /* No events allowed during simulation time */
+        if(root.isSimulating()){
+            return;
+        }
+
         int x = event.getX() - getTranslationX();
         int y = event.getY() - getTranslationY();
         event = new MouseEvent(
@@ -181,6 +193,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     }
 
     public void mouseDragged(MouseEvent event) {
+
+        /* No events allowed during simulation time */
+        if(root.isSimulating()){
+            return;
+        }
+
         int x = event.getX() - getTranslationX();
         int y = event.getY() - getTranslationY();
 
@@ -192,6 +210,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     }
 
     public void mouseReleased(MouseEvent evt) {
+
+        /* No events allowed during simulation time */
+        if(root.isSimulating()){
+            return;
+        }
+
         int x = evt.getX() - getTranslationX();
         int y = evt.getY() - getTranslationY();
 
@@ -204,6 +228,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     }
 
     public void mouseMoved(MouseEvent evt) {
+
+        /* No events allowed during simulation time */
+        if(root.isSimulating()){
+            return;
+        }
+
         int x = evt.getX() - getTranslationX();
         int y = evt.getY() - getTranslationY();
 

@@ -50,6 +50,7 @@ public class SetTokensAction extends AbstractAction {
     }
 
     public void actionPerformed(ActionEvent e) {
+
         Marking initialMarking = root.getDocument().petriNet.getInitialMarking();
         if (root.getClickedElement() != null) {
             if (root.getClickedElement() instanceof PlaceNode) {

@@ -72,10 +72,15 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private static final String APP_VERSION = "1.0.0";
 
     /*
+    * Used to disable all actions while simulating
+    */
+    private boolean simulating = false;
+
+    /*
      * Added event list to show which transitions were fired
      */
-    JSplitPane splitPane;
-    EventList events = new EventList();
+    private JSplitPane splitPane;
+    private EventList events = new EventList();
 
     public Root(String[] args)
     {
@@ -780,9 +785,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
             menuBar.getComponentAtIndex(i).setEnabled(false);
         }
 
-        //drawingBoard.setEnabled(false);
-        //selection.setSelectionChangedListener(null);
-
+        simulating = true;
         stopButton.setEnabled(true);
     }
 
@@ -798,8 +801,12 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
 
         enableOnlyPossibleActions();
 
+        simulating = false;
         stopButton.setEnabled(false);
+    }
 
+    public boolean isSimulating(){
+        return simulating;
     }
 
     public Marking getCurrentMarking() {
