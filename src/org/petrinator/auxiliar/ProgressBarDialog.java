@@ -52,5 +52,7 @@ public class ProgressBarDialog
     public void show(boolean b)
     {
         dialog.setVisible(b);
+        if(!b)
+            dialog.dispose();
     }
 }
