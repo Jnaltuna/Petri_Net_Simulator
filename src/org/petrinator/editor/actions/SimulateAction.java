@@ -121,6 +121,8 @@ public class SimulateAction extends AbstractAction
 
         JTextField number = new JTextField(8);
         JTextField time = new JTextField(8);
+        JCheckBox skip = new JCheckBox();
+
         JPanel myPanel = new JPanel();
         myPanel.setLayout(new MigLayout());
         myPanel.add(new JLabel("Number of transitions:  "));
@@ -129,11 +131,15 @@ public class SimulateAction extends AbstractAction
 
         if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
         {
-            myPanel.add(new JLabel("Time between transition:  "));
+            myPanel.add(new JLabel("Time between transition [ms]:  "));
             myPanel.add(new JLabel ("    "));
-            myPanel.add(time,"    ");
-            myPanel.add(new JLabel("ms"));
+            myPanel.add(time,"wrap");
+            //myPanel.add(new JLabel("ms"));
         }
+
+        myPanel.add(new JLabel("Skip graphic simulation: "));
+        myPanel.add(new JLabel ("    "));
+        myPanel.add(skip);
 
         time.setText("1000");
         number.setText("10");
