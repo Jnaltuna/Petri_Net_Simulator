@@ -71,23 +71,20 @@ public class MatricesAction extends AbstractAction
         public void actionPerformed(ActionEvent arg0)
         {
 
-            /*
-             *  Create HTML file with data
-             */
-            String s = "<h2>Petri Net Matrices</h2>";
-
-            if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
-            {
-                s += "Invalid net!";
+            if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
+                JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
+                return;
             }
             else
             {
+                /* Create HTML file with data */
+                String s = "<h2>Petri Net Matrices</h2>";
+
+                ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
+                ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
+
                 try
                 {
-
-                    ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
-                    ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
-
                     s += ResultsHTMLPane.makeTable(new String[]{
                             "Forwards incidence matrix <i>I<sup>+</sup></i>",
                             renderMatrix(pnames,tnames,root.getDocument().getPetriNet().forwardIMatrix())
@@ -138,9 +135,11 @@ public class MatricesAction extends AbstractAction
                     results.setText(s);
                     return;
                 }
+
+                results.setEnabled(true);
+                results.setText(s);
+
             }
-            results.setEnabled(true);
-            results.setText(s);
         }
     };
 

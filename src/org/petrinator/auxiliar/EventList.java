@@ -58,6 +58,18 @@ public class EventList
         scrollToBottom(scroller);
     }
 
+    /**
+     * Resets event list, clearing the scrollPane
+     */
+
+    public void resetEvents(){
+        events.clear();
+        list = new JList(events.toArray());
+        list.setBackground(scrollerColor);
+        scroller = new JScrollPane(list);
+        scrollToBottom(scroller);
+    }
+
     /*
      * @brief Provides with the scrollPane
      * @return scroller

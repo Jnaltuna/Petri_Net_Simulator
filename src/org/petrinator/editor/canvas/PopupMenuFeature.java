@@ -40,6 +40,7 @@ public class PopupMenuFeature implements Feature {
     }
 
     public void mousePressed(MouseEvent event) {
+
         int x = event.getX();
         int y = event.getY();
         int mouseButton = event.getButton();

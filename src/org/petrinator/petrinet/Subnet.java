@@ -277,6 +277,8 @@ public class Subnet extends TransitionNode {
         return !getTransitions().isEmpty();
     }
 
+    public boolean isValid() {return (hasPlaces() && hasTransitions());}
+
     public Set<Node> getNodes() {
         Set<Node> nodes = new HashSet<Node>();
         for (Element element : getElements()) {

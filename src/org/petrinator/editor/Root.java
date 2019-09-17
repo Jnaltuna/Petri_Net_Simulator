@@ -72,10 +72,15 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private static final String APP_VERSION = "1.0.0";
 
     /*
+    * Used to disable all actions while simulating
+    */
+    private boolean simulating = false;
+
+    /*
      * Added event list to show which transitions were fired
      */
-    JSplitPane splitPane;
-    EventList events = new EventList();
+    private JSplitPane splitPane;
+    private EventList events = new EventList();
 
     public Root(String[] args)
     {
@@ -309,6 +314,8 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private JPopupMenu subnetPopup;
     private JPopupMenu canvasPopup;
 
+    private ArrayList<Action> actionList = new ArrayList<>();
+
     //per application
     private JToggleButton select, place, transition, arc, token;
     private Action setLabel, setBehavior, setTokens, setArcMultiplicity, setArcInhibitory, setArcReset, setArcReader, delete;
@@ -321,9 +328,12 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private Action cutAction, copyAction, pasteAction, selectAllAction, graphPlaceAction, graphMultiplePlacesAction;
     private Action matrixAction;
 
+    private Action stopSimulation;
+
     //per application
     private Action openSubnet;
     private Action closeSubnet;
+
 
     public void openSubnet() {
         openSubnet.actionPerformed(null);
@@ -333,8 +343,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         closeSubnet.actionPerformed(null);
     }
 
-    public void refreshAll()
-    {
+    public void refreshAll() {
         canvas.repaint();
         enableOnlyPossibleActions();
         getRoleEditor().refreshSelected();
@@ -464,6 +473,8 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     }
 
     private JToolBar toolBar = new JToolBar();
+    private JMenuBar menuBar = new JMenuBar();
+    private JButton stopButton = new JButton();
 
     private void setupFrameIcons() {
         List<Image> icons = new LinkedList<Image>();
@@ -474,6 +485,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     }
 
     private void setupMainFrame() {
+
         List<FileType> openSaveFiletypes = new LinkedList<FileType>();
         openSaveFiletypes.add(new PflowFileType());
         List<FileType> importFiletypes = new LinkedList<FileType>();
@@ -525,6 +537,8 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         Action selectTool_ArcAction = new ArcSelectToolAction(this);
         Action selectTool_TokenAction = new TokenSelectToolAction(this);
 
+        stopSimulation = new StopSimulationAction(this);
+
         saveSubnetAs = new SaveSubnetAsAction(this);
         replaceSubnet = new ReplaceSubnetAction(this);
 
@@ -575,18 +589,23 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         toolBar.add(arc);
         toolBar.add(token);
         toolBar.addSeparator();
+
+        /* TODO NOT IMPLEMENTED YET
         toolBar.add(addSelectedTransitionsToSelectedRoles);
         toolBar.add(removeSelectedTransitionsFromSelectedRoles);
-        toolBar.addSeparator();
+        toolBar.addSeparator();*/
+
         toolBar.add(simulateNet);
-        toolBar.add(new StopSimulationAction(this));
+
+        stopButton = toolBar.add(stopSimulation);
+
         toolBar.add(graphMultiplePlacesAction);
         toolBar.addSeparator();
 
         /*
          * Top toolbar (File, Edit, Draw, etc...)
          */
-        JMenuBar menuBar = new JMenuBar();
+
         mainFrame.setJMenuBar(menuBar);
 
         JMenu fileMenu = new JMenu("File");
@@ -751,6 +770,43 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         mainFrame.setSize(1000, 600);
     //  mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
         mainFrame.setVisible(true);
+
+        stopButton.setEnabled(false);
+
+    }
+
+    public void disableWhileSimulating(){
+
+        for(int i=0; i<toolBar.getAccessibleContext().getAccessibleChildrenCount(); i++){
+            toolBar.getComponentAtIndex(i).setEnabled(false);
+        }
+
+        for (int i=0; i<menuBar.getAccessibleContext().getAccessibleChildrenCount(); i++){
+            menuBar.getComponentAtIndex(i).setEnabled(false);
+        }
+
+        simulating = true;
+        stopButton.setEnabled(true);
+    }
+
+    public void enableAfterStop(){
+
+        for(int i=0; i<toolBar.getAccessibleContext().getAccessibleChildrenCount(); i++){
+            toolBar.getComponentAtIndex(i).setEnabled(true);
+        }
+
+        for (int i=0; i<menuBar.getAccessibleContext().getAccessibleChildrenCount(); i++){
+            menuBar.getComponentAtIndex(i).setEnabled(true);
+        }
+
+        enableOnlyPossibleActions();
+
+        simulating = false;
+        stopButton.setEnabled(false);
+    }
+
+    public boolean isSimulating(){
+        return simulating;
     }
 
     public Marking getCurrentMarking() {
@@ -818,4 +874,6 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     public DrawingBoard getDrawingBoard() {
         return drawingBoard;
     }
+
+
 }

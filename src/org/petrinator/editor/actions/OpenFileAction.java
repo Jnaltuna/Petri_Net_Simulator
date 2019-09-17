@@ -76,6 +76,7 @@ public class OpenFileAction extends AbstractAction {
                 FileType chosenFileType = (FileType) chooser.getFileFilter();
 
                 try {
+                    root.getEventList().resetEvents();
                     Document document = chosenFileType.load(file);
                     root.setDocument(document);
                     root.setCurrentFile(file);

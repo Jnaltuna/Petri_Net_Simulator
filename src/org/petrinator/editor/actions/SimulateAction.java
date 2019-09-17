@@ -28,9 +28,6 @@ import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
 import org.petrinator.editor.commands.FireTransitionCommand;
 import org.petrinator.auxiliar.*;
-import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.*;
 
 import org.unc.lac.javapetriconcurrencymonitor.errors.DuplicatedNameError;
@@ -82,6 +79,11 @@ public class SimulateAction extends AbstractAction
     {
         stop = false;
 
+        if(!root.getDocument().getPetriNet().getRootSubnet().isValid()){
+            JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
+            return;
+        }
+
         /*
          * Create tmp.pnml file
          */
@@ -114,10 +116,14 @@ public class SimulateAction extends AbstractAction
         /*
          * Ask user to insert times
          */
-        int numberOfTransitions = 1, timeBetweenTransitions = 1000;
+        int numberOfTransitions = 1;
+        int timeBetweenTransitions = 10;
+        boolean skipGraphicalFire = false;
 
         JTextField number = new JTextField(8);
         JTextField time = new JTextField(8);
+        JCheckBox skip = new JCheckBox();
+
         JPanel myPanel = new JPanel();
         myPanel.setLayout(new MigLayout());
         myPanel.add(new JLabel("Number of transitions:  "));
@@ -126,11 +132,15 @@ public class SimulateAction extends AbstractAction
 
         if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
         {
-            myPanel.add(new JLabel("Time between transition:  "));
+            myPanel.add(new JLabel("Time between transition [ms]:  "));
             myPanel.add(new JLabel ("    "));
-            myPanel.add(time,"    ");
-            myPanel.add(new JLabel("ms"));
+            myPanel.add(time,"wrap");
+            //myPanel.add(new JLabel("ms"));
         }
+
+        myPanel.add(new JLabel("Skip graphic simulation: "));
+        myPanel.add(new JLabel ("    "));
+        myPanel.add(skip);
 
         time.setText("1000");
         number.setText("10");
@@ -140,31 +150,46 @@ public class SimulateAction extends AbstractAction
         {
             try
             {
-                numberOfTransitions = Integer.valueOf(number.getText());
-                timeBetweenTransitions = Integer.valueOf(time.getText());
+                int _transitions = Integer.parseInt(number.getText());
+                int _time = Integer.parseInt(time.getText());
+
+                skipGraphicalFire = skip.isSelected();
+
+                if(_transitions < numberOfTransitions || _time < timeBetweenTransitions){
+                    throw new NumberFormatException();
+                }
+                else {
+                    numberOfTransitions = _transitions;
+                    timeBetweenTransitions = _time;
+
+                }
             }
             catch(NumberFormatException e1)
             {
-                JOptionPane.showMessageDialog(null, "Invalid number");
+                String title = "Invalid Input!";
+                String message = String.format("Number of transitions must be at least: %d\n Time between transitions must be at least: %d ms  \n", numberOfTransitions, timeBetweenTransitions);
+                JOptionPane.showMessageDialog(null, message, title, JOptionPane.WARNING_MESSAGE, null);
                 return; // Don't execute further code
             }
         }
-        else {
-            return; // Don't execute further code
+        else if(result == JOptionPane.CANCEL_OPTION){
+            return;
         }
 
-        setEnabled(false);
+        //setEnabled(false);
+        root.disableWhileSimulating();
 
         /*
          * Run a single thread to fire the transitions graphically
          */
+        final boolean c = skipGraphicalFire;
         final int a = numberOfTransitions; final int b= timeBetweenTransitions;
         Thread t = new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                runInMonitor(a, b);
+                runInMonitor(a, b, c);
             }
         });
         t.start();
@@ -176,7 +201,7 @@ public class SimulateAction extends AbstractAction
      * @detail After getting all the firings the user set, it creates a thread that
      * will "fire" the transitions within our editor every x millis.
      */
-    public void runInMonitor(int numberOfTransitions, int timeBetweenTransitions)
+    public void runInMonitor(int numberOfTransitions, int timeBetweenTransitions, boolean skipGraphicalFire)
     {
         /*
          * Create monitor, petri net, and all related variables.
@@ -196,7 +221,7 @@ public class SimulateAction extends AbstractAction
         }
 
         TransitionsPolicy policy = new FirstInLinePolicy();
-        PetriMonitor monitor = new PetriMonitor(petri, policy);
+        PetriMonitor monitor = new PetriMonitor(petri, policy, numberOfTransitions);
         monitor.simulationRunning = true;
 
         petri.initializePetriNet();
@@ -231,6 +256,8 @@ public class SimulateAction extends AbstractAction
         ProgressBarDialog dialog = new ProgressBarDialog(root, "Simulating...");
         dialog.show(true);
 
+        boolean blocked = false;
+        long simTime = -1;
 		 /*
 		  * Wait for the number of events to occur
 		  */
@@ -247,20 +274,28 @@ public class SimulateAction extends AbstractAction
             {
                 try
                 {
-                    Thread.currentThread().sleep(10);
+                    Thread.sleep(10);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
                 // System.out.println(""); // Need at least one instruction in while, otherwise it will explode
+
                 if(checkAllAre(petri.getEnabledTransitions(),false))   // We need to check if the net is blocked and no more transitions can be fored
                 {
+                    blocked = true;
+                    simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + ((ConcreteObserver) observer).getEvents().size() + " transitions were fired.");
                     break;
                 }
                 else if(blockedMonitor(threads, petri))
                 {
+                    blocked = true;
+                    simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), " \n The net is blocked. Make sure that at least one \n fired transition comes before the automatic ones.      \n ");
+
                     System.out.println(" > Monitor blocked");
+                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
+
                     break;
                 }
             }
@@ -285,6 +320,16 @@ public class SimulateAction extends AbstractAction
         new TokenSelectToolAction(root).actionPerformed(e);
 
         /*
+        *   Display simulation time
+        * */
+        if(!blocked){
+            simTime = monitor.getSimulationTime();
+        }
+
+        JOptionPane.showMessageDialog(root.getParentFrame(), "Tiempo de simulacion: " + simTime + " ms");
+        //TODO ver si hace falta dejar o si ponemos que se cierre solo
+
+        /*
          * We fire the net graphically
          */
         running = true;
@@ -294,12 +339,13 @@ public class SimulateAction extends AbstractAction
             place.clearValues();
         }
         analyzePlaces(timeBetweenTransitions);
-        fireGraphically(((ConcreteObserver) observer).getEvents(), timeBetweenTransitions, numberOfTransitions);
+        fireGraphically(((ConcreteObserver) observer).getEvents(), timeBetweenTransitions, numberOfTransitions, skipGraphicalFire);
         new SelectionSelectToolAction(root).actionPerformed(e);
 
         running = false;
         System.out.println(" > Simulation ended");
-        setEnabled(true);
+        //setEnabled(true);
+        root.enableAfterStop();
     }
 
     /*
@@ -318,6 +364,7 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
+                        //Thread.sleep(10);
                         Thread.sleep(new Random().nextInt(50)); // Random value between 0 and 50 ms
                         m.fireTransition(id);
                     } catch (IllegalTransitionFiringError | IllegalArgumentException | PetriNetException e) {
@@ -337,7 +384,7 @@ public class SimulateAction extends AbstractAction
      * @param timeBetweenTransitions milliseconds to wait between events performed
      * @return
      */
-    void fireGraphically(List<String> list, int timeBetweenTransitions, int numberOfTransitions)
+    void fireGraphically(List<String> list, int timeBetweenTransitions, int numberOfTransitions,boolean skipGraphicalFire)
     {
         /*
          * If we wanna keep track of the current iteration, we need to do it with a separate variable,
@@ -384,28 +431,32 @@ public class SimulateAction extends AbstractAction
             Marking marking = root.getDocument().petriNet.getInitialMarking();
 
             //System.out.println(transition.getLabel() + " was fired!");
-            root.getEventList().addEvent((transition.getLabel() + " was fired!"));
+            if(!skipGraphicalFire)
+                root.getEventList().addEvent((transition.getLabel() + " was fired!"));
 
             if(transition.isTimed())
             {
                 transition.setTime((int) time);
                 transition.setWaiting(true);
-                countDown(transition);
 
-                try
-                {
-                    System.out.println("Sleeping " + (int) time);
-                    Thread.currentThread().sleep((int) time);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                if(!skipGraphicalFire) {
+                    countDown(transition);
+
+                    try {
+                        System.out.println("Sleeping " + (int) time);
+                        Thread.currentThread().sleep((int) time);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
-
                 transition.setWaiting(false);
             }
 
             FireTransitionCommand fire = new FireTransitionCommand(transition, marking);
             fire.execute();
-            root.refreshAll();
+
+            if(!skipGraphicalFire)
+                root.refreshAll();
 
             /*
              * Maybe, if several threads executed multiple transitions concurrently,
@@ -418,24 +469,29 @@ public class SimulateAction extends AbstractAction
                 return;
             }
 
-            if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
-            {
-                try
+            if(!skipGraphicalFire){
+                if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
                 {
-                    Thread.currentThread().sleep(timeBetweenTransitions);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    try
+                    {
+                        Thread.currentThread().sleep(timeBetweenTransitions);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        Thread.currentThread().sleep(50);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
             }
-            else
-            {
-                try
-                {
-                    Thread.currentThread().sleep(50);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-            }
+        }
+        if(skipGraphicalFire){
+            root.refreshAll();
         }
     }
 
