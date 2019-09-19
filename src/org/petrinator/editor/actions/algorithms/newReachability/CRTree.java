@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class myTree {
+public class CRTree {
 
     private boolean foundAnOmega = false;            //bounded
     private boolean moreThanOneToken = false;        //safe
@@ -48,7 +48,7 @@ public class myTree {
 
     private final Root petri_root;
 
-    public myTree(Root petri_root, int[] treeRoot) throws TreeTooBigException{
+    public CRTree(Root petri_root, int[] treeRoot) throws TreeTooBigException{
 
         this.petri_root = petri_root;
 
@@ -113,7 +113,7 @@ public class myTree {
 
     }
 
-    public myTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
+    public CRTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
             throws TreeTooBigException, ImmediateAbortException
     {
         this.petri_root = petri_root;
