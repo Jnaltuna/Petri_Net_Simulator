@@ -47,7 +47,7 @@ public class CRTree {
 
     private final Root petri_root;
 
-    public CRTree(Root petri_root, int[] treeRoot) throws TreeTooBigException{
+    public CRTree(Root petri_root, int[] initialMarking) throws TreeTooBigException{
 
         this.petri_root = petri_root;
 
@@ -235,7 +235,7 @@ public class CRTree {
                 if(enabledTransitions[i]){
 
                 }
-            }*/
+            }
         }
     }*/
 

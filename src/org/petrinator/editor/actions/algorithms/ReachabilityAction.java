@@ -22,7 +22,6 @@ package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.auxiliar.GraphFrame;
 import org.petrinator.editor.Root;
-import org.petrinator.editor.actions.algorithms.newReachability.myTree;
 import org.petrinator.editor.filechooser.*;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
@@ -207,7 +206,7 @@ public class ReachabilityAction extends AbstractAction
 
 
             try {
-                myTree arbol = new myTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
+                CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
             } catch (TreeTooBigException e) {
                 e.printStackTrace();
             }
