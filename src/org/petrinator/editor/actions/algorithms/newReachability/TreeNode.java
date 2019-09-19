@@ -8,6 +8,7 @@ public class TreeNode {
     private ArrayList<TreeNode> children;
     private int[] marking;
     private boolean[] enabledTransitions;
+    private myTree tree;
 
     private int depth;
     private int id;
@@ -15,17 +16,18 @@ public class TreeNode {
     private boolean deadlock;
     private boolean repeatedNode;
 
-    public TreeNode(int[] marking, TreeNode parent, int depth){
+    public TreeNode(myTree tree, int[] marking, TreeNode parent, int depth){
 
         this.marking = marking;
         this.parent = parent;
         this.depth = depth;
-        children = new ArrayList<TreeNode>();
+        this.tree = tree;
+        children = new ArrayList<>();
 
-        enabledT = RCTree.enabled(this.marking);
+        enabledT = tree.enabled(this.marking);
         deadlock = true;
 
-        repeatedNode = RCTree.repeatedState(this.marking);
+        repeatedNode = tree.repeatedState(this.marking);
     }
 
     public void recursiveExpansion(){
@@ -39,7 +41,7 @@ public class TreeNode {
             if(enabledTransitions[i]){
 
                 deadlock = false;
-                children.add(new TreeNode(RCTree.fire(i), this, depth+1));
+                children.add(new TreeNode(tree, tree.fire(i, marking), this, depth+1));
 
             }
         }

@@ -1,6 +1,7 @@
 package org.petrinator.editor.actions.algorithms.newReachability;
 
 import org.petrinator.editor.Root;
+import org.petrinator.petrinet.Marking;
 import pipe.exceptions.ImmediateAbortException;
 import pipe.exceptions.TreeTooBigException;
 import pipe.io.ReachabilityGraphFileHeader;
@@ -8,6 +9,7 @@ import pipe.io.ReachabilityGraphFileHeader;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -17,7 +19,9 @@ public class myTree {
     private boolean moreThanOneToken = false;        //safe
     private boolean noEnabledTransitions = false;    //deadlock
 
-    private myNode root;                             //root of the tree
+    private static ArrayList<int[]> statesList;
+
+    private TreeNode root;                             //root of the tree
     private int nodeCount = 0;                       //total number of nodes
 
     //Petri net matrices: TODO : final?
@@ -27,6 +31,7 @@ public class myTree {
     private int [][] _inhibition;
     private int [][] _reset;
     private int [][] _reader;
+    private int [] initialMarking;
 
     private boolean hasInhibitionArcs;
     private boolean hasResetArcs;
@@ -54,6 +59,9 @@ public class myTree {
         _reset = petri_root.getDocument().getPetriNet().resetMatrix();
         _reader = petri_root.getDocument().getPetriNet().readerMatrix();
 
+        initialMarking = petri_root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT];
+
+
         hasInhibitionArcs = isMatrixNonZero(_inhibition);
         hasReaderArcs = isMatrixNonZero(_reader);
         hasResetArcs = isMatrixNonZero(_reset);
@@ -63,15 +71,49 @@ public class myTree {
         transitionCount = _CMinus.length;
         placeCount = _CMinus.length;//TODO view if values are right
 
-        root = new myNode(treeRoot, root, this, 1);
+        root = new TreeNode(initialMarking, root, 1);
+
+        statesList = new ArrayList<>();
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
-        root.RecursiveExpansion();
+        root.recursiveExpansion();
+    }
+
+    protected boolean repeatedState(int[] marking){
+
+        for(int i=0; i<statesList.size(); i++){
+            if(Arrays.equals(statesList.get(i), marking)){
+                return true;
+            }
+        }
+
+        statesList.add(marking);
+        return false;
+    }
+
+    protected int[] fire(int transition, int[] marking){
+
+        int[] resultMarking = new int[placeCount];
+
+        for(int i=0; i<placeCount; i++){
+            resultMarking[i] = _C[i][transition] + marking[i];
+        }
+
+        if(hasResetArcs){
+            for(int i=0; i<placeCount; i++){
+                if(_reset[i][transition] != 0){
+                    resultMarking[i] = 0;
+                }
+            }
+        }
+
+        return resultMarking;
+
     }
 
     public myTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
-        throws TreeTooBigException, ImmediateAbortException
+            throws TreeTooBigException, ImmediateAbortException
     {
         this.petri_root = petri_root;
 
@@ -87,7 +129,7 @@ public class myTree {
         transitionCount = _CMinus.length;
         placeCount = _CMinus[0].length;//TODO view if values are right
 
-        root = new myNode(treeRoot, root, this, 1);
+        root = new TreeNode(treeRoot, root, this, 1);
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
