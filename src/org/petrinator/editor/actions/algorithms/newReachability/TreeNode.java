@@ -51,4 +51,8 @@ public class TreeNode {
 
     }
 
+    public int[] getMarking() {
+        return marking;
+    }
+
 }
