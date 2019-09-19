@@ -1,6 +1,7 @@
 package org.petrinator.editor.actions.algorithms.newReachability;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TreeNode {
 
@@ -24,7 +25,7 @@ public class TreeNode {
         this.tree = tree;
         children = new ArrayList<>();
 
-        enabledT = tree.enabled(this.marking);
+        enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
         repeatedNode = tree.repeatedState(this.marking);
@@ -42,6 +43,7 @@ public class TreeNode {
 
                 deadlock = false;
                 children.add(new TreeNode(tree, tree.fire(i, marking), this, depth+1));
+                children.get(children.size()-1).recursiveExpansion();
 
             }
         }

@@ -51,7 +51,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 import pipe.calculations.StateSpaceGenerator;
-import pipe.calculations.myTree;
+//TODO import pipe.calculations.myTree;
+import org.petrinator.editor.actions.algorithms.newReachability.myTree;
 import pipe.gui.ApplicationSettings;
 import pipe.controllers.PipeApplicationController;
 import pipe.models.PipeApplicationModel;
@@ -160,8 +161,8 @@ public class ReachabilityAction extends AbstractAction
                     {
                         markup[k] = markings[k].getFirst().getCurrentMarking();
                     }
-                    myTree tree = new myTree(sourcePetriNetView, markup);
-                    boolean bounded = !tree.foundAnOmega;
+                    myTree tree = new myTree(root, markup);
+                    boolean bounded = !tree.isFoundAnOmega();
 
                     if(bounded)
                     {
@@ -180,7 +181,7 @@ public class ReachabilityAction extends AbstractAction
                         {
                             currentMarking[i] = markings[i].getFirst().getCurrentMarking();
                         }
-                        myTree graphTree = new myTree(sourcePetriNetView, currentMarking, reachabilityGraph);
+                        myTree graphTree = new myTree(root, currentMarking, reachabilityGraph);
                         graphName = "Coverability graph";
                         System.out.println("Coverability graph successfully created");
                     }
