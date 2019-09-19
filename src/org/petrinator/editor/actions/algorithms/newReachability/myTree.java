@@ -129,7 +129,7 @@ public class myTree {
         transitionCount = _CMinus.length;
         placeCount = _CMinus[0].length;//TODO view if values are right
 
-        root = new TreeNode(treeRoot, root, this, 1);
+        root = new TreeNode(treeRoot, root, 1); //TODO view if tree reference needed
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
@@ -201,6 +201,33 @@ public class myTree {
 
         boolean repeatedNode; //attribute used for
 
+        //int[] state = new int[placeCount];
+        int[] state = root.getMarking();
+
+        boolean[] enabledTransitions = areTransitionsEnabled(state);
+
+        //writeNode(root.getID(),root.getMarking(),esoFile,true); TODO implementar ID
+        states++;
+
+        ArrayList<TreeNode> unprocessednodes = new ArrayList();
+
+        unprocessednodes.add(root);
+        TreeNode currentNode;
+        while(!unprocessednodes.isEmpty()){
+
+            currentNode = unprocessednodes.get(0);
+            unprocessednodes.remove(0);
+
+            state = currentNode.getMarking();
+
+            enabledTransitions = areTransitionsEnabled(state);
+
+            for (int i = 0; i< enabledTransitions.length; i++){
+                if(enabledTransitions[i]){
+
+                }
+            }
+        }
 
     }
 
@@ -215,12 +242,32 @@ public class myTree {
 
         for(int i = 0; i<transitionCount; i++){
             //for que recorre cada transicion
-
+            enabledTranitions[i] = true;
             //comparo incidencia con marca
             for(int j=0; j<placeCount ; j++){
                 if (_CMinus[j][i] > state[j]) {
                     enabledTranitions[i] = false;
                     break;
+                }
+            }
+
+            if(hasInhibitionArcs){
+                for(int j = 0; j < placeCount; j++){
+                    boolean emptyPlace = state[j] == 0;
+                    boolean placeInhibitsTransition = _inhibition[j][i] != 0;
+                    if (!emptyPlace && placeInhibitsTransition) {
+                        enabledTranitions[i] = false;
+                        break;
+                    }
+                }
+            }
+
+            if(hasReaderArcs){
+                for(int j=0; j<placeCount ; j++){
+                    if (_reader[j][i] > state[j]) {
+                        enabledTranitions[i] = false;
+                        break;
+                    }
                 }
             }
 
@@ -234,14 +281,13 @@ public class myTree {
         // if the matrix is null or if all elements are zeros
         // the net does not have the type of arcs described by the matrix semantics
         try{
-            // this trivial comparison is to throw a NullPointerException if matrix is null
-            Arrays.deepEquals(matrix, matrix);
-
-            for(int i = 0 ; i < matrix.length; i++){
-                for (int j = 0; j<matrix[0].length; j++){
-
+            for (int[] ints : matrix) {
+                for (int j = 0; j < matrix[0].length; j++) {
+                    if (ints[j] != 0)
+                        return true;
                 }
             }
+            return false;
         } catch (NullPointerException e){
             return false;
         }
