@@ -22,8 +22,11 @@ package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.auxiliar.GraphFrame;
 import org.petrinator.editor.Root;
+import org.petrinator.editor.actions.algorithms.newReachability.myTree;
 import org.petrinator.editor.filechooser.*;
+import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
+import pipe.exceptions.TreeTooBigException;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.EscapableDialog;
 import pipe.gui.widgets.ResultsHTMLPane;
@@ -51,7 +54,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 import pipe.calculations.StateSpaceGenerator;
-import pipe.calculations.myTree;
+//import pipe.calculations.myTree;
 import pipe.gui.ApplicationSettings;
 import pipe.controllers.PipeApplicationController;
 import pipe.models.PipeApplicationModel;
@@ -143,7 +146,7 @@ public class ReachabilityAction extends AbstractAction
              * Let's try to create the reachability graph
              */
             File reachabilityGraph = new File("results.rg");
-            if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
+            /*if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
             {
                 s += "Invalid net!";
             }
@@ -153,7 +156,7 @@ public class ReachabilityAction extends AbstractAction
                 {
                     /*
                      * Check if petri net is bounded
-                     */
+
                     LinkedList<MarkingView>[] markings = sourcePetriNetView.getCurrentMarkingVector();
                     int[] markup = new int[markings.length];
                     for(int k = 0; k < markings.length; k++)
@@ -173,7 +176,7 @@ public class ReachabilityAction extends AbstractAction
                     {
                          /*
                           * If we found the net to be unbounded, then we need to create the coverability graph
-                          */
+
                         LinkedList<MarkingView>[] graphMarkings = sourcePetriNetView.getCurrentMarkingVector();
                         int[] currentMarking = new int[markings.length];
                         for(int i = 0; i < markings.length; i++)
@@ -187,7 +190,7 @@ public class ReachabilityAction extends AbstractAction
 
                     /*
                      * Let's show the results
-                     */
+
                     gfinished = new Date().getTime();
                     System.gc();
                     generateGraph(reachabilityGraph, sourcePetriNetView, !bounded);
@@ -209,8 +212,17 @@ public class ReachabilityAction extends AbstractAction
                     e.printStackTrace();
                 }
                 results.setText(s);
+            }*/
+
+
+            try {
+                myTree arbol = new myTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
+            } catch (TreeTooBigException e) {
+                e.printStackTrace();
             }
         }
+
+
     };
 
     public void generateGraph(File rgFile, PetriNetView dataLayer, boolean coverabilityGraph) throws Exception

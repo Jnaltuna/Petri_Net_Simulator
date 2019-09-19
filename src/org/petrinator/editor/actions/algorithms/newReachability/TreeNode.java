@@ -13,10 +13,11 @@ public class TreeNode {
     private int depth;
     private int id;
 
+    private ArrayList<int[]> pathToDeadlock;
     private boolean deadlock;
     private boolean repeatedNode;
 
-    public TreeNode(myTree tree, int[] marking, TreeNode parent, int depth){
+    TreeNode(myTree tree, int[] marking, TreeNode parent, int depth){
 
         this.marking = marking;
         this.parent = parent;
@@ -24,13 +25,13 @@ public class TreeNode {
         this.tree = tree;
         children = new ArrayList<>();
 
-        enabledT = tree.enabled(this.marking);
+        enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
         repeatedNode = tree.repeatedState(this.marking);
     }
 
-    public void recursiveExpansion(){
+    void recursiveExpansion(){
 
         if(repeatedNode){
             return;
@@ -42,14 +43,29 @@ public class TreeNode {
 
                 deadlock = false;
                 children.add(new TreeNode(tree, tree.fire(i, marking), this, depth+1));
+                children.get(children.size()-1).recursiveExpansion();
 
             }
         }
 
         if(deadlock){
-            System.out.println("HAY deadlock PAPU");
+            //System.out.println("Hay deadlock");
+            recordDeadPath();
         }
+    }
 
+    private void recordDeadPath(){
+        pathToDeadlock = new ArrayList<>();
+        pathToDeadlock.add(marking);
+
+        ArrayList<TreeNode> nodePath = new ArrayList<>();
+        nodePath.add(this);
+
+        for(int i=1; i<depth; i++){
+            nodePath.add(nodePath.get(i-1).parent);
+            pathToDeadlock.add(nodePath.get(i).getMarking());
+
+        }
 
     }
 

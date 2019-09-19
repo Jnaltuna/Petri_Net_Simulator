@@ -19,7 +19,7 @@ public class myTree {
     private boolean moreThanOneToken = false;        //safe
     private boolean noEnabledTransitions = false;    //deadlock
 
-    private static ArrayList<int[]> statesList;
+    private ArrayList<int[]> statesList;
 
     private TreeNode root;                             //root of the tree
     private int nodeCount = 0;                       //total number of nodes
@@ -31,7 +31,6 @@ public class myTree {
     private int [][] _inhibition;
     private int [][] _reset;
     private int [][] _reader;
-    private int [] initialMarking;
 
     private boolean hasInhibitionArcs;
     private boolean hasResetArcs;
@@ -48,7 +47,7 @@ public class myTree {
 
     private final Root petri_root;
 
-    public myTree(Root petri_root, int[] treeRoot) throws TreeTooBigException{
+    public myTree(Root petri_root, int[] initialMarking) throws TreeTooBigException{
 
         this.petri_root = petri_root;
 
@@ -59,8 +58,6 @@ public class myTree {
         _reset = petri_root.getDocument().getPetriNet().resetMatrix();
         _reader = petri_root.getDocument().getPetriNet().readerMatrix();
 
-        initialMarking = petri_root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT];
-
 
         hasInhibitionArcs = isMatrixNonZero(_inhibition);
         hasReaderArcs = isMatrixNonZero(_reader);
@@ -68,19 +65,29 @@ public class myTree {
 
         //TODO add capacity/priority/timed if needed
 
-        transitionCount = _CMinus.length;
+        transitionCount = _CMinus[0].length;
         placeCount = _CMinus.length;//TODO view if values are right
 
-        root = new TreeNode(initialMarking, root, 1);
-
         statesList = new ArrayList<>();
+
+        root = new TreeNode(this, initialMarking, root, 1);
+
+
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
         root.recursiveExpansion();
+
+        System.out.printf("STATES - %d\n", statesList.size());
+        for(int i=0; i<statesList.size(); i++){
+            for(int j=0; j<placeCount; j++){
+                System.out.printf("%2d ", statesList.get(i)[j]);
+            }
+            System.out.println("");
+        }
     }
 
-    protected boolean repeatedState(int[] marking){
+    boolean repeatedState(int[] marking){
 
         for(int i=0; i<statesList.size(); i++){
             if(Arrays.equals(statesList.get(i), marking)){
@@ -92,7 +99,7 @@ public class myTree {
         return false;
     }
 
-    protected int[] fire(int transition, int[] marking){
+    int[] fire(int transition, int[] marking){
 
         int[] resultMarking = new int[placeCount];
 
@@ -112,7 +119,7 @@ public class myTree {
 
     }
 
-    public myTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
+    /*public myTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
             throws TreeTooBigException, ImmediateAbortException
     {
         this.petri_root = petri_root;
@@ -183,7 +190,7 @@ public class myTree {
             }
         }
         return false;
-    }*/
+    }
 
     /**
      * Function: void RecursiveExpansion()
@@ -194,7 +201,7 @@ public class myTree {
      * @throws pipe.exceptions.TreeTooBigException
      * @throws pipe.io.ImmediateAbortException
      */
-    private void createCoverabilityGraph(RandomAccessFile outputFile,
+    /*private void createCoverabilityGraph(RandomAccessFile outputFile,
                                          RandomAccessFile esoFile) throws TreeTooBigException, pipe.io.ImmediateAbortException
     {
         int[] newMarkup; //mark used to create new node
@@ -229,14 +236,14 @@ public class myTree {
             }
         }
 
-    }
+    }*/
 
     /**
      *
      * @param state current marking of the net
      * @return boolean array with true for enabled transitions
      */
-    public boolean [] areTransitionsEnabled(int [] state){
+    boolean [] areTransitionsEnabled(int [] state){
 
         boolean [] enabledTranitions = new boolean[transitionCount];
 
@@ -277,7 +284,7 @@ public class myTree {
 
     }
 
-    protected boolean isMatrixNonZero(int[][] matrix){
+    private boolean isMatrixNonZero(int[][] matrix){
         // if the matrix is null or if all elements are zeros
         // the net does not have the type of arcs described by the matrix semantics
         try{
