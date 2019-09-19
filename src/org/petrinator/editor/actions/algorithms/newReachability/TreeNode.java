@@ -8,7 +8,7 @@ public class TreeNode {
     private ArrayList<TreeNode> children;
     private int[] marking;
     private boolean[] enabledTransitions;
-    private myTree tree;
+    private CRTree tree;
 
     private int depth;
     private int id;
@@ -17,7 +17,8 @@ public class TreeNode {
     private boolean deadlock;
     private boolean repeatedNode;
 
-    TreeNode(myTree tree, int[] marking, TreeNode parent, int depth){
+
+    public TreeNode(CRTree tree, int[] marking, TreeNode parent, int depth){
 
         this.marking = marking;
         this.parent = parent;

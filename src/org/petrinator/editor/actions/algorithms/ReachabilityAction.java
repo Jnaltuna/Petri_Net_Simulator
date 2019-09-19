@@ -41,25 +41,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
 import pipe.calculations.StateSpaceGenerator;
-//import pipe.calculations.myTree;
-import pipe.gui.ApplicationSettings;
-import pipe.controllers.PipeApplicationController;
-import pipe.models.PipeApplicationModel;
+
+//TODO import pipe.calculations.myTree;
+import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
 import net.sourceforge.jpowergraph.defaults.DefaultGraph;
-import net.sourceforge.jpowergraph.defaults.DefaultNode;
 import pipe.views.PetriNetView;
 
 /**
@@ -163,8 +154,8 @@ public class ReachabilityAction extends AbstractAction
                     {
                         markup[k] = markings[k].getFirst().getCurrentMarking();
                     }
-                    myTree tree = new myTree(sourcePetriNetView, markup);
-                    boolean bounded = !tree.foundAnOmega;
+                    CRTree tree = new CRTree(root, markup);
+                    boolean bounded = !tree.isFoundAnOmega();
 
                     if(bounded)
                     {
@@ -183,7 +174,7 @@ public class ReachabilityAction extends AbstractAction
                         {
                             currentMarking[i] = markings[i].getFirst().getCurrentMarking();
                         }
-                        myTree graphTree = new myTree(sourcePetriNetView, currentMarking, reachabilityGraph);
+                        CRTree graphTree = new CRTree(root, currentMarking, reachabilityGraph);
                         graphName = "Coverability graph";
                         System.out.println("Coverability graph successfully created");
                     }

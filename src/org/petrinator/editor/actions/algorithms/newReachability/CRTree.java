@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class myTree {
+public class CRTree {
 
     private boolean foundAnOmega = false;            //bounded
     private boolean moreThanOneToken = false;        //safe
@@ -47,7 +47,7 @@ public class myTree {
 
     private final Root petri_root;
 
-    public myTree(Root petri_root, int[] initialMarking) throws TreeTooBigException{
+    public CRTree(Root petri_root, int[] treeRoot) throws TreeTooBigException{
 
         this.petri_root = petri_root;
 
@@ -71,8 +71,6 @@ public class myTree {
         statesList = new ArrayList<>();
 
         root = new TreeNode(this, initialMarking, root, 1);
-
-
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
@@ -119,7 +117,8 @@ public class myTree {
 
     }
 
-    /*public myTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
+    /*public CRTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
+
             throws TreeTooBigException, ImmediateAbortException
     {
         this.petri_root = petri_root;
@@ -133,10 +132,10 @@ public class myTree {
 
         //TODO add capacity/priority/timed if needed
 
-        transitionCount = _CMinus.length;
-        placeCount = _CMinus[0].length;//TODO view if values are right
+        transitionCount = _CMinus[0].length;
+        placeCount = _CMinus.length;//TODO view if values are right
 
-        root = new TreeNode(treeRoot, root, 1); //TODO view if tree reference needed
+        root = new TreeNode(this, treeRoot, root, 1); //TODO view if tree reference needed
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
@@ -158,7 +157,7 @@ public class myTree {
             ReachabilityGraphFileHeader header = new ReachabilityGraphFileHeader();
             header.write(esoFile);
             //Call expansion function on root of tree
-            createCoverabilityGraph(outputFile, esoFile);
+            //TODO createCoverabilityGraph(outputFile, esoFile);
             outputFile.close();
         }
         catch(IOException e)
@@ -167,7 +166,7 @@ public class myTree {
             return;
         }
 
-        createCGFile(intermediate, esoFile, treeRoot.length, states, edges);
+       //TODO createCGFile(intermediate, esoFile, treeRoot.length, states, edges);
 
         if(intermediate.exists())
         {
@@ -222,6 +221,9 @@ public class myTree {
         TreeNode currentNode;
         while(!unprocessednodes.isEmpty()){
 
+            //TODO sacar break
+            break;
+            /*
             currentNode = unprocessednodes.get(0);
             unprocessednodes.remove(0);
 
@@ -233,9 +235,8 @@ public class myTree {
                 if(enabledTransitions[i]){
 
                 }
-            }
+            }*/
         }
-
     }*/
 
     /**
@@ -279,7 +280,6 @@ public class myTree {
             }
 
         }
-
         return enabledTranitions;
 
     }
@@ -298,6 +298,10 @@ public class myTree {
         } catch (NullPointerException e){
             return false;
         }
+    }
+
+    public boolean isFoundAnOmega() {
+        return foundAnOmega;
     }
 
 }
