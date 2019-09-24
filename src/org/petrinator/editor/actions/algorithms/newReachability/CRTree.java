@@ -1,23 +1,18 @@
 package org.petrinator.editor.actions.algorithms.newReachability;
 
 import org.petrinator.editor.Root;
-import org.petrinator.petrinet.Marking;
-import pipe.exceptions.ImmediateAbortException;
 import pipe.exceptions.TreeTooBigException;
-import pipe.io.ReachabilityGraphFileHeader;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 public class CRTree {
 
     private boolean foundAnOmega = false;            //bounded
     private boolean moreThanOneToken = false;        //safe
-    private boolean noEnabledTransitions = false;    //deadlock
+
+    private boolean deadlock = false;    //deadlock
+    private ArrayList<int[]> shortestPathToDead;
 
     private ArrayList<int[]> statesList;
 
@@ -25,12 +20,12 @@ public class CRTree {
     private int nodeCount = 0;                       //total number of nodes
 
     //Petri net matrices: TODO : final?
-    private int [][] _CPlus;
-    private int [][] _CMinus;
-    private int [][] _C;
-    private int [][] _inhibition;
-    private int [][] _reset;
-    private int [][] _reader;
+    private int [][] iPlus;
+    private int [][] iMinus;
+    private int [][] iCombined;
+    private int [][] inhibition;
+    private int [][] reset;
+    private int [][] reader;
 
     private boolean hasInhibitionArcs;
     private boolean hasResetArcs;
@@ -51,26 +46,26 @@ public class CRTree {
 
         this.petri_root = petri_root;
 
-        _CPlus = petri_root.getDocument().getPetriNet().forwardIMatrix();
-        _CMinus = petri_root.getDocument().getPetriNet().backwardsIMatrix();
-        _C = petri_root.getDocument().getPetriNet().incidenceMatrix();
-        _inhibition = petri_root.getDocument().getPetriNet().inhibitionMatrix();
-        _reset = petri_root.getDocument().getPetriNet().resetMatrix();
-        _reader = petri_root.getDocument().getPetriNet().readerMatrix();
+        iPlus = petri_root.getDocument().getPetriNet().forwardIMatrix();
+        iMinus = petri_root.getDocument().getPetriNet().backwardsIMatrix();
+        iCombined = petri_root.getDocument().getPetriNet().incidenceMatrix();
+        inhibition = petri_root.getDocument().getPetriNet().inhibitionMatrix();
+        reset = petri_root.getDocument().getPetriNet().resetMatrix();
+        reader = petri_root.getDocument().getPetriNet().readerMatrix();
 
 
-        hasInhibitionArcs = isMatrixNonZero(_inhibition);
-        hasReaderArcs = isMatrixNonZero(_reader);
-        hasResetArcs = isMatrixNonZero(_reset);
+        hasInhibitionArcs = isMatrixNonZero(inhibition);
+        hasReaderArcs = isMatrixNonZero(reader);
+        hasResetArcs = isMatrixNonZero(reset);
 
         //TODO add capacity/priority/timed if needed
 
-        transitionCount = _CMinus[0].length;
-        placeCount = _CMinus.length;//TODO view if values are right
+        transitionCount = iMinus[0].length;
+        placeCount = iMinus.length;//TODO view if values are right
 
         statesList = new ArrayList<>();
 
-        root = new TreeNode(this, initialMarking, root, 1);
+        root = new TreeNode(this, initialMarking, root, 0);
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
@@ -102,18 +97,30 @@ public class CRTree {
         int[] resultMarking = new int[placeCount];
 
         for(int i=0; i<placeCount; i++){
-            resultMarking[i] = _C[i][transition] + marking[i];
+            resultMarking[i] = iCombined[i][transition] + marking[i];
         }
 
         if(hasResetArcs){
             for(int i=0; i<placeCount; i++){
-                if(_reset[i][transition] != 0){
+                if(reset[i][transition] != 0){
                     resultMarking[i] = 0;
                 }
             }
         }
 
         return resultMarking;
+
+    }
+
+    void setDeadLock(ArrayList<int[]> path){
+
+        if(!deadlock){
+            shortestPathToDead = path;
+            deadlock = true;
+        }
+        else if(shortestPathToDead.size() > path.size()){
+            shortestPathToDead = path;
+        }
 
     }
 
@@ -253,7 +260,7 @@ public class CRTree {
             enabledTranitions[i] = true;
             //comparo incidencia con marca
             for(int j=0; j<placeCount ; j++){
-                if (_CMinus[j][i] > state[j]) {
+                if (iMinus[j][i] > state[j]) {
                     enabledTranitions[i] = false;
                     break;
                 }
@@ -262,7 +269,7 @@ public class CRTree {
             if(hasInhibitionArcs){
                 for(int j = 0; j < placeCount; j++){
                     boolean emptyPlace = state[j] == 0;
-                    boolean placeInhibitsTransition = _inhibition[j][i] != 0;
+                    boolean placeInhibitsTransition = inhibition[j][i] != 0;
                     if (!emptyPlace && placeInhibitsTransition) {
                         enabledTranitions[i] = false;
                         break;
@@ -272,7 +279,7 @@ public class CRTree {
 
             if(hasReaderArcs){
                 for(int j=0; j<placeCount ; j++){
-                    if (_reader[j][i] > state[j]) {
+                    if (reader[j][i] > state[j]) {
                         enabledTranitions[i] = false;
                         break;
                     }

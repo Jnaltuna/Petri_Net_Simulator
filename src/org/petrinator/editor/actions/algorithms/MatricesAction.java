@@ -40,36 +40,59 @@ import java.util.*;
 public class MatricesAction extends AbstractAction
 {
     private Root root;
+
+    private JDialog guiDialog;
+    private Container contentPane;
     private ResultsHTMLPane results;
 
+
     public MatricesAction(Root root) {
+
         this.root = root;
 
         String name = "Matrices";
         putValue(NAME, name);
         putValue(SHORT_DESCRIPTION, name);
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/matrices16.png"));
+
+        guiDialog = new JDialog(root.getParentFrame(), "Petri net matrices and marking", true);
+
+        contentPane = guiDialog.getContentPane();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+
+        results = new ResultsHTMLPane("");
+        contentPane.add(results);
+
+        contentPane.add(new ButtonBar("Calculate", new CalculateActionListener(results), guiDialog.getRootPane()));
+
     }
 
     public void actionPerformed(ActionEvent e) {
         /*
          * Show initial pane
          */
-        EscapableDialog guiDialog = new EscapableDialog(root.getParentFrame(), "Petri net matrices and marking", true);
-        Container contentPane = guiDialog.getContentPane();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-        results = new ResultsHTMLPane("");
-        contentPane.add(results);
-        contentPane.add(new ButtonBar("Calculate", calculateButtonClick, guiDialog.getRootPane()));
+
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
+
+        if(results != null){
+            results.setText("");
+        }
+
         guiDialog.setVisible(true);
+
     }
 
-    private final ActionListener calculateButtonClick = new ActionListener() {
+    private class CalculateActionListener implements ActionListener{
 
-        public void actionPerformed(ActionEvent arg0)
-        {
+        ResultsHTMLPane results;
+
+        CalculateActionListener(ResultsHTMLPane results){
+            this.results = results;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
 
             if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
                 JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
@@ -140,8 +163,9 @@ public class MatricesAction extends AbstractAction
                 results.setText(s);
 
             }
+
         }
-    };
+    }
 
     /**
      * Format a matrix as HTML

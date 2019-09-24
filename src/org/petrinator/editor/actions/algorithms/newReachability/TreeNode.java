@@ -1,8 +1,12 @@
 package org.petrinator.editor.actions.algorithms.newReachability;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TreeNode {
+
+    static int nodes = 0;
+    private int id;
 
     private TreeNode parent;
     private ArrayList<TreeNode> children;
@@ -11,7 +15,6 @@ public class TreeNode {
     private CRTree tree;
 
     private int depth;
-    private int id;
 
     private ArrayList<int[]> pathToDeadlock;
     private boolean deadlock;
@@ -26,14 +29,22 @@ public class TreeNode {
         this.tree = tree;
         children = new ArrayList<>();
 
+        id = nodes;
+        nodes++;
+
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
         repeatedNode = tree.repeatedState(this.marking);
     }
 
+    String getNodeId(){
+        return "E"+id;
+    }
+
     void recursiveExpansion(){
 
+        //TODO si se quiere saber todos los caminos preguntar adentro del for
         if(repeatedNode){
             return;
         }
@@ -50,22 +61,26 @@ public class TreeNode {
         }
 
         if(deadlock){
-            //System.out.println("Hay deadlock");
+            System.out.println("Hay deadlock");
             recordDeadPath();
+            tree.setDeadLock(pathToDeadlock);
+            /*for(int i=pathToDeadlock.size()-1; i>=0; i--){
+                System.out.println(Arrays.toString(pathToDeadlock.get(i)));
+            }*/
         }
     }
 
     private void recordDeadPath(){
+
         pathToDeadlock = new ArrayList<>();
         pathToDeadlock.add(marking);
 
         ArrayList<TreeNode> nodePath = new ArrayList<>();
         nodePath.add(this);
 
-        for(int i=1; i<depth; i++){
-            nodePath.add(nodePath.get(i-1).parent);
-            pathToDeadlock.add(nodePath.get(i).getMarking());
-
+        for(int i=0; i<depth; i++){
+            nodePath.add(nodePath.get(i).parent);
+            pathToDeadlock.add(nodePath.get(i+1).getMarking());
         }
 
     }
