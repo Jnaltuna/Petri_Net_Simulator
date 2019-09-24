@@ -8,6 +8,9 @@ import java.util.Arrays;
 
 public class CRTree {
 
+    public static final int REPEATED = 0;
+    public static final int STATE = 1;
+
     private boolean foundAnOmega = false;            //bounded
     private boolean moreThanOneToken = false;        //safe
 
@@ -65,7 +68,7 @@ public class CRTree {
 
         statesList = new ArrayList<>();
 
-        root = new TreeNode(this, initialMarking, root, 0);
+        root = new TreeNode(this, initialMarking, -1, root, 0);
 
         //this.moreThanOneToken = isSafe(treeRoot);
 
@@ -78,18 +81,27 @@ public class CRTree {
             }
             System.out.println("");
         }
+
+        System.out.println("LOG: ");
+        root.recursiveLog();
     }
 
-    boolean repeatedState(int[] marking){
+    /**
+     *
+     * @param marking current marking of the node, it's equivalent to a state
+     * @return a vector where the first element is 1 if the state is repeated and 0 in the opposite case;
+     * and the second element is the state number, regardless if it's repeated
+     */
+    int[] repeatedState(int[] marking){
 
         for(int i=0; i<statesList.size(); i++){
             if(Arrays.equals(statesList.get(i), marking)){
-                return true;
+                return new int[]{1, i};
             }
         }
 
         statesList.add(marking);
-        return false;
+        return new int[]{0, statesList.size()-1};
     }
 
     int[] fire(int transition, int[] marking){
