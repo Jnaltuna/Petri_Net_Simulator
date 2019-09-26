@@ -71,14 +71,11 @@ public class MatricesAction extends AbstractAction
         /*
          * Show initial pane
          */
+        results.setText("");
+        results.setEnabled(false);
 
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
-
-        if(results != null){
-            results.setText("");
-        }
-
         guiDialog.setVisible(true);
 
     }

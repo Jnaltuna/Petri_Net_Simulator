@@ -65,9 +65,10 @@ import pipe.views.PetriNetView;
  */
 public class ReachabilityAction extends AbstractAction
 {
-    Root root;
-    String graphName = "";
+    private Root root;
+    private String graphName = "";
     private ResultsHTMLPane results;
+    private JDialog guiDialog;
 
     public ReachabilityAction(Root root)
     {
@@ -76,6 +77,14 @@ public class ReachabilityAction extends AbstractAction
         putValue(NAME, name);
         putValue(SHORT_DESCRIPTION, name);
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/graph16.png"));
+
+        guiDialog = new JDialog(root.getParentFrame(), "Reachabilty/Coverability graph", false);
+        Container contentPane = guiDialog.getContentPane();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+        results = new ResultsHTMLPane("");
+        contentPane.add(results);
+        contentPane.add(new ButtonBar("Generate graph", generateButtonClick, guiDialog.getRootPane()));
+
     }
 
     public void actionPerformed(ActionEvent e)
@@ -83,7 +92,7 @@ public class ReachabilityAction extends AbstractAction
         /*
          * Create tmp.pnml file
          */
-        FileChooserDialog chooser = new FileChooserDialog();
+        /*FileChooserDialog chooser = new FileChooserDialog();
 
         if (root.getCurrentFile() != null) {
             chooser.setSelectedFile(root.getCurrentFile());
@@ -100,18 +109,15 @@ public class ReachabilityAction extends AbstractAction
             chosenFileType.save(root.getDocument(), file);
         } catch (FileTypeException e1) {
             e1.printStackTrace();
-        }
+        }*/
 
         /*
          * Show initial pane
          */
-        EscapableDialog guiDialog = new EscapableDialog(root.getParentFrame(), "Reachabilty/Coverability graph", false);
-        Container contentPane = guiDialog.getContentPane();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-        //sourceFilePanel = new PetriNetChooserPanel("Source net", null);
-        results = new ResultsHTMLPane("");
-        contentPane.add(results);
-        contentPane.add(new ButtonBar("Generate graph", generateButtonClick, guiDialog.getRootPane()));
+
+        results.setText("");
+        results.setEnabled(false);
+
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
         guiDialog.setVisible(true);
@@ -123,14 +129,14 @@ public class ReachabilityAction extends AbstractAction
              * Read tmp file
              */
             PetriNetView sourcePetriNetView = new PetriNetView("tmp/tmp.pnml");
-            String s = "<h2>Reachability/Coverability Graph Information</h2>";
+            String log = "<h2>Reachability/Coverability Graph Information</h2>";
 
-            long start = new Date().getTime();
+            /*long start = new Date().getTime();
             long gfinished;
             long allfinished;
             double graphtime;
             double constructiontime;
-            double totaltime;
+            double totaltime;*/
 
             /*
              * Let's try to create the reachability graph
@@ -207,9 +213,13 @@ public class ReachabilityAction extends AbstractAction
 
             try {
                 CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
+                log += arbol.getTreeLog();
             } catch (TreeTooBigException e) {
                 e.printStackTrace();
             }
+
+            results.setText(log);
+            results.setEnabled(true);
         }
 
 

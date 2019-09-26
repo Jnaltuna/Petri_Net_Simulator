@@ -43,6 +43,8 @@ public class CRTree {
     private int edges = 0;
     private int states = 0;
 
+    private String log;
+
     private final Root petri_root;
 
     public CRTree(Root petri_root, int[] initialMarking) throws TreeTooBigException{
@@ -82,7 +84,11 @@ public class CRTree {
             System.out.println("");
         }
 
-        root.recursiveLog();
+        log = root.recursiveLog();
+    }
+
+    public String getTreeLog(){
+        return log;
     }
 
     /**

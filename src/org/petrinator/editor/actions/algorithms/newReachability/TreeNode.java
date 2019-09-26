@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 public class TreeNode {
 
-    static int nodes = 0;
     private int id;
 
     private TreeNode parent;
@@ -31,9 +30,6 @@ public class TreeNode {
         this.tree = tree;
         this.fromTransition = fromTransition;
         children = new ArrayList<>();
-
-        id = nodes;
-        nodes++;
 
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
@@ -71,28 +67,31 @@ public class TreeNode {
             System.out.println("Hay deadlock");
             recordDeadPath();
             tree.setDeadLock(pathToDeadlock);
-            /*for(int i=pathToDeadlock.size()-1; i>=0; i--){
-                System.out.println(Arrays.toString(pathToDeadlock.get(i)));
-            }*/
         }
     }
 
-    void recursiveLog(){
+    String recursiveLog(){
+
+        String log = "";
 
         int childrenCount = children.size();
 
         if(childrenCount > 0){
             for(int i=0; i<childrenCount; i++){
-                children.get(i).recursiveLog();
+                log = log.concat(children.get(i).recursiveLog());
             }
-            String from = String.format("\n-- Reachable states from %3s %s:\n\n", getNodeId(), Arrays.toString(marking));
-            System.out.println(from);
+
+            log = log.concat(String.format("<p></p><h3>Reachable states from %3s %s:</h3>", getNodeId(), Arrays.toString(marking)));
+
             for (int j=0; j<childrenCount; j++){
-                String state = String.format("   *  T%d -> %s %s\n", children.get(j).fromTransition ,children.get(j).getNodeId(), Arrays.toString(children.get(j).marking));
-                System.out.println(state);
+
+                log = log.concat(String.format("<p>T%d => %s %s</p>", children.get(j).fromTransition ,children.get(j).getNodeId(), Arrays.toString(children.get(j).marking)));
+
             }
 
         }
+
+        return log;
 
     }
 
