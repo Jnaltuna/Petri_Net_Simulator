@@ -128,7 +128,7 @@ public class ReachabilityAction extends AbstractAction
             /*
              * Read tmp file
              */
-            PetriNetView sourcePetriNetView = new PetriNetView("tmp/tmp.pnml");
+            //PetriNetView sourcePetriNetView = new PetriNetView("tmp/tmp.pnml");
             String log = "<h2>Reachability/Coverability Graph Information</h2>";
 
             /*long start = new Date().getTime();

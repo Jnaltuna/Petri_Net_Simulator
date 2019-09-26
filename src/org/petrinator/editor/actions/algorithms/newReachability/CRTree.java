@@ -63,10 +63,8 @@ public class CRTree {
         hasReaderArcs = isMatrixNonZero(reader);
         hasResetArcs = isMatrixNonZero(reset);
 
-        //TODO add capacity/priority/timed if needed
-
         transitionCount = iMinus[0].length;
-        placeCount = iMinus.length;//TODO view if values are right
+        placeCount = iMinus.length;
 
         statesList = new ArrayList<>();
 
@@ -315,7 +313,7 @@ public class CRTree {
                 for(int j = 0; j < placeCount; j++){
                     boolean emptyPlace = state[j] == 0;
                     boolean placeInhibitsTransition = inhibition[j][i] != 0;
-                    if ((inhibition[j][i]>0 && state[j] > inhibition[j][i]) || (inhibition[j][i] > 0 && state[j] == -1)) {
+                    if ((inhibition[j][i]>0 && state[j] >= inhibition[j][i]) || (inhibition[j][i] > 0 && state[j] == -1)) {
                         enabledTranitions[i] = false;
                         break;
                     }

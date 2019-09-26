@@ -59,7 +59,7 @@ public class NodeIdGenerator {
 
         for (Place place : rootSubnet.getPlacesRecursively()) {
             String placeLabel = place.getLabel();
-            if (placeLabel.startsWith("p")) {
+            if (placeLabel.toUpperCase().startsWith("P")) {
                 try {
                     int placeNumber = Integer.parseInt(placeLabel.substring(1));
                     if (placeNumber > maxPlaceNumber) {
@@ -72,7 +72,7 @@ public class NodeIdGenerator {
         }
         for (Transition transition : rootSubnet.getTransitionsRecursively()) {
             String transitionLabel = transition.getLabel();
-            if (transitionLabel.startsWith("t")) {
+            if (transitionLabel.toUpperCase().startsWith("T")) {
                 try {
                     int transitionNumber = Integer.parseInt(transitionLabel.substring(1));
                     if (transitionNumber > maxTransitionNumber) {
@@ -85,7 +85,7 @@ public class NodeIdGenerator {
         }
         for (Subnet subnet : rootSubnet.getSubnetsRecursively()) {
             String subnetLabel = subnet.getLabel();
-            if (subnetLabel.startsWith("s")) {
+            if (subnetLabel.toUpperCase().startsWith("S")) {
                 try {
                     int subnetNumber = Integer.parseInt(subnetLabel.substring(1));
                     if (subnetNumber > maxSubnetNumber) {
@@ -98,7 +98,7 @@ public class NodeIdGenerator {
         }
         for (ReferencePlace referencePlace : rootSubnet.getReferencePlacesRecursively()) {
             String referencePlaceLabel = referencePlace.getLabel();
-            if (referencePlaceLabel.startsWith("rp")) {
+            if (referencePlaceLabel.toUpperCase().startsWith("RP")) {
                 try {
                     int referencePlaceNumber = Integer.parseInt(referencePlaceLabel.substring(1));
                     if (referencePlaceNumber > maxReferencePlaceNumber) {
