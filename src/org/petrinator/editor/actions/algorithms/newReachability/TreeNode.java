@@ -17,12 +17,12 @@ public class TreeNode {
 
     private ArrayList<int[]> pathToDeadlock;
     private boolean deadlock;
-    private boolean repeatedState;
+    //private boolean repeatedState;
 
     private int fromTransition;
 
 
-    public TreeNode(CRTree tree, int[] marking, int fromTransition, TreeNode parent, int depth){
+    TreeNode(CRTree tree, int[] marking, int fromTransition, TreeNode parent, int depth){
 
         this.marking = marking;
         this.parent = parent;
@@ -34,32 +34,43 @@ public class TreeNode {
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
-        int[] rs = tree.repeatedState(this.marking).clone();
+        //int[] rs = tree.repeatedState(this.marking).clone();
 
-        repeatedState = (rs[CRTree.REPEATED] == 1);
-        id = rs[CRTree.STATE];
+        //repeatedState = (rs[CRTree.REPEATED] == 1);
+        //id = rs[CRTree.STATE];
 
     }
 
-    String getNodeId(){
+    private String getNodeId(){
         return String.format("S%-4d",id);
     }
 
     void recursiveExpansion(){
 
-        //TODO si se quiere saber todos los caminos preguntar adentro del for
-        if(repeatedState){
-            return;
-        }
+        boolean allOmegas;
+        boolean repeated;
 
         for(int i=0; i<enabledTransitions.length; i++){
 
             if(enabledTransitions[i]){
 
                 deadlock = false;
-                children.add(new TreeNode(tree, tree.fire(i, marking), i+1,this, depth+1));
-                children.get(children.size()-1).recursiveExpansion();
 
+                children.add(new TreeNode(tree, tree.fire(i, marking), i+1, this, depth+1));
+
+                allOmegas = children.get(children.size()-1).InsertOmegas();
+
+                int[] rs = tree.repeatedState(children.get(children.size()-1).marking).clone(); //todo ver si esta funcionando bien id
+                repeated = (rs[CRTree.REPEATED] == 1);
+                children.get(children.size()-1).id = rs[CRTree.STATE];
+
+                //repeated = children.get(children.size()-1).repeatedState;
+
+                if(!repeated && !allOmegas) {
+                    children.get(children.size() - 1).recursiveExpansion();
+                }
+                //size -1 me devuelve el children de esta iteracion
+                //ver si me hace falta mantener el orden
             }
         }
 
@@ -74,6 +85,7 @@ public class TreeNode {
 
         String log = "";
 
+        //TODO view if we need to add state with allOmegas to log
         int childrenCount = children.size();
 
         if(childrenCount > 0){
@@ -92,7 +104,6 @@ public class TreeNode {
         }
 
         return log;
-
     }
 
     private void recordDeadPath(){
@@ -108,6 +119,86 @@ public class TreeNode {
             pathToDeadlock.add(nodePath.get(i+1).getMarking());
         }
 
+    }
+
+    /**
+     * Function: void InsertOmegas()
+     * Checks if any omegas need to be inserted in the places of a given node.
+     * Omegas (shown by -1 here) represent unbounded places and are therefore
+     * important when testing whether a petri net is bounded. This function
+     * checks each of the ancestors of a given node.
+     * @return true if all places now contain an omega.
+     */
+    private boolean InsertOmegas(){ //TODO need to add condition for reader/reset arcs if needed
+        //Attributes used for assessing boundedness of the net
+        boolean allElementsGreaterOrEqual;
+        boolean insertedOmega = false;
+        TreeNode ancestorNode;
+
+        boolean [] elementIsStrictlyGreater = new boolean[tree.getPlaceCount()];
+
+        //Initialize array to false
+        Arrays.fill(elementIsStrictlyGreater,false);
+
+        ancestorNode = this;
+
+        //For each ancestor node until root
+        while (ancestorNode != tree.getRoot() && !insertedOmega){
+            //Take parent of current ancestor
+            ancestorNode = ancestorNode.parent;
+
+            allElementsGreaterOrEqual = true;
+
+            //compare marking of this node to the current ancestor reference
+            //if any place has a lower marking, set allElementsGreaterOrEqual to false
+            for(int i = 0; i < tree.getPlaceCount(); i++){
+
+                if(marking[i] != -1)
+                {
+
+                    if(marking[i] < ancestorNode.marking[i]){
+                        allElementsGreaterOrEqual = false;
+                        break;
+                    }
+
+                    elementIsStrictlyGreater[i] = (marking[i] > ancestorNode.marking[i]);
+
+                }
+            }
+
+            //Assess the information obtained for this node
+            if(allElementsGreaterOrEqual) {
+
+                for(int p = 0; p< tree.getPlaceCount(); p++){
+                    //check inhibition for each place
+                    boolean inhibition = false;
+                    for(int t = 0; t< tree.getTransitionCount(); t++){
+                        //check if there is an inhibiton arc asociated to this place
+                        int inhibiton_value = tree.getInhibition()[p][t];
+                        if(inhibiton_value > 0 && (marking[p] <= inhibiton_value)){
+                            inhibition = true;
+                            break;
+                        }
+                    }
+
+                    if(!inhibition){
+                        if(marking[p] != -1 && elementIsStrictlyGreater[p]){
+                            marking[p] = -1;
+                            insertedOmega = true;
+                            tree.setFoundAnOmega();
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i< tree.getPlaceCount(); i++){
+            if(marking[i] != -1){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public int[] getMarking() {

@@ -73,6 +73,7 @@ public class CRTree {
         root = new TreeNode(this, initialMarking, -1, root, 0);
 
         //this.moreThanOneToken = isSafe(treeRoot);
+        repeatedState(initialMarking); //add initial marking to state list
 
         root.recursiveExpansion();
 
@@ -104,7 +105,7 @@ public class CRTree {
                 return new int[]{1, i};
             }
         }
-
+        System.out.println(Arrays.toString(marking));
         statesList.add(marking);
         return new int[]{0, statesList.size()-1};
     }
@@ -114,10 +115,16 @@ public class CRTree {
         int[] resultMarking = new int[placeCount];
 
         for(int i=0; i<placeCount; i++){
-            resultMarking[i] = iCombined[i][transition] + marking[i];
+
+            if(marking[i] != -1) {
+                resultMarking[i] = iCombined[i][transition] + marking[i];
+            }
+            else{
+                resultMarking[i] = marking[i];
+            }
         }
 
-        if(hasResetArcs){
+        if(hasResetArcs){ //TODO view if we need to consider omegas
             for(int i=0; i<placeCount; i++){
                 if(reset[i][transition] != 0){
                     resultMarking[i] = 0;
@@ -140,6 +147,27 @@ public class CRTree {
         }
 
     }
+
+    public int getPlaceCount() {
+        return placeCount;
+    }
+
+    public int getTransitionCount(){
+        return transitionCount;
+    }
+
+    public TreeNode getRoot() {
+        return root;
+    }
+
+    public int[][] getInhibition(){
+        return inhibition;
+    }
+
+    public void setFoundAnOmega(){
+        foundAnOmega = true;
+    }
+
 
     /*public CRTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
 
@@ -277,7 +305,7 @@ public class CRTree {
             enabledTranitions[i] = true;
             //comparo incidencia con marca
             for(int j=0; j<placeCount ; j++){
-                if (iMinus[j][i] > state[j]) {
+                if ((iMinus[j][i] > state[j]) && state[j] != -1) {
                     enabledTranitions[i] = false;
                     break;
                 }
@@ -287,7 +315,7 @@ public class CRTree {
                 for(int j = 0; j < placeCount; j++){
                     boolean emptyPlace = state[j] == 0;
                     boolean placeInhibitsTransition = inhibition[j][i] != 0;
-                    if (!emptyPlace && placeInhibitsTransition) {
+                    if ((inhibition[j][i]>0 && state[j] > inhibition[j][i]) || (inhibition[j][i] > 0 && state[j] == -1)) {
                         enabledTranitions[i] = false;
                         break;
                     }
@@ -296,7 +324,8 @@ public class CRTree {
 
             if(hasReaderArcs){
                 for(int j=0; j<placeCount ; j++){
-                    if (reader[j][i] > state[j]) {
+                    //if (reader[j][i] > state[j]) {
+                    if(reader[j][i]>0 && reader[j][i] > state[j] && state[j] != -1){ //check logic
                         enabledTranitions[i] = false;
                         break;
                     }
