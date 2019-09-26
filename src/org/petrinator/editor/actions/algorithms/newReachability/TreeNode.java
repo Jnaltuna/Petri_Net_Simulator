@@ -18,15 +18,18 @@ public class TreeNode {
 
     private ArrayList<int[]> pathToDeadlock;
     private boolean deadlock;
-    private boolean repeatedNode;
+    private boolean repeatedState;
+
+    private int fromTransition;
 
 
-    public TreeNode(CRTree tree, int[] marking, TreeNode parent, int depth){
+    public TreeNode(CRTree tree, int[] marking, int fromTransition, TreeNode parent, int depth){
 
         this.marking = marking;
         this.parent = parent;
         this.depth = depth;
         this.tree = tree;
+        this.fromTransition = fromTransition;
         children = new ArrayList<>();
 
         id = nodes;
@@ -35,7 +38,11 @@ public class TreeNode {
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
-        repeatedNode = tree.repeatedState(this.marking);
+        int[] rs = tree.repeatedState(this.marking).clone();
+
+        repeatedState = (rs[CRTree.REPEATED] == 1);
+        id = rs[CRTree.STATE];
+
     }
 
     String getNodeId(){
@@ -47,7 +54,7 @@ public class TreeNode {
         boolean allOmegas;
 
         //TODO si se quiere saber todos los caminos preguntar adentro del for
-        if(repeatedNode){
+        if(repeatedState){
             return;
         }
 
@@ -56,7 +63,8 @@ public class TreeNode {
             if(enabledTransitions[i]){
 
                 deadlock = false;
-                children.add(new TreeNode(tree, tree.fire(i, marking), this, depth+1));
+
+                children.add(new TreeNode(tree, tree.fire(i, marking), i+1, this, depth+1));
 
                 //TODO add omegas, verify if its repeated
                 allOmegas = children.get(children.size()-1).InsertOmegas();
@@ -79,6 +87,25 @@ public class TreeNode {
                 System.out.println(Arrays.toString(pathToDeadlock.get(i)));
             }*/
         }
+    }
+
+    void recursiveLog(){
+
+        int childrenCount = children.size();
+
+        if(childrenCount > 0){
+            for(int i=0; i<childrenCount; i++){
+                children.get(i).recursiveLog();
+            }
+            String from = String.format("\n-- Reachable states from %3s %s:\n\n", getNodeId(), Arrays.toString(marking));
+            System.out.println(from);
+            for (int j=0; j<childrenCount; j++){
+                String state = String.format("     T%d -> * %s - %s\n", children.get(j).fromTransition ,children.get(j).getNodeId(), Arrays.toString(children.get(j).marking));
+                System.out.println(state);
+            }
+
+        }
+
     }
 
     private void recordDeadPath(){
