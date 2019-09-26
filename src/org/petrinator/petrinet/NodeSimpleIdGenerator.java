@@ -34,6 +34,8 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
 
     public void fixFutureUniqueIds() {
 
+        super.fixFutureUniqueIds(petriNet.getRootSubnet());
+
         int maxId = 0;
 
         Set<Node> allNodes = petriNet.getRootSubnet().getNodesRecursively();
@@ -49,7 +51,6 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
                 //do nothing
             }
         }
-
         //nextUniqueId = maxId + 1;
     }
 

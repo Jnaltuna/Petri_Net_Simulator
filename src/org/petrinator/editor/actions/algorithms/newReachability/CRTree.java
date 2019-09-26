@@ -62,10 +62,8 @@ public class CRTree {
         hasReaderArcs = isMatrixNonZero(reader);
         hasResetArcs = isMatrixNonZero(reset);
 
-        //TODO add capacity/priority/timed if needed
-
         transitionCount = iMinus[0].length;
-        placeCount = iMinus.length;//TODO view if values are right
+        placeCount = iMinus.length;
 
         statesList = new ArrayList<>();
 

@@ -80,6 +80,7 @@ public class ReachabilityAction extends AbstractAction
         guiDialog.setVisible(true);
     }
 
+
     /**
      * Generate Button Listener
      */
