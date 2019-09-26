@@ -44,6 +44,8 @@ public class TreeNode {
 
     void recursiveExpansion(){
 
+        boolean allOmegas;
+
         //TODO si se quiere saber todos los caminos preguntar adentro del for
         if(repeatedNode){
             return;
@@ -55,8 +57,17 @@ public class TreeNode {
 
                 deadlock = false;
                 children.add(new TreeNode(tree, tree.fire(i, marking), this, depth+1));
-                children.get(children.size()-1).recursiveExpansion();
 
+                //TODO add omegas, verify if its repeated
+                allOmegas = children.get(children.size()-1).InsertOmegas();
+
+                repeatedNode = children.get(children.size()-1).repeatedNode;
+
+                if(!repeatedNode && !allOmegas) {
+                    children.get(children.size() - 1).recursiveExpansion();
+                }
+                //size -1 me devuelve el children de esta iteracion
+                //ver si me hace falta mantener el orden
             }
         }
 
@@ -83,6 +94,87 @@ public class TreeNode {
             pathToDeadlock.add(nodePath.get(i+1).getMarking());
         }
 
+    }
+
+    /**
+     * Function: void InsertOmegas()
+     * Checks if any omegas need to be inserted in the places of a given node.
+     * Omegas (shown by -1 here) represent unbounded places and are therefore
+     * important when testing whether a petri net is bounded. This function
+     * checks each of the ancestors of a given node.
+     * Returns true iff all places now contain an omega.
+     * @return
+     */
+    public boolean InsertOmegas(){
+        //Attributes used for assessing boundedness of the net
+        boolean allElementsGreaterOrEqual;
+        boolean insertedOmega = false;
+        TreeNode ancestorNode;
+
+        boolean [] elementIsStrictlyGreater = new boolean[tree.getPlaceCount()];
+
+        //Initialize array to false
+        Arrays.fill(elementIsStrictlyGreater,false);
+
+        ancestorNode = this;
+
+        //For each ancestor node until root
+        while (ancestorNode != tree.getRoot() && !insertedOmega){
+            //Take parent of current ancestor
+            ancestorNode = ancestorNode.parent;
+
+            allElementsGreaterOrEqual = true;
+
+            //compare marking of this node to the current ancestor reference
+            //if any place has a lower marking, set allElementsGreaterOrEqual to false
+            for(int i = 0; i < tree.getPlaceCount(); i++){
+
+                if(marking[i] != -1)
+                {
+
+                    if(marking[i] < ancestorNode.marking[i]){
+                        allElementsGreaterOrEqual = false;
+                        break;
+                    }
+
+                    elementIsStrictlyGreater[i] = (marking[i] > ancestorNode.marking[i]);
+
+                }
+            }
+
+            //Assess the information obtained for this node
+            if(allElementsGreaterOrEqual) {
+
+                for(int p = 0; p< tree.getPlaceCount(); p++){
+                    //check inhibition for each place
+                    boolean inhibition = false;
+                    for(int t = 0; t< tree.getTransitionCount(); t++){
+                        //check if there is an inhibiton arc asociated to this place
+                        int inhibiton_value = tree.getInhibition()[p][t];
+                        if(inhibiton_value > 0 && (marking[p] <= inhibiton_value)){
+                            inhibition = true;
+                            break;
+                        }
+                    }
+
+                    if(!inhibition){
+                        if(marking[p] != -1 && elementIsStrictlyGreater[p]){
+                            marking[p] = -1;
+                            insertedOmega = true;
+                            tree.setFoundAnOmega();
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i< tree.getPlaceCount(); i++){
+            if(marking[i] != -1){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public int[] getMarking() {

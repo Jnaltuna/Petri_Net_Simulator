@@ -124,6 +124,27 @@ public class CRTree {
 
     }
 
+    public int getPlaceCount() {
+        return placeCount;
+    }
+
+    public int getTransitionCount(){
+        return transitionCount;
+    }
+
+    public TreeNode getRoot() {
+        return root;
+    }
+
+    public int[][] getInhibition(){
+        return inhibition;
+    }
+
+    public void setFoundAnOmega(){
+        foundAnOmega = true;
+    }
+
+
     /*public CRTree(Root petri_root, int[] treeRoot, File reachabilityGraph)
 
             throws TreeTooBigException, ImmediateAbortException
