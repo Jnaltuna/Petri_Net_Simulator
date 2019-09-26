@@ -15,7 +15,7 @@ public class CRTree {
     private boolean moreThanOneToken = false;        //safe
 
     private boolean deadlock = false;    //deadlock
-    private ArrayList<int[]> shortestPathToDead;
+    private ArrayList<Integer> shortestPathToDead;
 
     private ArrayList<int[]> statesList;
 
@@ -36,8 +36,7 @@ public class CRTree {
 
     private final int transitionCount;
     private final int placeCount;
-    //public final int[] capacity;
-    //public final int[] priority;
+
     private int[] pathToDeadlock;
     private final boolean tooBig = false;
     private int edges = 0;
@@ -86,6 +85,16 @@ public class CRTree {
         }
 
         log = root.recursiveLog();
+
+        if(deadlock){
+            System.out.println("Shortest Path to DeadLock: ");
+            for(int i=shortestPathToDead.size()-1; i>=0; i--){
+                System.out.printf("T%d -> ", shortestPathToDead.get(i));
+            }
+            System.out.println("Deadlock");
+        }
+
+
     }
 
     public String getTreeLog(){
@@ -136,7 +145,10 @@ public class CRTree {
 
     }
 
-    void setDeadLock(ArrayList<int[]> path){
+    void setDeadLock(ArrayList<Integer> path){
+
+        //Last transition is a -1 from the root, we just discard it
+        path.remove(path.size()-1);
 
         if(!deadlock){
             shortestPathToDead = path;
@@ -315,7 +327,7 @@ public class CRTree {
                 for(int j = 0; j < placeCount; j++){
                     boolean emptyPlace = state[j] == 0;
                     boolean placeInhibitsTransition = inhibition[j][i] != 0;
-                    if ((inhibition[j][i]>0 && state[j] > inhibition[j][i]) || (inhibition[j][i] > 0 && state[j] == -1)) {
+                    if ((inhibition[j][i]>0 && state[j] >= inhibition[j][i]) || (inhibition[j][i] > 0 && state[j] == -1)) {
                         enabledTranitions[i] = false;
                         break;
                     }

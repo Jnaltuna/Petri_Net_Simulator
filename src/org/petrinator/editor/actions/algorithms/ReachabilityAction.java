@@ -20,53 +20,30 @@
 
 package org.petrinator.editor.actions.algorithms;
 
-import org.petrinator.auxiliar.GraphFrame;
 import org.petrinator.editor.Root;
-import org.petrinator.editor.filechooser.*;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
 import pipe.exceptions.TreeTooBigException;
 import pipe.gui.widgets.ButtonBar;
-import pipe.gui.widgets.EscapableDialog;
 import pipe.gui.widgets.ResultsHTMLPane;
-import java.util.Date;
 
-import pipe.modules.reachability.ReachabilityGraphGenerator;
-import pipe.views.*;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import java.text.DecimalFormat;
-import java.util.LinkedList;
+import javax.swing.*;
 
-import javax.swing.BoxLayout;
-
-import pipe.calculations.StateSpaceGenerator;
-
-//TODO import pipe.calculations.myTree;
 import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
-import net.sourceforge.jpowergraph.defaults.DefaultGraph;
-import pipe.views.PetriNetView;
+
 
 /**
- * Created module to produce the reachability graph representation of a Petri
- * net. If the petri net is bounded, then the reachability and coverability
- * graphs are the same. If it's not bounded, it's reachability graph is not
- * finit, so we generate the coverability one instead.
- *
- * @author Matthew Worthington
- * @author Edwin Chung
- * @author Will Master
- * @author Joaquin Rodriguez Felici
+ * Generates the reachability/coverability graph representation for the Petri Net
  */
 public class ReachabilityAction extends AbstractAction
 {
     private Root root;
-    private String graphName = "";
+    //private String graphName = "";
     private ResultsHTMLPane results;
     private JDialog guiDialog;
 
@@ -83,39 +60,19 @@ public class ReachabilityAction extends AbstractAction
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         results = new ResultsHTMLPane("");
         contentPane.add(results);
-        contentPane.add(new ButtonBar("Generate graph", generateButtonClick, guiDialog.getRootPane()));
+        contentPane.add(new ButtonBar("Generate graph", new GenerateListener(), guiDialog.getRootPane()));
 
     }
 
+
+    /**
+     * Resets and shows the 'Reachability/Coverability' initial dialog window
+     */
     public void actionPerformed(ActionEvent e)
     {
-        /*
-         * Create tmp.pnml file
-         */
-        /*FileChooserDialog chooser = new FileChooserDialog();
-
-        if (root.getCurrentFile() != null) {
-            chooser.setSelectedFile(root.getCurrentFile());
-        }
-
-        chooser.addChoosableFileFilter(new PipePnmlFileType());
-        chooser.setAcceptAllFileFilterUsed(false);
-        chooser.setCurrentDirectory(root.getCurrentDirectory());
-        chooser.setDialogTitle("Save as...");
-
-        File file = new File("tmp/" + "tmp" + "." + "pnml");
-        FileType chosenFileType = (FileType) chooser.getFileFilter();
-        try {
-            chosenFileType.save(root.getDocument(), file);
-        } catch (FileTypeException e1) {
-            e1.printStackTrace();
-        }*/
-
-        /*
-         * Show initial pane
-         */
-
         results.setText("");
+
+        // Disables the copy and save buttons
         results.setEnabled(false);
 
         guiDialog.pack();
@@ -123,12 +80,19 @@ public class ReachabilityAction extends AbstractAction
         guiDialog.setVisible(true);
     }
 
-    private final ActionListener generateButtonClick = new ActionListener() {
-        public void actionPerformed(ActionEvent arg0) {
-            /*
-             * Read tmp file
-             */
-            PetriNetView sourcePetriNetView = new PetriNetView("tmp/tmp.pnml");
+    /**
+     * Generate Button Listener
+     */
+    private class GenerateListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent actionEvent) {
+
+            // Checks if the net is valid
+            if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
+                JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
+                return;
+            }
+
             String log = "<h2>Reachability/Coverability Graph Information</h2>";
 
             /*long start = new Date().getTime();
@@ -219,13 +183,15 @@ public class ReachabilityAction extends AbstractAction
             }
 
             results.setText(log);
+
+            // Enables the copy and save buttons
             results.setEnabled(true);
         }
 
 
     };
 
-    public void generateGraph(File rgFile, PetriNetView dataLayer, boolean coverabilityGraph) throws Exception
+    /*public void generateGraph(File rgFile, PetriNetView dataLayer, boolean coverabilityGraph) throws Exception
     {
         ReachabilityGraphGenerator graphGenerator = new ReachabilityGraphGenerator();
 
@@ -244,5 +210,5 @@ public class ReachabilityAction extends AbstractAction
         frame.setTitle(graphName);
         frame.constructGraphFrame(graph, legend, root);
         frame.toFront();
-    }
+    }*/
 }

@@ -5,19 +5,17 @@ import java.util.Arrays;
 
 public class TreeNode {
 
-    private int id;
-
     private TreeNode parent;
     private ArrayList<TreeNode> children;
     private int[] marking;
     private boolean[] enabledTransitions;
     private CRTree tree;
 
+    private int id;
     private int depth;
 
-    private ArrayList<int[]> pathToDeadlock;
+    private ArrayList<Integer> pathToDeadlock;
     private boolean deadlock;
-    //private boolean repeatedState;
 
     private int fromTransition;
 
@@ -33,11 +31,6 @@ public class TreeNode {
 
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
-
-        //int[] rs = tree.repeatedState(this.marking).clone();
-
-        //repeatedState = (rs[CRTree.REPEATED] == 1);
-        //id = rs[CRTree.STATE];
 
     }
 
@@ -58,7 +51,7 @@ public class TreeNode {
 
                 children.add(new TreeNode(tree, tree.fire(i, marking), i+1, this, depth+1));
 
-                allOmegas = children.get(children.size()-1).InsertOmegas();
+                allOmegas = children.get(children.size()-1).insertOmegas();
 
                 int[] rs = tree.repeatedState(children.get(children.size()-1).marking).clone(); //todo ver si esta funcionando bien id
                 repeated = (rs[CRTree.REPEATED] == 1);
@@ -81,6 +74,10 @@ public class TreeNode {
         }
     }
 
+    /**
+     * Generates a string with all of the possible state-transitions,
+     * for all states, in html format
+     */
     String recursiveLog(){
 
         String log = "";
@@ -109,27 +106,30 @@ public class TreeNode {
     private void recordDeadPath(){
 
         pathToDeadlock = new ArrayList<>();
-        pathToDeadlock.add(marking);
+        //pathToDeadlock.add(marking);
+        pathToDeadlock.add(fromTransition);
 
         ArrayList<TreeNode> nodePath = new ArrayList<>();
         nodePath.add(this);
 
         for(int i=0; i<depth; i++){
             nodePath.add(nodePath.get(i).parent);
-            pathToDeadlock.add(nodePath.get(i+1).getMarking());
+            //pathToDeadlock.add(nodePath.get(i+1).getMarking());
+            pathToDeadlock.add(nodePath.get(i+1).fromTransition);
         }
 
     }
 
     /**
-     * Function: void InsertOmegas()
+     *
      * Checks if any omegas need to be inserted in the places of a given node.
      * Omegas (shown by -1 here) represent unbounded places and are therefore
      * important when testing whether a petri net is bounded. This function
      * checks each of the ancestors of a given node.
+     *
      * @return true if all places now contain an omega.
      */
-    private boolean InsertOmegas(){ //TODO need to add condition for reader/reset arcs if needed
+    private boolean insertOmegas(){ //TODO need to add condition for reader/reset arcs if needed
         //Attributes used for assessing boundedness of the net
         boolean allElementsGreaterOrEqual;
         boolean insertedOmega = false;
@@ -169,7 +169,7 @@ public class TreeNode {
             //Assess the information obtained for this node
             if(allElementsGreaterOrEqual) {
 
-                for(int p = 0; p< tree.getPlaceCount(); p++){
+                for(int p = 0; p<tree.getPlaceCount(); p++){
                     //check inhibition for each place
                     boolean inhibition = false;
                     for(int t = 0; t< tree.getTransitionCount(); t++){
@@ -189,6 +189,7 @@ public class TreeNode {
                         }
                     }
                 }
+
             }
         }
 

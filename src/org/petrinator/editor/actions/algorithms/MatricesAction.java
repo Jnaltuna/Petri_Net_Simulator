@@ -27,7 +27,6 @@ import org.petrinator.petrinet.Transition;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
 import pipe.gui.widgets.ButtonBar;
-import pipe.gui.widgets.EscapableDialog;
 import pipe.gui.widgets.ResultsHTMLPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,15 +62,18 @@ public class MatricesAction extends AbstractAction
         results = new ResultsHTMLPane("");
         contentPane.add(results);
 
-        contentPane.add(new ButtonBar("Calculate", new CalculateActionListener(results), guiDialog.getRootPane()));
+        contentPane.add(new ButtonBar("Calculate", new CalculateListener(), guiDialog.getRootPane()));
 
     }
 
+    /**
+     * Resets and shows the 'Matrices' initial dialog window
+     */
     public void actionPerformed(ActionEvent e) {
-        /*
-         * Show initial pane
-         */
+
         results.setText("");
+
+        // Disables the copy and save buttons
         results.setEnabled(false);
 
         guiDialog.pack();
@@ -80,13 +82,10 @@ public class MatricesAction extends AbstractAction
 
     }
 
-    private class CalculateActionListener implements ActionListener{
-
-        ResultsHTMLPane results;
-
-        CalculateActionListener(ResultsHTMLPane results){
-            this.results = results;
-        }
+    /**
+     * Calculate Button Listener
+     */
+    private class CalculateListener implements ActionListener{
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -150,14 +149,15 @@ public class MatricesAction extends AbstractAction
                 }
                 catch(Exception e)
                 {
-                    //e.printStackTrace();
                     s = "<br>Invalid net";
                     results.setText(s);
                     return;
                 }
 
-                results.setEnabled(true);
                 results.setText(s);
+
+                // Enables the copy and save buttons
+                results.setEnabled(true);
 
             }
 
