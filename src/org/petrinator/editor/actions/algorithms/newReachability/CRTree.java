@@ -82,7 +82,6 @@ public class CRTree {
             System.out.println("");
         }
 
-        System.out.println("LOG: ");
         root.recursiveLog();
     }
 

@@ -46,7 +46,7 @@ public class TreeNode {
     }
 
     String getNodeId(){
-        return "E"+id;
+        return String.format("S%-4d",id);
     }
 
     void recursiveExpansion(){
@@ -88,7 +88,7 @@ public class TreeNode {
             String from = String.format("\n-- Reachable states from %3s %s:\n\n", getNodeId(), Arrays.toString(marking));
             System.out.println(from);
             for (int j=0; j<childrenCount; j++){
-                String state = String.format("     T%d -> * %s - %s\n", children.get(j).fromTransition ,children.get(j).getNodeId(), Arrays.toString(children.get(j).marking));
+                String state = String.format("   *  T%d -> %s %s\n", children.get(j).fromTransition ,children.get(j).getNodeId(), Arrays.toString(children.get(j).marking));
                 System.out.println(state);
             }
 
