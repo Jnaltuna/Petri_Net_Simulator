@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 public class TreeNode {
 
-    static int nodes = 0;
     private int id;
 
     private TreeNode parent;
@@ -18,12 +17,12 @@ public class TreeNode {
 
     private ArrayList<int[]> pathToDeadlock;
     private boolean deadlock;
-    private boolean repeatedState;
+    //private boolean repeatedState;
 
     private int fromTransition;
 
 
-    public TreeNode(CRTree tree, int[] marking, int fromTransition, TreeNode parent, int depth){
+    TreeNode(CRTree tree, int[] marking, int fromTransition, TreeNode parent, int depth){
 
         this.marking = marking;
         this.parent = parent;
@@ -32,31 +31,25 @@ public class TreeNode {
         this.fromTransition = fromTransition;
         children = new ArrayList<>();
 
-        id = nodes;
-        nodes++;
 
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
-        int[] rs = tree.repeatedState(this.marking).clone();
+        //int[] rs = tree.repeatedState(this.marking).clone();
 
-        repeatedState = (rs[CRTree.REPEATED] == 1);
-        id = rs[CRTree.STATE];
+        //repeatedState = (rs[CRTree.REPEATED] == 1);
+        //id = rs[CRTree.STATE];
 
     }
 
-    String getNodeId(){
+    private String getNodeId(){
         return "E"+id;
     }
 
     void recursiveExpansion(){
 
         boolean allOmegas;
-
-        //TODO si se quiere saber todos los caminos preguntar adentro del for
-        if(repeatedState){
-            return;
-        }
+        boolean repeated;
 
         for(int i=0; i<enabledTransitions.length; i++){
 
@@ -66,12 +59,15 @@ public class TreeNode {
 
                 children.add(new TreeNode(tree, tree.fire(i, marking), i+1, this, depth+1));
 
-                //TODO add omegas, verify if its repeated
                 allOmegas = children.get(children.size()-1).InsertOmegas();
 
-                repeatedNode = children.get(children.size()-1).repeatedNode;
+                int[] rs = tree.repeatedState(children.get(children.size()-1).marking).clone(); //todo ver si esta funcionando bien id
+                repeated = (rs[CRTree.REPEATED] == 1);
+                children.get(children.size()-1).id = rs[CRTree.STATE];
 
-                if(!repeatedNode && !allOmegas) {
+                //repeated = children.get(children.size()-1).repeatedState;
+
+                if(!repeated && !allOmegas) {
                     children.get(children.size() - 1).recursiveExpansion();
                 }
                 //size -1 me devuelve el children de esta iteracion
@@ -90,7 +86,7 @@ public class TreeNode {
     }
 
     void recursiveLog(){
-
+        //TODO view if we need to add state with allOmegas to log
         int childrenCount = children.size();
 
         if(childrenCount > 0){
@@ -105,6 +101,7 @@ public class TreeNode {
             }
 
         }
+
 
     }
 
@@ -129,10 +126,9 @@ public class TreeNode {
      * Omegas (shown by -1 here) represent unbounded places and are therefore
      * important when testing whether a petri net is bounded. This function
      * checks each of the ancestors of a given node.
-     * Returns true iff all places now contain an omega.
-     * @return
+     * @return true if all places now contain an omega.
      */
-    public boolean InsertOmegas(){
+    private boolean InsertOmegas(){ //TODO need to add condition for reader/reset arcs if needed
         //Attributes used for assessing boundedness of the net
         boolean allElementsGreaterOrEqual;
         boolean insertedOmega = false;
