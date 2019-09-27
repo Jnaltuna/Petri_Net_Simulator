@@ -173,12 +173,10 @@ public class ReachabilityAction extends AbstractAction
             }*/
 
 
-            try {
+
                 CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
                 log += arbol.getTreeLog();
-            } catch (TreeTooBigException e) {
-                e.printStackTrace();
-            }
+
 
             results.setText(log);
 

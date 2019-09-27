@@ -34,13 +34,14 @@ public class TreeNode {
 
     }
 
-    private String getNodeId() {
-        return String.format("S%-4d", id);
-    }
 
+    /**
+     * Generates nodes, recursively, for all of the possible states
+     * that can be reached from each state. It also checks if the
+     * net is bounded and if it has deadlock //TODO: safeness and stuff
+     */
     void recursiveExpansion() {
 
-        boolean allOmegas;
         boolean repeated;
 
         for (int i = 0; i < enabledTransitions.length; i++) {
@@ -51,28 +52,25 @@ public class TreeNode {
 
                 children.add(new TreeNode(tree, tree.fire(i, marking), i + 1, this, depth + 1));
 
-                allOmegas = children.get(children.size()-1).insertOmegas();
+                children.get(children.size()-1).insertOmegas();
 
-                int[] rs = tree.repeatedState(children.get(children.size() - 1).marking).clone(); //todo ver si esta funcionando bien id
-                repeated = (rs[CRTree.REPEATED] == 1);
-                children.get(children.size() - 1).id = rs[CRTree.STATE];
+                int[] r_s = tree.repeatedState(children.get(children.size() - 1).marking).clone();
+                repeated = (r_s[CRTree.REPEATED] == 1);
+                children.get(children.size()-1).id = r_s[CRTree.STATE];
 
-                //repeated = children.get(children.size()-1).repeatedState;
-
-                if (!repeated /*&& !allOmegas*/) {
-                    children.get(children.size() - 1).recursiveExpansion();
+                if (!repeated) {
+                    children.get(children.size()-1).recursiveExpansion();
                 }
-                //size -1 me devuelve el children de esta iteracion
-                //ver si me hace falta mantener el orden
             }
         }
 
         if (deadlock) {
-            System.out.println("Hay deadlock");
             recordDeadPath();
             tree.setDeadLock(pathToDeadlock);
         }
     }
+
+
     /**
      * Fills the given matrix with the reachability information
      * rows are source states, columns are destination states
@@ -83,17 +81,22 @@ public class TreeNode {
 
         int childrenCount = children.size();
         if(childrenCount > 0){
-            for(int i=0; i<childrenCount; i++){
-                children.get(i).recursiveMatrix(reachabilityMatrix);
+            for (TreeNode child : children) {
+                child.recursiveMatrix(reachabilityMatrix);
             }
 
-            for(int i=0; i<childrenCount; i++){
-                reachabilityMatrix[id][children.get(i).id] = children.get(i).fromTransition;
+            for (TreeNode child : children) {
+                reachabilityMatrix[id][child.id] = child.fromTransition;
             }
         }
 
     }
 
+
+    /**
+     * Generates an arraylist with the all the transitions
+     * fired from the root node to reach the current state
+     */
     private void recordDeadPath() {
 
         pathToDeadlock = new ArrayList<>();
@@ -109,16 +112,14 @@ public class TreeNode {
 
     }
 
+
     /**
-     *
      * Checks if any omegas need to be inserted in the places of a given node.
      * Omegas (shown by -1 here) represent unbounded places and are therefore
      * important when testing whether a petri net is bounded. This function
      * checks each of the ancestors of a given node.
-     *
-     * @return true if all places now contain an omega.
      */
-    private boolean insertOmegas() {
+    private void insertOmegas() {
 
         //Attributes used for assessing boundedness of the net
         boolean allElementsGreaterOrEqual;
@@ -133,7 +134,7 @@ public class TreeNode {
         ancestorNode = this;
 
         //For each ancestor node until root
-        while (ancestorNode != tree.getRoot() && !insertedOmega) {
+        while (ancestorNode != tree.getRootNode() && !insertedOmega) {
             //Take parent of current ancestor
             ancestorNode = ancestorNode.parent;
 
@@ -175,7 +176,7 @@ public class TreeNode {
                         if (marking[p] != -1 && elementIsStrictlyGreater[p]) {
                             marking[p] = -1;
                             insertedOmega = true;
-                            tree.setFoundAnOmega();
+                            tree.setNotBounded();
                         }
                     }
                 }
@@ -185,12 +186,12 @@ public class TreeNode {
 
         for (int i = 0; i < tree.getPlaceCount(); i++) {
             if (marking[i] != -1) {
-                return false;
+                return;
             }
         }
 
-        return true;
     }
+
 
     public int[] getMarking() {
         return marking;
