@@ -203,12 +203,16 @@ public class ReachabilityAction extends AbstractAction
     private void generateGraph(int[][] stateMatrix){
         Graph graph = new SingleGraph("Reachability/Coverability");
 
-
+        //Create a node for each state
+        //Each state has a label indicated by S + state number
         for(int i = 0;i<stateMatrix.length; i++){
             String s = Integer.toString(i);
             Node n = graph.addNode(s);
             n.addAttribute("ui.label", "S"+s);
         }
+
+        //Create arrows that join the previous states based on the values of the stateMatrix
+        //Each arrow has a label based on the transition fired that caused the change in state
         for(int i=0;i<stateMatrix.length; i++){
             for(int j = 0; j < stateMatrix[0].length; j++){
                 if(stateMatrix[i][j] != -1){
@@ -223,6 +227,8 @@ public class ReachabilityAction extends AbstractAction
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         Viewer viewer = graph.display();
         viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+
+        //Atributes for all nodes
         graph.addAttribute("ui.stylesheet","node {\n" +
                 "\tsize: 30px;\n" +
                 "\tshape: circle;\n" +
@@ -234,6 +240,7 @@ public class ReachabilityAction extends AbstractAction
                 "\tfill-color: rgb(156,230,255);\n" +
                 "\tz-index: 1;\n" +
                 "}");
+        //Atributes for all edges
         graph.addAttribute("ui.stylesheet","edge {\n" +
                 "\ttext-mode: normal;\n" +
                 "\ttext-style: bold;\n" +
