@@ -88,6 +88,7 @@ public class CRTree {
                 log = log.concat(String.format("<p></p><h3>Reachable states from S%s %s:</h3>", i, Arrays.toString(statesList.get(i))));
 
                 for(int j=0; j<reachMatrix.length; j++){
+
                     if(reachMatrix[i][j] != NAN){
 
                         log = log.concat(String.format("<p>T%d => S%d %s</p>", reachMatrix[i][j], j, Arrays.toString(statesList.get(j))));
@@ -174,8 +175,9 @@ public class CRTree {
 
     }
 
+
     /**
-     * Looks for enabled transitions in the current state of the net
+     * Calculates the enabled transitions based on incidence, inhibition and reader matrix.
      * @param state current marking of the net
      * @return boolean array with true for enabled transitions
      */
@@ -249,6 +251,11 @@ public class CRTree {
     public ArrayList<Integer> getShortestPathToDeadlock(){
         return SPDeadlock;
     }
+
+    public int[][] getReachabilityMatrix() {
+        return reachMatrix;
+    }
+
 
     /**
      * Checks if the given matrix is not null or all zeros
