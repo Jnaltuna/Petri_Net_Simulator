@@ -181,6 +181,7 @@ public class ReachabilityAction extends AbstractAction
             try {
                 CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
                 log += arbol.getTreeLog();
+                generateGraph(arbol.getReachMatrix());
             } catch (TreeTooBigException e) {
                 e.printStackTrace();
             }
@@ -190,38 +191,57 @@ public class ReachabilityAction extends AbstractAction
             // Enables the copy and save buttons
             results.setEnabled(true);
 
-            Graph graph = new SingleGraph("Tutorial 1");
-            graph.addNode("A" );
-            graph.addNode("B" );
-            graph.addNode("C" );
-            graph.addNode("D");
-            graph.addEdge("AB", "A", "B");
-            graph.addEdge("BC", "B", "C");
-            graph.addEdge("CA", "C", "A");
-            graph.addEdge("DA","D","A");
-
-            //graph.display();
-            System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-            Viewer viewer = graph.display();
-            viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
-            graph.addAttribute("ui.stylesheet","node {\n" +
-                    "\tsize: 15px, 15px;\n" +
-                    "\tshape: circle;\n" +
-                    "\tfill-color: white;\n" +
-                    "\tstroke-mode: plain;\n" +
-                    "\tstroke-color: black;\n" +
-                    "\tstroke-width: 1;\n" +
-                    "\ttext-mode: normal;\n" +
-                    "}");
-
-            //Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-            //View view = viewer.addDefaultView(true);
-            //view.getCamera().resetView();
-
         }
 
 
     };
+
+    /**
+     * Displays graph using Graphstream library
+     * @param stateMatrix matrix that contains all the states and possible transitions
+     */
+    private void generateGraph(int[][] stateMatrix){
+        Graph graph = new SingleGraph("Reachability/Coverability");
+
+
+        for(int i = 0;i<stateMatrix.length; i++){
+            String s = Integer.toString(i);
+            Node n = graph.addNode(s);
+            n.addAttribute("ui.label", "S"+s);
+        }
+        for(int i=0;i<stateMatrix.length; i++){
+            for(int j = 0; j < stateMatrix[0].length; j++){
+                if(stateMatrix[i][j] != -1){
+                    String ename = "S" + Integer.toString(i) + "-" + Integer.toString(j);
+                    Edge e = graph.addEdge(ename,Integer.toString(i),Integer.toString(j),true);
+                    e.addAttribute("ui.label","T" + Integer.toString(stateMatrix[i][j]));
+
+                }
+            }
+        }
+
+        System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+        Viewer viewer = graph.display();
+        viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+        graph.addAttribute("ui.stylesheet","node {\n" +
+                "\tsize: 30px;\n" +
+                "\tshape: circle;\n" +
+                "\tstroke-mode: plain;\n" +
+                "\tstroke-color: black;\n" +
+                "\tstroke-width: 1;\n" +
+                "\ttext-mode: normal;\n" +
+                "\ttext-style: bold;\n" +
+                "\tfill-color: rgb(156,230,255);\n" +
+                "\tz-index: 1;\n" +
+                "}");
+        graph.addAttribute("ui.stylesheet","edge {\n" +
+                "\ttext-mode: normal;\n" +
+                "\ttext-style: bold;\n" +
+                "\ttext-alignment: center;\n" +
+                "\tz-index: 0;  \n" +
+                "}");
+
+    }
 
     /*public void generateGraph(File rgFile, PetriNetView dataLayer, boolean coverabilityGraph) throws Exception
     {

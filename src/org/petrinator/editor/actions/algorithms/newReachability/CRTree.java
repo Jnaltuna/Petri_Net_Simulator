@@ -98,7 +98,7 @@ public class CRTree {
                 log = log.concat(String.format("<p></p><h3>Reachable states from S%s %s:</h3>", i, Arrays.toString(statesList.get(i))));
 
                 for(int j=0; j<reachMatrix.length; j++){
-                    if(reachMatrix[i][j] != 0){
+                    if(reachMatrix[i][j] != -1){
 
                         log = log.concat(String.format("<p>T%d => S%d %s</p>", reachMatrix[i][j], j, Arrays.toString(statesList.get(j))));
 
@@ -396,5 +396,10 @@ public class CRTree {
     public boolean isFoundAnOmega() {
         return foundAnOmega;
     }
+
+    public int[][] getReachMatrix() {
+        return reachMatrix;
+    }
+
 
 }
