@@ -73,35 +73,25 @@ public class TreeNode {
             tree.setDeadLock(pathToDeadlock);
         }
     }
-
-
     /**
-     * Generates a string with all of the possible state-transitions,
-     * for all states, in html format
+     * Fills the given matrix with the reachability information
+     * rows are source states, columns are destination states
+     * and the value in any M[i][j] will be the transition required
+     * to reach state j from state i if possible
      */
-    String recursiveLog(){
+    void recursiveMatrix(int[][] reachabilityMatrix){
 
-        String log = "";
-
-        //TODO view if we need to add state with allOmegas to log
         int childrenCount = children.size();
-
-        if (childrenCount > 0) {
-            for (int i = 0; i < childrenCount; i++) {
-                log = log.concat(children.get(i).recursiveLog());
+        if(childrenCount > 0){
+            for(int i=0; i<childrenCount; i++){
+                children.get(i).recursiveMatrix(reachabilityMatrix);
             }
 
-            log = log.concat(String.format("<p></p><h3>Reachable states from %3s %s:</h3>", getNodeId(), Arrays.toString(marking)));
-
-            for (int j = 0; j < childrenCount; j++) {
-
-                log = log.concat(String.format("<p>T%d => %s %s</p>", children.get(j).fromTransition, children.get(j).getNodeId(), Arrays.toString(children.get(j).marking)));
-
+            for(int i=0; i<childrenCount; i++){
+                reachabilityMatrix[id][children.get(i).id] = children.get(i).fromTransition;
             }
-
         }
 
-        return log;
     }
 
     private void recordDeadPath() {

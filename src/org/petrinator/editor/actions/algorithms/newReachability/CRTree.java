@@ -37,6 +37,8 @@ public class CRTree {
     private final int transitionCount;
     private final int placeCount;
 
+    private int[][] reachMatrix;
+
     private int[] pathToDeadlock;
     private final boolean tooBig = false;
     private int edges = 0;
@@ -75,14 +77,42 @@ public class CRTree {
         root.recursiveExpansion();
 
         System.out.printf("STATES - %d\n", statesList.size());
-        for(int i=0; i<statesList.size(); i++){
-            for(int j=0; j<placeCount; j++){
-                System.out.printf("%2d ", statesList.get(i)[j]);
-            }
-            System.out.println("");
+
+
+        reachMatrix = new int[statesList.size()][statesList.size()];
+        for(int i=0; i<reachMatrix.length; i++){
+            Arrays.fill(reachMatrix[i], -1);
         }
 
-        log = root.recursiveLog();
+        int[]   zero = new int[reachMatrix.length];
+        Arrays.fill(zero, -1);
+
+        root.recursiveMatrix(reachMatrix);
+
+        log = "";
+
+        for(int i=0; i<reachMatrix.length; i++){
+
+            if(!Arrays.equals(reachMatrix[i], zero)){
+
+                log = log.concat(String.format("<p></p><h3>Reachable states from S%s %s:</h3>", i, Arrays.toString(statesList.get(i))));
+
+                for(int j=0; j<reachMatrix.length; j++){
+                    if(reachMatrix[i][j] != 0){
+
+                        log = log.concat(String.format("<p>T%d => S%d %s</p>", reachMatrix[i][j], j, Arrays.toString(statesList.get(j))));
+
+                    }
+                }
+
+            }
+            else {
+                log = log.concat(String.format("<p></p><h3 style=\"color:#8300004a\">Deadlock on S%s %s</h3>", i, Arrays.toString(statesList.get(i))));
+            }
+
+        }
+
+        //log = root.recursiveLog();
 
         if(deadlock){
             System.out.println("Shortest Path to DeadLock: ");
@@ -112,7 +142,7 @@ public class CRTree {
                 return new int[]{1, i};
             }
         }
-        System.out.println(Arrays.toString(marking));
+
         statesList.add(marking);
         return new int[]{0, statesList.size()-1};
     }

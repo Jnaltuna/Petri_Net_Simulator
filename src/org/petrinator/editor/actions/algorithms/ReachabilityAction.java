@@ -106,11 +106,8 @@ public class ReachabilityAction extends AbstractAction
             /*
              * Let's try to create the reachability graph
              */
-            File reachabilityGraph = new File("results.rg");
-            /*if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
-            {
-                s += "Invalid net!";
-            }
+            /*File reachabilityGraph = new File("results.rg");
+
             else
             {
                 try
