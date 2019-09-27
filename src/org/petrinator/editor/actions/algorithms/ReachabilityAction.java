@@ -20,6 +20,9 @@
 
 package org.petrinator.editor.actions.algorithms;
 
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.View;
+import org.graphstream.ui.view.Viewer;
 import org.petrinator.editor.Root;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
@@ -35,6 +38,8 @@ import java.io.File;
 import javax.swing.*;
 
 import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
+
+import org.graphstream.graph.*;
 
 
 /**
@@ -187,6 +192,35 @@ public class ReachabilityAction extends AbstractAction
 
             // Enables the copy and save buttons
             results.setEnabled(true);
+
+            Graph graph = new SingleGraph("Tutorial 1");
+            graph.addNode("A" );
+            graph.addNode("B" );
+            graph.addNode("C" );
+            graph.addNode("D");
+            graph.addEdge("AB", "A", "B");
+            graph.addEdge("BC", "B", "C");
+            graph.addEdge("CA", "C", "A");
+            graph.addEdge("DA","D","A");
+
+            //graph.display();
+            System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+            Viewer viewer = graph.display();
+            viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+            graph.addAttribute("ui.stylesheet","node {\n" +
+                    "\tsize: 15px, 15px;\n" +
+                    "\tshape: circle;\n" +
+                    "\tfill-color: white;\n" +
+                    "\tstroke-mode: plain;\n" +
+                    "\tstroke-color: black;\n" +
+                    "\tstroke-width: 1;\n" +
+                    "\ttext-mode: normal;\n" +
+                    "}");
+
+            //Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+            //View view = viewer.addDefaultView(true);
+            //view.getCamera().resetView();
+
         }
 
 

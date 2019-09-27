@@ -158,11 +158,11 @@ public class CRTree {
 
     }
 
-    public int getPlaceCount() {
+    int getPlaceCount() {
         return placeCount;
     }
 
-    public int getTransitionCount(){
+    int getTransitionCount(){
         return transitionCount;
     }
 
@@ -170,11 +170,11 @@ public class CRTree {
         return root;
     }
 
-    public int[][] getInhibition(){
+    int[][] getInhibition(){
         return inhibition;
     }
 
-    public void setFoundAnOmega(){
+    void setFoundAnOmega(){
         foundAnOmega = true;
     }
 
@@ -302,7 +302,7 @@ public class CRTree {
     }*/
 
     /**
-     *
+     * Calculates the enabled transitions based on incidence, inhibition and reader matrix.
      * @param state current marking of the net
      * @return boolean array with true for enabled transitions
      */
