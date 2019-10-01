@@ -48,6 +48,8 @@ public class ReachabilityAction extends AbstractAction
     private Root root;
     private ResultsHTMLPane results;
     private JDialog guiDialog;
+    private ButtonBar graphGenerate;
+    private int[][] reachMatrix;
 
     public ReachabilityAction(Root root)
     {
@@ -62,10 +64,12 @@ public class ReachabilityAction extends AbstractAction
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         results = new ResultsHTMLPane("");
         contentPane.add(results);
-        contentPane.add(new ButtonBar("Generate graph", new GenerateListener(), guiDialog.getRootPane()));
+        contentPane.add(new ButtonBar("Generate states", new GenerateListener(), guiDialog.getRootPane()));
+        graphGenerate = new ButtonBar("Generate graph", new GenerateGraphListener(), guiDialog.getRootPane());
+        contentPane.add(graphGenerate);
+        graphGenerate.setButtonsEnabled(false);
 
     }
-
 
     /**
      * Resets and shows the 'Reachability/Coverability' initial dialog window
@@ -98,20 +102,33 @@ public class ReachabilityAction extends AbstractAction
 
             String log = "<h2>Reachability/Coverability Graph Information</h2>";
 
-
             //TODO check tree size
             CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
             log += arbol.getTreeLog();
 
-            generateGraph(arbol.getReachabilityMatrix());
+            reachMatrix = arbol.getReachabilityMatrix();
 
             results.setText(log);
 
             // Enables the copy and save buttons
             results.setEnabled(true);
+            graphGenerate.setButtonsEnabled(true);
 
         }
 
+
+    };
+
+    /**
+     * Generate Graph Button Listener
+     */
+    private class GenerateGraphListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent actionEvent) {
+
+            generateGraph(reachMatrix);
+
+        }
 
     };
 
