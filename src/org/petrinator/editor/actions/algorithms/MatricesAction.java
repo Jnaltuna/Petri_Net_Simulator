@@ -33,6 +33,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.*;
 
 
@@ -55,6 +57,19 @@ public class MatricesAction extends AbstractAction
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/matrices16.png"));
 
         guiDialog = new JDialog(root.getParentFrame(), "Petri net matrices and marking", true);
+
+        guiDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        /*
+            Sets variables on null after closing the dialog window
+            to free heap memory
+         */
+        guiDialog.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e)
+            {
+                results.setText("");
+            }
+        });
 
         contentPane = guiDialog.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
