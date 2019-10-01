@@ -55,6 +55,9 @@ public class NewFileAction extends AbstractAction {
                 "Cancel") == JOptionPane.YES_OPTION) {
             root.getDocument().petriNet.clear();
             root.getDocument().roles.clear();
+            root.getDocument().petriNet.getNodeSimpleIdGenerator().fixFutureUniqueIds();
+            root.getDocument().petriNet.getNodeSimpleIdGenerator().ensureNumberIds();
+            root.getDocument().petriNet.getNodeLabelGenerator().fixFutureUniqueLabels();
             root.setClickedElement(null);
             root.refreshAll();
             root.getUndoManager().eraseAll();
