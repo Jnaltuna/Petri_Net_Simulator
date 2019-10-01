@@ -25,7 +25,6 @@ import org.graphstream.ui.view.Viewer;
 import org.petrinator.editor.Root;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
-import pipe.exceptions.TreeTooBigException;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.ResultsHTMLPane;
 
@@ -34,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -51,7 +51,8 @@ public class ReachabilityAction extends AbstractAction
     private ResultsHTMLPane results;
     private JDialog guiDialog;
     private ButtonBar graphGenerate;
-    private int[][] reachMatrix;
+    private ButtonBar calculateButton;
+    private ArrayList<Integer>[][] reachMatrix;
 
     public ReachabilityAction(Root root)
     {
@@ -81,7 +82,11 @@ public class ReachabilityAction extends AbstractAction
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         results = new ResultsHTMLPane("");
         contentPane.add(results);
-        contentPane.add(new ButtonBar("Generate states", new GenerateListener(), guiDialog.getRootPane()));
+
+        /* Buttons */
+        calculateButton = new ButtonBar("Generate states", new GenerateListener(), guiDialog.getRootPane());
+        contentPane.add(calculateButton);
+
         graphGenerate = new ButtonBar("Generate graph", new GenerateGraphListener(), guiDialog.getRootPane());
         contentPane.add(graphGenerate);
 
@@ -94,6 +99,9 @@ public class ReachabilityAction extends AbstractAction
     {
         results.setText("");
 
+        // Enables button to calculate states
+        calculateButton.setButtonsEnabled(true);
+
         // Disables the copy and save buttons
         results.setEnabled(false);
 
@@ -103,7 +111,6 @@ public class ReachabilityAction extends AbstractAction
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
         guiDialog.setVisible(true);
-
 
     }
 
@@ -121,19 +128,26 @@ public class ReachabilityAction extends AbstractAction
                 return;
             }
 
+            // Disables the calculate button
+            calculateButton.setButtonsEnabled(false);
+
             String log = "<h2>Reachability/Coverability Graph Information</h2>";
 
             //TODO check tree size
-            CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
-            log += arbol.getTreeLog();
+            try {
+                CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
+                log += arbol.getTreeLog();
+                reachMatrix = arbol.getReachabilityMatrix();
+                // Enables the copy and save buttons
+                results.setEnabled(true);
+                graphGenerate.setButtonsEnabled(true);
+            }
+            catch (StackOverflowError e){
+                log = "An error has occurred, the net might have too many states...";
+            }
 
-            reachMatrix = arbol.getReachabilityMatrix();
 
             results.setText(log);
-
-            // Enables the copy and save buttons
-            results.setEnabled(true);
-            graphGenerate.setButtonsEnabled(true);
 
         }
     };
@@ -145,7 +159,7 @@ public class ReachabilityAction extends AbstractAction
 
         public void actionPerformed(ActionEvent actionEvent) {
 
-            generateGraph(reachMatrix);
+            //generateGraph(reachMatrix);
 
         }
 

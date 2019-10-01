@@ -33,6 +33,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.*;
 
 
@@ -41,7 +43,6 @@ public class MatricesAction extends AbstractAction
     private Root root;
 
     private JDialog guiDialog;
-    private Container contentPane;
     private ResultsHTMLPane results;
 
 
@@ -56,7 +57,20 @@ public class MatricesAction extends AbstractAction
 
         guiDialog = new JDialog(root.getParentFrame(), "Petri net matrices and marking", true);
 
-        contentPane = guiDialog.getContentPane();
+        guiDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        /*
+            Sets variables on null after closing the dialog window
+            to free heap memory
+         */
+        guiDialog.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e)
+            {
+                results.setText("");
+            }
+        });
+
+        Container contentPane = guiDialog.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
 
         results = new ResultsHTMLPane("");
@@ -92,7 +106,6 @@ public class MatricesAction extends AbstractAction
 
             if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
                 JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
-                return;
             }
             else
             {

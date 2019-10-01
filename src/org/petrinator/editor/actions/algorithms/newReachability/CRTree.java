@@ -1,6 +1,7 @@
 package org.petrinator.editor.actions.algorithms.newReachability;
 
 import org.petrinator.editor.Root;
+import scala.Array;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,11 +35,9 @@ public class CRTree {
     private final int transitionCount;
     private final int placeCount;
 
-    private int[][] reachMatrix;
+    private ArrayList<Integer>[][] reachMatrix;
 
     public CRTree(Root root, int[] initialMarking) {
-
-        //this.moreThanOneToken = isSafe(treeRoot);
 
         iMinus = root.getDocument().getPetriNet().backwardsIMatrix();
         iCombined = root.getDocument().getPetriNet().incidenceMatrix();
@@ -59,14 +58,9 @@ public class CRTree {
         statesList.add(initialMarking); //add initial marking to state list
 
         rootNode.recursiveExpansion(); //generates the tree
-
-        reachMatrix = new int[statesList.size()][statesList.size()];
-
-        for (int[] matrix : reachMatrix) {
-            Arrays.fill(matrix, NAN);
-        }
-
+        reachMatrix = new ArrayList[statesList.size()][statesList.size()];
         rootNode.recursiveMatrix(reachMatrix); //generates reachability matrix
+
     }
 
     /**
@@ -76,8 +70,7 @@ public class CRTree {
      */
     public String getTreeLog(){
 
-        int[]   zero = new int[reachMatrix.length];
-        Arrays.fill(zero, NAN);
+        ArrayList<Integer>[] zero = new ArrayList[reachMatrix.length];
 
         String log = "";
 
@@ -89,9 +82,11 @@ public class CRTree {
 
                 for(int j=0; j<reachMatrix.length; j++){
 
-                    if(reachMatrix[i][j] != NAN){
+                    if(reachMatrix[i][j] != null){
 
-                        log = log.concat(String.format("<p>T%d => S%d %s</p>", reachMatrix[i][j], j, Arrays.toString(statesList.get(j))));
+                        for(int k=0; k<reachMatrix[i][j].size(); k++){
+                            log = log.concat(String.format("<p>T%d => S%d %s</p>", reachMatrix[i][j].get(k), j, Arrays.toString(statesList.get(j))));
+                        }
 
                     }
                 }
@@ -258,7 +253,7 @@ public class CRTree {
         return SPDeadlock;
     }
 
-    public int[][] getReachabilityMatrix() {
+    public ArrayList<Integer>[][] getReachabilityMatrix() {
         return reachMatrix;
     }
 

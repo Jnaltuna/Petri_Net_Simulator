@@ -86,7 +86,7 @@ public class TreeNode {
      * and the value in any M[i][j] will be the transition required
      * to reach state j from state i if possible
      */
-    void recursiveMatrix(int[][] reachabilityMatrix){
+    void recursiveMatrix(ArrayList<Integer>[][] reachabilityMatrix){
 
         int childrenCount = children.size();
         if(childrenCount > 0){
@@ -94,8 +94,14 @@ public class TreeNode {
                 child.recursiveMatrix(reachabilityMatrix);
             }
 
+            System.out.println("Hijos del nodo "+id);
+
             for (TreeNode child : children) {
-                reachabilityMatrix[id][child.id] = child.fromTransition;
+                System.out.println();
+                if(reachabilityMatrix[id][child.id] == null){
+                    reachabilityMatrix[id][child.id] = new ArrayList<>();
+                }
+                reachabilityMatrix[id][child.id].add(child.fromTransition);
             }
         }
 
