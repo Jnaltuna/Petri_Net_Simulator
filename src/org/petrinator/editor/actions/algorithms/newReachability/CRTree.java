@@ -12,7 +12,7 @@ public class CRTree {
     private static final int NAN = -1;
 
     private boolean bounded = true;
-    private boolean moreThanOneToken = false;
+    private boolean safe = false;
 
     private boolean deadlock = false;
     private ArrayList<Integer> SPDeadlock;
@@ -143,6 +143,10 @@ public class CRTree {
 
     }
 
+    void setNotSafe(){
+        safe = false;
+    }
+
     /**
      * Generates the resulting marking from firing a transition in certain state
      * @param transition number of transition to fire
@@ -247,6 +251,8 @@ public class CRTree {
     public boolean hasDeadlock(){
         return deadlock;
     }
+
+    public boolean isSafe(){return safe;}
 
     public ArrayList<Integer> getShortestPathToDeadlock(){
         return SPDeadlock;

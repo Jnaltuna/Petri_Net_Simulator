@@ -32,6 +32,15 @@ public class TreeNode {
         enabledTransitions = tree.areTransitionsEnabled(this.marking);
         deadlock = true;
 
+        /*No need to keep checking once the net has
+         already been marked as not safe */
+        if(tree.isSafe()){
+            if(moreThanOneToken()){
+                tree.setNotSafe();
+            }
+        }
+
+
     }
 
 
@@ -190,6 +199,20 @@ public class TreeNode {
             }
         }
 
+    }
+
+    /**
+     * Checks if there's more than one token in any place of the net
+     */
+    private boolean moreThanOneToken(){
+
+        for (int value : marking) {
+            if (value > 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

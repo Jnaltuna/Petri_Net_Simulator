@@ -32,6 +32,8 @@ import pipe.gui.widgets.ResultsHTMLPane;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
@@ -58,6 +60,20 @@ public class ReachabilityAction extends AbstractAction
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/graph16.png"));
 
         guiDialog = new JDialog(root.getParentFrame(), "Reachabilty/Coverability graph", false);
+
+        guiDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        /*
+            Sets variables on null after closing the dialog window
+            to free memory
+         */
+        guiDialog.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e)
+            {
+                results = null;
+            }
+        });
+
         Container contentPane = guiDialog.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         results = new ResultsHTMLPane("");
@@ -80,6 +96,8 @@ public class ReachabilityAction extends AbstractAction
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
         guiDialog.setVisible(true);
+
+
     }
 
 
@@ -111,8 +129,6 @@ public class ReachabilityAction extends AbstractAction
             results.setEnabled(true);
 
         }
-
-
     };
 
     /**
