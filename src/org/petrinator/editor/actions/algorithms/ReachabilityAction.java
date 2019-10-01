@@ -52,6 +52,7 @@ public class ReachabilityAction extends AbstractAction
     private JDialog guiDialog;
     private ButtonBar graphGenerate;
     private ButtonBar calculateButton;
+
     private ArrayList<Integer>[][] reachMatrix;
 
     public ReachabilityAction(Root root)
@@ -82,6 +83,7 @@ public class ReachabilityAction extends AbstractAction
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         results = new ResultsHTMLPane("");
         contentPane.add(results);
+
 
         /* Buttons */
         calculateButton = new ButtonBar("Generate states", new GenerateListener(), guiDialog.getRootPane());
@@ -147,6 +149,13 @@ public class ReachabilityAction extends AbstractAction
             }
 
 
+            //for(int i = 0; i<reachMatrix.length;i++){
+             //   for(int j=0; j<reachMatrix[0].length;j++){
+              //      System.out.print(reachMatrix[i][j]+ ",");
+              //  }
+               // System.out.println("");
+            //}
+
             results.setText(log);
 
         }
@@ -159,7 +168,7 @@ public class ReachabilityAction extends AbstractAction
 
         public void actionPerformed(ActionEvent actionEvent) {
 
-            //generateGraph(reachMatrix);
+            generateGraph(reachMatrix);
 
         }
 
@@ -169,7 +178,7 @@ public class ReachabilityAction extends AbstractAction
      * Displays graph using Graphstream library
      * @param stateMatrix matrix that contains all the states and possible transitions
      */
-    private void generateGraph(int[][] stateMatrix){
+    private void generateGraph(ArrayList<Integer>[][] stateMatrix){
         Graph graph = new SingleGraph("Reachability/Coverability");
 
         //Create a node for each state
@@ -184,11 +193,19 @@ public class ReachabilityAction extends AbstractAction
         //Each arrow has a label based on the transition fired that caused the change in state
         for(int i=0;i<stateMatrix.length; i++){
             for(int j = 0; j < stateMatrix[0].length; j++){
-                if(stateMatrix[i][j] != -1){
+                if(stateMatrix[i][j] != null){
+
+                    String label = "";
+                    for(int k = 0; k < stateMatrix[i][j].size();k++) {
+                        label = label.concat("T" + Integer.toString(stateMatrix[i][j].get(k)));
+                        if(k != stateMatrix[i][j].size()-1){
+                            label = label.concat(",");
+                        }
+                    }
+
                     String ename = "S" + Integer.toString(i) + "-" + Integer.toString(j);
                     Edge e = graph.addEdge(ename,Integer.toString(i),Integer.toString(j),true);
-                    e.addAttribute("ui.label","T" + Integer.toString(stateMatrix[i][j]));
-
+                    e.addAttribute("ui.label",label);
                 }
             }
         }

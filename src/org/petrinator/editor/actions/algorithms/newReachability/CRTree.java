@@ -58,7 +58,9 @@ public class CRTree {
         statesList.add(initialMarking); //add initial marking to state list
 
         rootNode.recursiveExpansion(); //generates the tree
+
         reachMatrix = new ArrayList[statesList.size()][statesList.size()];
+
         rootNode.recursiveMatrix(reachMatrix); //generates reachability matrix
 
     }
@@ -76,7 +78,15 @@ public class CRTree {
 
         for(int i=0; i<reachMatrix.length; i++){
 
-            if(!Arrays.equals(reachMatrix[i], zero)){
+            boolean dead = true;
+            for(int k=0; k<reachMatrix.length;k++){
+                if (reachMatrix[i][k] != null) {
+                    dead = false;
+                    break;
+                }
+            }
+
+            if(!dead){
 
                 log = log.concat(String.format("<p></p><h3>Reachable states from S%s %s:</h3>", i, Arrays.toString(statesList.get(i))));
 
@@ -84,8 +94,9 @@ public class CRTree {
 
                     if(reachMatrix[i][j] != null){
 
-                        for(int k=0; k<reachMatrix[i][j].size(); k++){
-                            log = log.concat(String.format("<p>T%d => S%d %s</p>", reachMatrix[i][j].get(k), j, Arrays.toString(statesList.get(j))));
+
+                        for(Integer trans : reachMatrix[i][j]){
+                            log = log.concat(String.format("<p>T%d => S%d %s</p>", trans, j, Arrays.toString(statesList.get(j))));
                         }
 
                     }

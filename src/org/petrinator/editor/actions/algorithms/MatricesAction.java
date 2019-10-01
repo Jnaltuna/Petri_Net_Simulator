@@ -70,7 +70,9 @@ public class MatricesAction extends AbstractAction
             }
         });
 
+
         Container contentPane = guiDialog.getContentPane();
+
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
 
         results = new ResultsHTMLPane("");

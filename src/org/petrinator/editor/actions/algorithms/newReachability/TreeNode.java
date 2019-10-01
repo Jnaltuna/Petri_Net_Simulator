@@ -94,13 +94,12 @@ public class TreeNode {
                 child.recursiveMatrix(reachabilityMatrix);
             }
 
-            System.out.println("Hijos del nodo "+id);
-
             for (TreeNode child : children) {
                 System.out.println();
                 if(reachabilityMatrix[id][child.id] == null){
                     reachabilityMatrix[id][child.id] = new ArrayList<>();
                 }
+
                 reachabilityMatrix[id][child.id].add(child.fromTransition);
             }
         }
