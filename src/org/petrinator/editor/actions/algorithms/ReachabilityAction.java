@@ -67,12 +67,13 @@ public class ReachabilityAction extends AbstractAction
 
         /*
             Sets variables on null after closing the dialog window
-            to free memory
+            to free heap memory
          */
         guiDialog.addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e)
             {
-                results = null;
+                reachMatrix = null;
+                results.setText("");
             }
         });
 
@@ -83,7 +84,6 @@ public class ReachabilityAction extends AbstractAction
         contentPane.add(new ButtonBar("Generate states", new GenerateListener(), guiDialog.getRootPane()));
         graphGenerate = new ButtonBar("Generate graph", new GenerateGraphListener(), guiDialog.getRootPane());
         contentPane.add(graphGenerate);
-        graphGenerate.setButtonsEnabled(false);
 
     }
 
@@ -96,6 +96,9 @@ public class ReachabilityAction extends AbstractAction
 
         // Disables the copy and save buttons
         results.setEnabled(false);
+
+        // Disables graph button
+        graphGenerate.setButtonsEnabled(false);
 
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
