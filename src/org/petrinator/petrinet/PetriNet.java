@@ -349,7 +349,7 @@ public class PetriNet {
         return R;
     }
 
-    private ArrayList<Node> getSortedPlaces(){
+    public ArrayList<Node> getSortedPlaces(){
 
         Set<Place> allPlaces = getRootSubnet().getPlaces();
         ArrayList<Node> places = new ArrayList<Node>();
@@ -363,7 +363,7 @@ public class PetriNet {
         return merge.mergeSort(places);
     }
 
-    private ArrayList<Node> getSortedTransitions(){
+    public ArrayList<Node> getSortedTransitions(){
 
         Set<Transition>  allTransitions = getRootSubnet().getTransitions();
         ArrayList<Node> transitions = new ArrayList<Node>();

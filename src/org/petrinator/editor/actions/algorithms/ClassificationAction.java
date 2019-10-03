@@ -23,7 +23,7 @@ package org.petrinator.editor.actions.algorithms;
 import org.petrinator.editor.Root;
 import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
 import org.petrinator.editor.filechooser.*;
-import org.petrinator.petrinet.Marking;
+import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
 import pipe.calculations.myTree;
 import pipe.exceptions.EmptyNetException;
@@ -139,18 +139,19 @@ public class ClassificationAction extends AbstractAction
                 /*
                  * Standard classification
                  */
-                s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
+                /*s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
                         "State Machine", "" + stateMachine(sourceDataLayer),
                         "Marked Graph", "" + markedGraph(sourceDataLayer),
                         "Free Choice Net", "" + freeChoiceNet(sourceDataLayer),
                         "Extended FCN", "" + extendedFreeChoiceNet(sourceDataLayer),
                         "Simple Net", "" + simpleNet(sourceDataLayer),
                         "Extended SN", "" + extendedSimpleNet(sourceDataLayer)
-                }, 2, false, true, false, true);
+                }, 2, false, true, false, true);*/
 
                 /*
                  * Bounded/safe/deadlock
                  */
+
 
                 results.setEnabled(true);
 
@@ -189,32 +190,17 @@ public class ClassificationAction extends AbstractAction
     /**
      * State machine detection
      *
-     * @param pnmlData
-     * @return <i>true</i> iff all transitions have at most one input or output
-     *         SM iff &forall; t &isin; T: |&bull;t| = |t&bull;| &#8804; 1
-     *         <pre>
-     *         P - T - P
-     *         P - T - P   true (one input/output each)
-     *
-     *         P - T - P
-     *               \     false (>1 output)
-     *                 P
-     *
-     *         P - T - P
-     *           /         false (>1 input)
-     *         P
-     *         </pre>
-     * @author Maxim Gready after James D Bloom
+     * @return true if and only if all transitions have at most one input or output
      */
-    boolean stateMachine(PetriNetView pnmlData)
+    private boolean stateMachine(PetriNet petriNet)
     {
-        int transitionsCount = pnmlData.numberOfTransitions();
+        ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
 
-        for(int transitionNo = 0; transitionNo < transitionsCount; transitionNo++)
-        {
-            if((countTransitionInputs(pnmlData, transitionNo) > 1) ||
-                    (countTransitionOutputs(pnmlData, transitionNo) > 1))
-            {
+        for (Node sortedTransition : sortedTransitions) {
+
+            Transition transition = ((Transition) sortedTransition);
+
+            if (transition.getConnectedArcsToNode().size() > 1 || transition.getConnectedArcsFromNode().size() > 1) {
                 return false;
             }
         }
@@ -224,35 +210,22 @@ public class ClassificationAction extends AbstractAction
     /**
      * Marked graph detection
      *
-     * @param pnmlData
-     * @return true iff all places have at most one input or output
-     *         MG iff &forall; p &isin; P: |&bull;p| = |t&bull;| &#8804; 1
-     *         <pre>
-     *         T - P - T
-     *         T - P - T   true (one input/output each)
-     *
-     *         T - P - T
-     *               \     false (>1 output)
-     *                 T
-     *
-     *         T - P - T
-     *           /         false (>1 input)
-     *         T
-     *         </pre>
-     * @author Maxim Gready after James D Bloom
+     * @return true if and only if all places have at most one input or output
      */
-    boolean markedGraph(PetriNetView pnmlData)
+    boolean markedGraph(PetriNet petriNet)
     {
-        int placeCount = pnmlData.numberOfPlaces();
 
-        for(int placeNo = 0; placeNo < placeCount; placeNo++)
-        {
-            if((countPlaceInputs(pnmlData, placeNo) > 1) ||
-                    (countPlaceOutputs(pnmlData, placeNo) > 1))
-            {
+        ArrayList<Node> sortedPlaces = petriNet.getSortedPlaces();
+
+        for (Node sortedPlace : sortedPlaces) {
+
+            Place place = ((Place) sortedPlace);
+
+            if(place.getConnectedArcsToNode().size() > 1 || place.getConnectedArcsFromNode().size() > 1){
                 return false;
             }
         }
+
         return true;
     }
 
