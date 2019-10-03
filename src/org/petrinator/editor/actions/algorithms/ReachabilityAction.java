@@ -47,6 +47,9 @@ import org.graphstream.graph.*;
  */
 public class ReachabilityAction extends AbstractAction
 {
+
+    private static final String MODULE_NAME = "Reachabilty/Coverability graph";
+
     private Root root;
     private ResultsHTMLPane results;
     private JDialog guiDialog;
@@ -58,9 +61,8 @@ public class ReachabilityAction extends AbstractAction
     public ReachabilityAction(Root root)
     {
         this.root = root;
-        String name = "Reachabilty/Coverability graph";
-        putValue(NAME, name);
-        putValue(SHORT_DESCRIPTION, name);
+        putValue(NAME, MODULE_NAME);
+        putValue(SHORT_DESCRIPTION, MODULE_NAME);
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/graph16.png"));
 
         guiDialog = new JDialog(root.getParentFrame(), "Reachabilty/Coverability graph", false);
@@ -137,9 +139,9 @@ public class ReachabilityAction extends AbstractAction
 
             //TODO check tree size
             try {
-                CRTree arbol = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
-                log += arbol.getTreeLog();
-                reachMatrix = arbol.getReachabilityMatrix();
+                CRTree statesTree = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
+                log += statesTree.getTreeLog();
+                reachMatrix = statesTree.getReachabilityMatrix();
                 // Enables the copy and save buttons
                 results.setEnabled(true);
                 graphGenerate.setButtonsEnabled(true);
@@ -147,14 +149,6 @@ public class ReachabilityAction extends AbstractAction
             catch (StackOverflowError e){
                 log = "An error has occurred, the net might have too many states...";
             }
-
-
-            //for(int i = 0; i<reachMatrix.length;i++){
-             //   for(int j=0; j<reachMatrix[0].length;j++){
-              //      System.out.print(reachMatrix[i][j]+ ",");
-              //  }
-               // System.out.println("");
-            //}
 
             results.setText(log);
 

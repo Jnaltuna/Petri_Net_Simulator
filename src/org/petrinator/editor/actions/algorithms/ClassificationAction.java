@@ -21,7 +21,9 @@
 package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.editor.Root;
+import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
 import org.petrinator.editor.filechooser.*;
+import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
 import pipe.calculations.myTree;
 import pipe.exceptions.EmptyNetException;
@@ -49,10 +51,10 @@ import java.util.LinkedList;
 public class ClassificationAction extends AbstractAction
 {
     private static final String MODULE_NAME = "Net classification";
-    private PetriNetChooserPanel sourceFilePanel;
     private ResultsHTMLPane results;
     private Root root;
-    private PetriNetView pnmlData;
+    private JDialog guiDialog;
+    private ButtonBar classifyButton;
 
     public ClassificationAction(Root root)
     {
@@ -61,42 +63,30 @@ public class ClassificationAction extends AbstractAction
         putValue(NAME, name);
         putValue(SHORT_DESCRIPTION, name);
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/classification16.png"));
+
+        guiDialog =  new JDialog(root.getParentFrame(), MODULE_NAME, true);
+        Container contentPane = guiDialog.getContentPane();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+
+        results = new ResultsHTMLPane("");
+        contentPane.add(results);
+
+        classifyButton = new ButtonBar("Classify", new ClassifyListener(), guiDialog.getRootPane());
+        contentPane.add(classifyButton);
     }
 
     public void actionPerformed(ActionEvent e)
     {
-        /*
-         * Create tmp.pnml file
-         */
-        FileChooserDialog chooser = new FileChooserDialog();
 
-        if (root.getCurrentFile() != null) {
-            chooser.setSelectedFile(root.getCurrentFile());
-        }
+        results.setText("");
 
-        chooser.addChoosableFileFilter(new PipePnmlFileType());
-        chooser.setAcceptAllFileFilterUsed(false);
-        chooser.setCurrentDirectory(root.getCurrentDirectory());
-        chooser.setDialogTitle("Save as...");
+        // Disables the copy and save buttons
+        results.setEnabled(false);
 
-        File file = new File("tmp/" + "tmp" + "." + "pnml");
-        FileType chosenFileType = (FileType) chooser.getFileFilter();
-        try {
-            chosenFileType.save(root.getDocument(), file);
-        } catch (FileTypeException e1) {
-            e1.printStackTrace();
-        }
+        // Enables classify button
+        classifyButton.setButtonsEnabled(true);
 
-        /*
-         * Show initial pane
-         */
-        this.pnmlData = new PetriNetView("tmp/tmp.pnml");
-        EscapableDialog guiDialog =  new EscapableDialog(root.getParentFrame(), MODULE_NAME, true);
-        Container contentPane = guiDialog.getContentPane();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-        results = new ResultsHTMLPane(pnmlData.getPNMLName());
-        contentPane.add(results);
-        contentPane.add(new ButtonBar("Classify", classifyButtonClick, guiDialog.getRootPane()));
+        // Shows initial pane
         guiDialog.pack();
         guiDialog.setLocationRelativeTo(root.getParentFrame());
         guiDialog.setVisible(true);
@@ -105,145 +95,96 @@ public class ClassificationAction extends AbstractAction
     /**
      * Classify button click handler
      */
-    private final ActionListener classifyButtonClick = new ActionListener()
-    {
+    private class ClassifyListener implements ActionListener {
 
-        public void actionPerformed(ActionEvent arg0)
+        public void actionPerformed(ActionEvent actionEvent)
         {
-            PetriNetView sourceDataLayer = new PetriNetView("tmp/tmp.pnml");
 
-            if(sourceDataLayer == null)
-            {
-                JOptionPane.showMessageDialog(null, "Please, choose a source net",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+            // Checks if the net is valid
+            if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
+                JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
                 return;
             }
 
+            classifyButton.setButtonsEnabled(false);
+
             String s = "<h2>Petri Net Classification</h2>";
 
-            if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
-            {
-                s += "Invalid net!";
+            try {
+
+
+                /*
+                 * Information for boundedness, safeness and deadlock
+                 */
+                CRTree statesTree = new CRTree(root, root.getCurrentMarking().getMarkingAsArray()[Marking.CURRENT]);
+
+                s += "<h3>Mathematical Properties</h3>";
+
+                String[] treeInfo = new String[]{
+                        "", "",
+                        "Bounded", "" + statesTree.isBounded(),
+                        "Safe", "" + statesTree.isSafe(),
+                        "Deadlock", "" + statesTree.hasDeadlock()
+                };
+
+                s += ResultsHTMLPane.makeTable(treeInfo, 2, false, true, true, true);
+
+                if(statesTree.hasDeadlock())
+                {
+                    s += "<h3 style=\"margin-top:20px\">Shortest Path to Deadlock</h3>";
+                    s += "<div style=\"margin-top:10px\">"+statesTree.getShortestPathToDeadlock()+"</div>";
+                }
+
+
+                /*
+                 * Standard classification
+                 */
+                s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
+                        "State Machine", "" + stateMachine(sourceDataLayer),
+                        "Marked Graph", "" + markedGraph(sourceDataLayer),
+                        "Free Choice Net", "" + freeChoiceNet(sourceDataLayer),
+                        "Extended FCN", "" + extendedFreeChoiceNet(sourceDataLayer),
+                        "Simple Net", "" + simpleNet(sourceDataLayer),
+                        "Extended SN", "" + extendedSimpleNet(sourceDataLayer)
+                }, 2, false, true, false, true);
+
+                /*
+                 * Bounded/safe/deadlock
+                 */
+
+                results.setEnabled(true);
+
             }
-            else
+            catch(OutOfMemoryError e)
             {
-                try
-                {
-                    /*
-                     * Information for bounded/safe/deadlock
-                     */
-                    //Get the new marking
-                    LinkedList<MarkingView>[] markings = sourceDataLayer.getCurrentMarkingVector();
-                    int[] markup = new int[markings.length];
-                    for(int k = 0; k < markings.length; k++)
-                    {
-                        markup[k] = markings[k].getFirst().getCurrentMarking();
-                    }
-                    myTree tree = new myTree(sourceDataLayer, markup);
-                    boolean bounded = !tree.foundAnOmega;
-                    boolean safe = !tree.moreThanOneToken;
-                    boolean deadlock = tree.noEnabledTransitions;
+                System.gc();
+                results.setText("");
+                s = "Memory error: " + e.getMessage();
 
-                    /*
-                     * Standard classification
-                     */
-                    s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
-                            "State Machine", "" + stateMachine(sourceDataLayer),
-                            "Marked Graph", "" + markedGraph(sourceDataLayer),
-                            "Free Choice Net", "" + freeChoiceNet(sourceDataLayer),
-                            "Extended FCN", "" + extendedFreeChoiceNet(sourceDataLayer),
-                            "Simple Net", "" + simpleNet(sourceDataLayer),
-                            "Extended SN", "" + extendedSimpleNet(sourceDataLayer)
-                    }, 2, false, true, false, true);
-
-                    /*
-                     * Bounded/safe/deadlock
-                     */
-                    if(tree.tooBig)
-                    {
-                        s += "<div class=warning> State space tree expansion aborted " +
-                                "because it grew too large. Results will be " +
-                                "incomplete.</div>";
-                    }
-
-                    s += ResultsHTMLPane.makeTable(
-                            new String[]{"Mathematical properties","&emsp&emsp&emsp",
-                                    "Bounded", "" + bounded,
-                                    "Safe", "" + safe,
-                                    "Deadlock", "" + deadlock},
-                            2, false, true, false, true);
-
-                    if(deadlock)
-                    {
-                        s += "<b>Shortest path to deadlock:</b> ";
-                        if(tree.pathToDeadlock.length == 0)
-                        {
-                            s += "Initial state is deadlocked";
-                        }
-                        else
-                        {
-                            for(int i = 0; i < tree.pathToDeadlock.length; i++)
-                            {
-                                int j = tree.pathToDeadlock[i];
-                                if(sourceDataLayer.getTransition(j) != null &&
-                                        sourceDataLayer.getTransition(j).getName() != null)
-                                {
-                                    s += sourceDataLayer.getTransition(j).getName() + " ";
-                                }
-                            }
-                        }
-                    }
-
-
-                    results.setEnabled(true);
-                }
-                catch(OutOfMemoryError oome)
-                {
-                    System.gc();
-                    results.setText("");
-                    s = "Memory error: " + oome.getMessage();
-
-                    s += "<br>Not enough memory. Please use a larger heap size." +
-                            "<br>" + "<br>Note:" +
-                            "<br>The Java heap size can be specified with the -Xmx option." +
-                            "<br>E.g., to use 512MB as heap size, the command line looks like this:" +
-                            "<br>java -Xmx512m -classpath ...\n";
-                    results.setText(s);
-                    return;
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                    s = "<br>Error" + e.getMessage();
-                    results.setText(s);
-                    return;
-                }
+                s += "<br>Not enough memory. Please use a larger heap size." +
+                        "<br>" + "<br>Note:" +
+                        "<br>The Java heap size can be specified with the -Xmx option." +
+                        "<br>E.g., to use 512MB as heap size, the command line looks like this:" +
+                        "<br>java -Xmx512m -classpath ...\n";
+                results.setText(s);
             }
+            catch (StackOverflowError e){
+                results.setText("An error has occurred, the net might have too many states...");
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                s = "<br>Error" + e.getMessage();
+                results.setText(s);
+            }
+
             results.setText(s);
+
         }
+
+
     };
 
-
-    //<Marc>
-    public boolean[] getClassification(PetriNetView sourceDataLayer) throws EmptyNetException
-    {
-        boolean result[] = new boolean[6];
-        if(!sourceDataLayer.hasPlaceTransitionObjects())
-        {
-            throw new EmptyNetException();
-        }
-        else
-        {
-            result[0] = stateMachine(sourceDataLayer);
-            result[1] = markedGraph(sourceDataLayer);
-            result[2] = freeChoiceNet(sourceDataLayer);
-            result[3] = extendedFreeChoiceNet(sourceDataLayer);
-            result[4] = simpleNet(sourceDataLayer);
-            result[5] = extendedSimpleNet(sourceDataLayer);
-            return result;
-        }
-    }
-    //</Marc>
 
     /**
      * State machine detection
