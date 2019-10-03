@@ -21,6 +21,7 @@
 package org.petrinator.editor.actions.algorithms;
 
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 import org.petrinator.editor.Root;
 import org.petrinator.petrinet.Marking;
@@ -45,8 +46,7 @@ import org.graphstream.graph.*;
 /**
  * Generates the reachability/coverability graph representation for the Petri Net
  */
-public class ReachabilityAction extends AbstractAction
-{
+public class ReachabilityAction extends AbstractAction {
     private Root root;
     private ResultsHTMLPane results;
     private JDialog guiDialog;
@@ -55,8 +55,7 @@ public class ReachabilityAction extends AbstractAction
 
     private ArrayList<Integer>[][] reachMatrix;
 
-    public ReachabilityAction(Root root)
-    {
+    public ReachabilityAction(Root root) {
         this.root = root;
         String name = "Reachabilty/Coverability graph";
         putValue(NAME, name);
@@ -72,8 +71,7 @@ public class ReachabilityAction extends AbstractAction
             to free heap memory
          */
         guiDialog.addWindowListener(new WindowAdapter() {
-            public void windowClosed(WindowEvent e)
-            {
+            public void windowClosed(WindowEvent e) {
                 reachMatrix = null;
                 results.setText("");
             }
@@ -97,8 +95,7 @@ public class ReachabilityAction extends AbstractAction
     /**
      * Resets and shows the 'Reachability/Coverability' initial dialog window
      */
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         results.setText("");
 
         // Enables button to calculate states
@@ -125,7 +122,7 @@ public class ReachabilityAction extends AbstractAction
         public void actionPerformed(ActionEvent actionEvent) {
 
             // Checks if the net is valid
-            if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
+            if (!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
                 JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
                 return;
             }
@@ -143,23 +140,24 @@ public class ReachabilityAction extends AbstractAction
                 // Enables the copy and save buttons
                 results.setEnabled(true);
                 graphGenerate.setButtonsEnabled(true);
-            }
-            catch (StackOverflowError e){
+            } catch (StackOverflowError e) {
                 log = "An error has occurred, the net might have too many states...";
             }
 
 
             //for(int i = 0; i<reachMatrix.length;i++){
-             //   for(int j=0; j<reachMatrix[0].length;j++){
-              //      System.out.print(reachMatrix[i][j]+ ",");
-              //  }
-               // System.out.println("");
+            //   for(int j=0; j<reachMatrix[0].length;j++){
+            //      System.out.print(reachMatrix[i][j]+ ",");
+            //  }
+            // System.out.println("");
             //}
 
             results.setText(log);
 
         }
-    };
+    }
+
+    ;
 
     /**
      * Generate Graph Button Listener
@@ -168,54 +166,59 @@ public class ReachabilityAction extends AbstractAction
 
         public void actionPerformed(ActionEvent actionEvent) {
 
-            generateGraph(reachMatrix);
+            displayGraph(reachMatrix);
 
         }
 
-    };
+    }
+
+    ;
 
     /**
      * Displays graph using Graphstream library
+     *
      * @param stateMatrix matrix that contains all the states and possible transitions
      */
-    private void generateGraph(ArrayList<Integer>[][] stateMatrix){
+    private View generateGraph(ArrayList<Integer>[][] stateMatrix) {
         Graph graph = new SingleGraph("Reachability/Coverability");
 
         //Create a node for each state
         //Each state has a label indicated by S + state number
-        for(int i = 0;i<stateMatrix.length; i++){
+        for (int i = 0; i < stateMatrix.length; i++) {
             String s = Integer.toString(i);
             Node n = graph.addNode(s);
-            n.addAttribute("ui.label", "S"+s);
+            n.addAttribute("ui.label", "S" + s);
         }
 
         //Create arrows that join the previous states based on the values of the stateMatrix
         //Each arrow has a label based on the transition fired that caused the change in state
-        for(int i=0;i<stateMatrix.length; i++){
-            for(int j = 0; j < stateMatrix[0].length; j++){
-                if(stateMatrix[i][j] != null){
+        for (int i = 0; i < stateMatrix.length; i++) {
+            for (int j = 0; j < stateMatrix[0].length; j++) {
+                if (stateMatrix[i][j] != null) {
 
                     String label = "";
-                    for(int k = 0; k < stateMatrix[i][j].size();k++) {
+                    for (int k = 0; k < stateMatrix[i][j].size(); k++) {
                         label = label.concat("T" + Integer.toString(stateMatrix[i][j].get(k)));
-                        if(k != stateMatrix[i][j].size()-1){
+                        if (k != stateMatrix[i][j].size() - 1) {
                             label = label.concat(",");
                         }
                     }
 
                     String ename = "S" + Integer.toString(i) + "-" + Integer.toString(j);
-                    Edge e = graph.addEdge(ename,Integer.toString(i),Integer.toString(j),true);
-                    e.addAttribute("ui.label",label);
+                    Edge e = graph.addEdge(ename, Integer.toString(i), Integer.toString(j), true);
+                    e.addAttribute("ui.label", label);
                 }
             }
         }
 
+        //Get view from GraphStream to embedd into a JDialog
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-        Viewer viewer = graph.display();
-        viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+        Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        View view = viewer.addDefaultView(false);
+        viewer.enableAutoLayout();
 
         //Atributes for all nodes
-        graph.addAttribute("ui.stylesheet","node {\n" +
+        graph.addAttribute("ui.stylesheet", "node {\n" +
                 "\tsize: 30px;\n" +
                 "\tshape: circle;\n" +
                 "\tstroke-mode: plain;\n" +
@@ -227,13 +230,70 @@ public class ReachabilityAction extends AbstractAction
                 "\tz-index: 1;\n" +
                 "}");
         //Atributes for all edges
-        graph.addAttribute("ui.stylesheet","edge {\n" +
+        graph.addAttribute("ui.stylesheet", "edge {\n" +
                 "\ttext-mode: normal;\n" +
                 "\ttext-style: bold;\n" +
                 "\ttext-alignment: center;\n" +
                 "\tz-index: 0;  \n" +
                 "}");
+        graph.addAttribute("ui.quality");
+        graph.addAttribute("ui.antialias");
+        //graph.addAttribute("ui.screenshot", "/home/jna/Desktop/test.png");
 
+        return view;
     }
 
+    /**
+     * @param stateMatrix used to generate graph
+     */
+    private void displayGraph(ArrayList<Integer>[][] stateMatrix) {
+
+        //Generate view containing the graph
+        View view = generateGraph(stateMatrix);
+
+        //JDialog to contain buttons and graph
+        JDialog graphview = new JDialog();
+        graphview.setSize(700, 700);
+        graphview.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        //Generate buttons and JPanel to contain them
+        JPanel panelbuttons = new JPanel();
+
+        JButton zoomplus = new JButton("+");
+        zoomplus.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                double per = view.getCamera().getViewPercent();
+                view.getCamera().setViewPercent(per - 0.1);
+            }
+        });
+        JButton zoomminus = new JButton("-");
+        zoomminus.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                double per = view.getCamera().getViewPercent();
+                view.getCamera().setViewPercent(per + 0.1);
+            }
+        });
+        JButton resetview = new JButton("Reset");
+        resetview.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                view.getCamera().resetView();
+            }
+        });
+
+        panelbuttons.add(zoomminus);
+        panelbuttons.add(zoomplus);
+        panelbuttons.add(resetview);
+
+        JPanel panelgraph = new JPanel(new BorderLayout());
+        ((Component) view).setPreferredSize(new Dimension(700, 600));
+        panelgraph.add(panelbuttons, BorderLayout.NORTH);
+        panelgraph.add((Component) view, BorderLayout.CENTER);
+
+        graphview.getContentPane().add(panelgraph);
+        graphview.pack();
+        graphview.setVisible(true);
+    }
 }
