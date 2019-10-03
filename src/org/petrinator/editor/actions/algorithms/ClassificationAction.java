@@ -44,6 +44,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * @author Joaquin Felici <joaquinfelici at gmail.com>
@@ -152,6 +153,10 @@ public class ClassificationAction extends AbstractAction
                  * Bounded/safe/deadlock
                  */
 
+                s += "<h3>State Machine: </h3>"+stateMachine(root.getDocument().getPetriNet());
+                s += "<h3>Marked Graph: </h3>"+markedGraph(root.getDocument().getPetriNet());
+                s += "<h3>Free Choice Net: </h3>"+freeChoiceNet(root.getDocument().getPetriNet());
+
 
                 results.setEnabled(true);
 
@@ -196,9 +201,7 @@ public class ClassificationAction extends AbstractAction
     {
         ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
 
-        for (Node sortedTransition : sortedTransitions) {
-
-            Transition transition = ((Transition) sortedTransition);
+        for (Node transition : sortedTransitions) {
 
             if (transition.getConnectedArcsToNode().size() > 1 || transition.getConnectedArcsFromNode().size() > 1) {
                 return false;
@@ -217,9 +220,7 @@ public class ClassificationAction extends AbstractAction
 
         ArrayList<Node> sortedPlaces = petriNet.getSortedPlaces();
 
-        for (Node sortedPlace : sortedPlaces) {
-
-            Place place = ((Place) sortedPlace);
+        for (Node place : sortedPlaces) {
 
             if(place.getConnectedArcsToNode().size() > 1 || place.getConnectedArcsFromNode().size() > 1){
                 return false;
@@ -232,47 +233,28 @@ public class ClassificationAction extends AbstractAction
     /**
      * Free choice net detection
      *
-     * @param pnmlData
      * @return true iff no places' outputs go to the same transition, unless those places both have only one output
-     *         FC-net iff &forall; p, p&prime; &isin; P: p &#x2260; p&prime; &#x21d2; (p&bull;&#x2229;p&prime;&bull; = 0 or |p&bull;| = |p&prime;&bull;| &#8804; 1)
-     *         <pre>
-     *         P - T
-     *         P - T       true (no common outputs)
-     *           \
-     *             T
-     *
-     *         P - T
-     *           /         true (common outputs but both have only one output)
-     *         P
-     *
-     *         P - T
-     *           X
-     *         P - T       false (common outputs, both have >1 output)
-     *
-     *         P - T
-     *           /
-     *         P - T       false (common outputs but one has >1 output)
-     *         </pre>
-     * @author Maxim Gready after James D Bloom
      */
-    boolean freeChoiceNet(PetriNetView pnmlData)
+    boolean freeChoiceNet(PetriNet petriNet)
     {
-        int placeCount = pnmlData.numberOfPlaces();
-        int[] fps1, fps2; // forwards place sets for p and p'
+        ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
 
-        for(int placeNo = 0; placeNo < placeCount; placeNo++)
-        {
-            for(int placeDashNo = placeNo + 1; placeDashNo < placeCount; placeDashNo++)
-            {
-                fps1 = forwardsPlaceSet(pnmlData, placeNo);
-                fps2 = forwardsPlaceSet(pnmlData, placeDashNo);
-                if(intersectionBetweenSets(fps1, fps2) &&
-                        ((fps1.length > 1) || (fps2.length > 1)))
-                {
-                    return false;
+        for (Node transition: sortedTransitions) {
+
+            Set<Node> inputPlaces = transition.getInputNodes();
+
+            if(inputPlaces.size() > 1){
+
+                for(Node place: inputPlaces){
+                    if(place.getConnectedArcsFromNode().size() > 1){
+                        return false;
+                    }
                 }
             }
+
+
         }
+
         return true;
     }
 
@@ -302,10 +284,13 @@ public class ClassificationAction extends AbstractAction
      *         </pre>
      * @author Maxim Gready after James D Bloom
      */
-    protected boolean extendedFreeChoiceNet(PetriNetView pnmlData)
+    protected boolean extendedFreeChoiceNet(PetriNet petriNet)
     {
-        int placeCount = pnmlData.numberOfPlaces();
-        int[] fps1, fps2; // forwards place sets for p and p'
+
+
+        /*int[] fps1, fps2; // forwards place sets for p and p'
+
+
 
         for(int placeNo = 0; placeNo < placeCount; placeNo++)
         {
@@ -318,7 +303,7 @@ public class ClassificationAction extends AbstractAction
                     return false;
                 }
             }
-        }
+        }*/
         return true;
     }
 
