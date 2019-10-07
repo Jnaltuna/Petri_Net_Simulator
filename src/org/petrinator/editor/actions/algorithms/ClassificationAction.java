@@ -46,10 +46,10 @@ public class ClassificationAction extends AbstractAction
 
     public ClassificationAction(Root root)
     {
-        String name = "Net classification";
+
         this.root = root;
-        putValue(NAME, name);
-        putValue(SHORT_DESCRIPTION, name);
+        putValue(NAME, MODULE_NAME);
+        putValue(SHORT_DESCRIPTION, MODULE_NAME);
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/classification16.png"));
 
         guiDialog =  new JDialog(root.getParentFrame(), MODULE_NAME, true);
@@ -109,32 +109,37 @@ public class ClassificationAction extends AbstractAction
                 s += "<h3>Mathematical Properties</h3>";
 
                 String[] treeInfo = new String[]{
-                        "", "",
+                        "&nbsp&emsp &emsp&nbsp", "&emsp&emsp&emsp",
                         "Bounded", "" + statesTree.isBounded(),
                         "Safe", "" + statesTree.isSafe(),
                         "Deadlock", "" + statesTree.hasDeadlock()
                 };
 
-                s += ResultsHTMLPane.makeTable(treeInfo, 2, false, true, true, true);
+                s += ResultsHTMLPane.makeTable(treeInfo, 2, false, true, false, true);
+
 
                 if(statesTree.hasDeadlock())
                 {
-                    s += "<h3 style=\"margin-top:20px\">Shortest Path to Deadlock</h3>";
-                    s += "<div style=\"margin-top:10px\">"+statesTree.getShortestPathToDeadlock()+"</div>";
+                    s += "<h3 style=\"margin-top:10px\">Shortest Path to Deadlock</h3>";
+                    s += "<div style=\"margin-top:10px; margin-bottom:10px;\">"+statesTree.getShortestPathToDeadlock()+"</div>";
                 }
 
+                s += "<h3 style=\"margin-top:20px\">Petri Net Types</h3>";
 
-                /*
-                 * Standard classification
-                 */
-                s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
+                String[] petriInfo = new String[]{
+                        "&nbsp&emsp &emsp&nbsp", "&emsp&emsp&emsp",
                         "State Machine", "" + stateMachine(root.getDocument().getPetriNet()),
                         "Marked Graph", "" + markedGraph(root.getDocument().getPetriNet()),
                         "Free Choice Net", "" + freeChoiceNet(root.getDocument().getPetriNet()),
                         "Extended FCN", "" + extendedFreeChoiceNet(root.getDocument().getPetriNet()),
                         "Simple Net", "" + simpleNet(root.getDocument().getPetriNet()),
-                        "Extended SN", "" + extendedSimpleNet(root.getDocument().getPetriNet())
-                }, 2, false, true, false, true);
+                        "Extended SN", "" + extendedSimpleNet(root.getDocument().getPetriNet()),
+                        "Bounded", "" + statesTree.isBounded(),
+                        "Safe", "" + statesTree.isSafe(),
+                        "Deadlock", "" + statesTree.hasDeadlock()
+                };
+
+                s += ResultsHTMLPane.makeTable(petriInfo, 2, false, true, false, true);
 
                 results.setEnabled(true);
 
@@ -191,7 +196,7 @@ public class ClassificationAction extends AbstractAction
      *
      * @return true if and only if all places have at most one input or output
      */
-    boolean markedGraph(PetriNet petriNet)
+    private boolean markedGraph(PetriNet petriNet)
     {
 
         ArrayList<Node> sortedPlaces = petriNet.getSortedPlaces();
@@ -211,7 +216,7 @@ public class ClassificationAction extends AbstractAction
      *
      * @return true iff no places' outputs go to the same transition, unless those places both have only one output
      */
-    boolean freeChoiceNet(PetriNet petriNet)
+    private boolean freeChoiceNet(PetriNet petriNet)
     {
         ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
 
@@ -239,7 +244,7 @@ public class ClassificationAction extends AbstractAction
      *
      * @return true iff no places' outputs go to the same transition, unless both places outputs are identical
      */
-    protected boolean extendedFreeChoiceNet(PetriNet petriNet)
+    private boolean extendedFreeChoiceNet(PetriNet petriNet)
     {
 
         ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
@@ -274,10 +279,9 @@ public class ClassificationAction extends AbstractAction
      *
      * @return true iff no places' outputs go to the same transition, unless one of the places only has one output
      */
-    boolean simpleNet(PetriNet petriNet)
+    private boolean simpleNet(PetriNet petriNet)
     {
-        int placeCount = petriNet.getSortedPlaces().size();
-        ArrayList<Node> places = petriNet.getSortedPlaces();
+
         ArrayList<Node> transitions = petriNet.getSortedTransitions();
 
         for(Node trans : transitions){
@@ -304,7 +308,7 @@ public class ClassificationAction extends AbstractAction
      *
      * @return true iff no places' outputs go to the same transition, unless one of the places' outputs is a subset of or equal to the other's
      */
-    boolean extendedSimpleNet(PetriNet petriNet)
+    private boolean extendedSimpleNet(PetriNet petriNet)
     {
 
         ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
