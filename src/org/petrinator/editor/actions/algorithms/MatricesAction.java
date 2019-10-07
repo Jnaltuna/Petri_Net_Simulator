@@ -123,27 +123,27 @@ public class MatricesAction extends AbstractAction
             {
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Forwards incidence matrix <i>I<sup>+</sup></i>",
-                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().forwardIMatrix())
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getForwardIMatrix())
                 }, 1, false, false, true, false);
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Backwards incidence matrix <i>I<sup>-</sup></i>",
-                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().backwardsIMatrix())
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getBackwardsIMatrix())
                 }, 1, false, false, true, false);
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Combined incidence matrix <i>I</i>",
-                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().incidenceMatrix())
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getIncidenceMatrix())
                 }, 1, false, false, true, false);
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Inhibition matrix <i>H</i>",
-                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().inhibitionMatrix())
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getInhibitionMatrix())
                 }, 1, false, false, true, false);
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Reset matrix <i>H</i>",
-                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().resetMatrix())
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getResetMatrix())
                 }, 1, false, false, true, false);
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Reader matrix <i>H</i>",
-                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().readerMatrix())
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getReaderMatrix())
                 }, 1, false, false, true, false);
                 s += ResultsHTMLPane.makeTable(new String[]{
                         "Marking",

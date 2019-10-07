@@ -22,28 +22,17 @@ package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.editor.Root;
 import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
-import org.petrinator.editor.filechooser.*;
 import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
-import pipe.calculations.myTree;
-import pipe.exceptions.EmptyNetException;
-import pipe.gui.ApplicationSettings;
 import pipe.gui.widgets.ButtonBar;
-import pipe.gui.widgets.EscapableDialog;
-import pipe.gui.widgets.PetriNetChooserPanel;
 import pipe.gui.widgets.ResultsHTMLPane;
-import pipe.utilities.writers.PNMLWriter;
-import pipe.views.MarkingView;
 import pipe.views.PetriNetView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -287,6 +276,33 @@ public class ClassificationAction extends AbstractAction
     protected boolean extendedFreeChoiceNet(PetriNet petriNet)
     {
 
+        petriNet.getBackwardsIMatrix();
+
+        ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
+
+        for (Node transition: sortedTransitions) {
+
+            Set<Node> inputPlaces = transition.getInputNodes();
+
+            if(inputPlaces.size() > 1){
+
+                for(Node place: inputPlaces){
+
+                    int nodeCount = place.getOutputNodes().size();
+
+                    if(nodeCount > 1){
+
+                        for(int i=0; i<nodeCount; i++){
+                            place.getOutputNodes().toArray(new Node[nodeCount]);
+                        }
+
+                        return false;
+                    }
+                }
+            }
+
+
+        }
 
         /*int[] fps1, fps2; // forwards place sets for p and p'
 

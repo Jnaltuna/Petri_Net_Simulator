@@ -38,11 +38,11 @@ public class CRTree {
 
     public CRTree(Root root, int[] initialMarking) {
 
-        iMinus = root.getDocument().getPetriNet().backwardsIMatrix();
-        iCombined = root.getDocument().getPetriNet().incidenceMatrix();
-        inhibition = root.getDocument().getPetriNet().inhibitionMatrix();
-        reset = root.getDocument().getPetriNet().resetMatrix();
-        reader = root.getDocument().getPetriNet().readerMatrix();
+        iMinus = root.getDocument().getPetriNet().getBackwardsIMatrix();
+        iCombined = root.getDocument().getPetriNet().getIncidenceMatrix();
+        inhibition = root.getDocument().getPetriNet().getInhibitionMatrix();
+        reset = root.getDocument().getPetriNet().getResetMatrix();
+        reader = root.getDocument().getPetriNet().getReaderMatrix();
 
         hasInhibitionArcs = isMatrixNonZero(inhibition);
         hasReaderArcs = isMatrixNonZero(reader);
