@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -212,14 +211,14 @@ public class PetriNet {
     /*
      * Agregado. Calcular matriz de incidencia a partir de la subnet.
      */
-    public int[][] incidenceMatrix()
+    public int[][] getIncidenceMatrix()
     {
 
     	ArrayList<Node> sortedPlaces = getSortedPlaces();
     	ArrayList<Node> sortedTransitions = getSortedTransitions();
 
-        int iMinus [][] = backwardsIMatrix().clone();
-        int iPlus [][] = forwardIMatrix().clone();
+        int iMinus [][] = getBackwardsIMatrix().clone();
+        int iPlus [][] = getForwardIMatrix().clone();
 
         int I [][] = new int [sortedPlaces.size()][sortedTransitions.size()];
         for(int i=0; i<getRootSubnet().getPlaces().size(); i++)
@@ -231,7 +230,7 @@ public class PetriNet {
         return I;
     }
 
-    public int[][] forwardIMatrix(){
+    public int[][] getForwardIMatrix(){
 
         ArrayList<Node> sortedPlaces = getSortedPlaces();
         ArrayList<Node> sortedTransitions = getSortedTransitions();
@@ -256,7 +255,7 @@ public class PetriNet {
 
     }
 
-    public int[][] backwardsIMatrix(){
+    public int[][] getBackwardsIMatrix(){
 
         ArrayList<Node> sortedPlaces = getSortedPlaces();
         ArrayList<Node> sortedTransitions = getSortedTransitions();
@@ -279,7 +278,7 @@ public class PetriNet {
 
     }
     
-    public int[][] inhibitionMatrix()
+    public int[][] getInhibitionMatrix()
     {
 
     	ArrayList<Node> sortedPlaces = getSortedPlaces();
@@ -303,7 +302,7 @@ public class PetriNet {
        return H;
     }
     
-    public int[][] resetMatrix()
+    public int[][] getResetMatrix()
     {
 
     	ArrayList<Node> sortedPlaces = getSortedPlaces();
@@ -325,7 +324,7 @@ public class PetriNet {
         return R;
     }
 
-    public int[][] readerMatrix()
+    public int[][] getReaderMatrix()
     {
 
 
@@ -349,7 +348,7 @@ public class PetriNet {
         return R;
     }
 
-    private ArrayList<Node> getSortedPlaces(){
+    public ArrayList<Node> getSortedPlaces(){
 
         Set<Place> allPlaces = getRootSubnet().getPlaces();
         ArrayList<Node> places = new ArrayList<Node>();
@@ -363,7 +362,7 @@ public class PetriNet {
         return merge.mergeSort(places);
     }
 
-    private ArrayList<Node> getSortedTransitions(){
+    public ArrayList<Node> getSortedTransitions(){
 
         Set<Transition>  allTransitions = getRootSubnet().getTransitions();
         ArrayList<Node> transitions = new ArrayList<Node>();

@@ -106,77 +106,79 @@ public class MatricesAction extends AbstractAction
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
 
+            // Checks if the net is valid
             if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
                 JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
+                return;
             }
-            else
+
+
+            /* Create HTML file with data */
+            String s = "<h2>Petri Net Matrices</h2>";
+
+            ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
+            ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
+
+            try
             {
-                /* Create HTML file with data */
-                String s = "<h2>Petri Net Matrices</h2>";
-
-                ArrayList<String> pnames = root.getDocument().getPetriNet().getSortedPlacesNames();
-                ArrayList<String> tnames = root.getDocument().getPetriNet().getSortedTransitionsNames();
-
-                try
-                {
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Forwards incidence matrix <i>I<sup>+</sup></i>",
-                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().forwardIMatrix())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Backwards incidence matrix <i>I<sup>-</sup></i>",
-                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().backwardsIMatrix())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Combined incidence matrix <i>I</i>",
-                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().incidenceMatrix())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Inhibition matrix <i>H</i>",
-                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().inhibitionMatrix())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Reset matrix <i>H</i>",
-                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().resetMatrix())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Reader matrix <i>H</i>",
-                            renderMatrix(pnames,tnames,root.getDocument().getPetriNet().readerMatrix())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Marking",
-                            renderMarkingMatrices(pnames, root.getDocument())
-                    }, 1, false, false, true, false);
-                    s += ResultsHTMLPane.makeTable(new String[]{
-                            "Enabled transitions",
-                            renderTransitionStates(tnames, root.getDocument())
-                    }, 1, false, false, true, false);
-                }
-                catch(OutOfMemoryError oome)
-                {
-                    System.gc();
-                    results.setText("");
-                    s = "Memory error: " + oome.getMessage();
-
-                    s += "<br>Not enough memory. Please use a larger heap size." + "<br>" + "<br>Note:" + "<br>The Java heap size can be specified with the -Xmx option." + "<br>E.g., to use 512MB as heap size, the command line looks like this:" + "<br>java -Xmx512m -classpath ...\n";
-                    results.setText(s);
-                    return;
-                }
-                catch(Exception e)
-                {
-                    s = "<br>Invalid net";
-                    results.setText(s);
-                    return;
-                }
-
-                results.setText(s);
-
-                // Enables the copy and save buttons
-                results.setEnabled(true);
-
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Forwards incidence matrix <i>I<sup>+</sup></i>",
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getForwardIMatrix())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Backwards incidence matrix <i>I<sup>-</sup></i>",
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getBackwardsIMatrix())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Combined incidence matrix <i>I</i>",
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getIncidenceMatrix())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Inhibition matrix <i>H</i>",
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getInhibitionMatrix())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Reset matrix <i>H</i>",
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getResetMatrix())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Reader matrix <i>H</i>",
+                        renderMatrix(pnames,tnames,root.getDocument().getPetriNet().getReaderMatrix())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Marking",
+                        renderMarkingMatrices(pnames, root.getDocument())
+                }, 1, false, false, true, false);
+                s += ResultsHTMLPane.makeTable(new String[]{
+                        "Enabled transitions",
+                        renderTransitionStates(tnames, root.getDocument())
+                }, 1, false, false, true, false);
             }
+            catch(OutOfMemoryError e)
+            {
+                System.gc();
+                results.setText("");
+                s = "Memory error: " + e.getMessage();
+
+                s += "<br>Not enough memory. Please use a larger heap size." + "<br>" + "<br>Note:" + "<br>The Java heap size can be specified with the -Xmx option." + "<br>E.g., to use 512MB as heap size, the command line looks like this:" + "<br>java -Xmx512m -classpath ...\n";
+                results.setText(s);
+                return;
+            }
+            catch(Exception e)
+            {
+                s = "<br>Invalid net";
+                results.setText(s);
+                return;
+            }
+
+            results.setText(s);
+
+            // Enables the copy and save buttons
+            results.setEnabled(true);
 
         }
+
+
     }
 
     /**

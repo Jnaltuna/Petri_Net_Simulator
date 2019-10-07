@@ -1,7 +1,6 @@
 package org.petrinator.editor.actions.algorithms.newReachability;
 
 import org.petrinator.editor.Root;
-import scala.Array;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +15,7 @@ public class CRTree {
     private boolean safe = false;
 
     private boolean deadlock = false;
-    private ArrayList<Integer> SPDeadlock;
+    private ArrayList<Integer> spDeadlock;
 
     private ArrayList<int[]> statesList;
 
@@ -39,11 +38,11 @@ public class CRTree {
 
     public CRTree(Root root, int[] initialMarking) {
 
-        iMinus = root.getDocument().getPetriNet().backwardsIMatrix();
-        iCombined = root.getDocument().getPetriNet().incidenceMatrix();
-        inhibition = root.getDocument().getPetriNet().inhibitionMatrix();
-        reset = root.getDocument().getPetriNet().resetMatrix();
-        reader = root.getDocument().getPetriNet().readerMatrix();
+        iMinus = root.getDocument().getPetriNet().getBackwardsIMatrix();
+        iCombined = root.getDocument().getPetriNet().getIncidenceMatrix();
+        inhibition = root.getDocument().getPetriNet().getInhibitionMatrix();
+        reset = root.getDocument().getPetriNet().getResetMatrix();
+        reader = root.getDocument().getPetriNet().getReaderMatrix();
 
         hasInhibitionArcs = isMatrixNonZero(inhibition);
         hasReaderArcs = isMatrixNonZero(reader);
@@ -137,14 +136,14 @@ public class CRTree {
     void setDeadLock(ArrayList<Integer> path){
 
         //Last transition is a -1 from the root, we just discard it
-        path.remove(path.size()-1);
+        //path.remove(path.size()-1);
 
         if(!deadlock){
-            SPDeadlock = path;
+            spDeadlock = path;
             deadlock = true;
         }
-        else if(SPDeadlock.size() > path.size()){
-            SPDeadlock = path;
+        else if(spDeadlock.size() > path.size()){
+            spDeadlock = path;
         }
 
     }
@@ -260,8 +259,25 @@ public class CRTree {
 
     public boolean isSafe(){return safe;}
 
-    public ArrayList<Integer> getShortestPathToDeadlock(){
-        return SPDeadlock;
+    public String getShortestPathToDeadlock(){
+
+        String deadpath = "";
+
+        if(spDeadlock == null){
+            return "There is no Deadlock";
+        }
+
+        if(spDeadlock.size() == 1){
+            return  "The net is blocked since the initial state";
+        }
+
+        for(int i = spDeadlock.size()-2; i>=0; i--){
+            deadpath += String.format("T%d => ", spDeadlock.get(i));
+        }
+
+        deadpath += "Deadlock";
+
+        return deadpath;
     }
 
     public ArrayList<Integer>[][] getReachabilityMatrix() {
