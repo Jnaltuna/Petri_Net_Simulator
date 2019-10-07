@@ -35,9 +35,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Set;
 
-/**
- * @author Joaquin Felici <joaquinfelici at gmail.com>
- */
+
 public class ClassificationAction extends AbstractAction
 {
     private static final String MODULE_NAME = "Net classification";
@@ -129,23 +127,18 @@ public class ClassificationAction extends AbstractAction
                 /*
                  * Standard classification
                  */
-                /*s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
-                        "State Machine", "" + stateMachine(sourceDataLayer),
-                        "Marked Graph", "" + markedGraph(sourceDataLayer),
-                        "Free Choice Net", "" + freeChoiceNet(sourceDataLayer),
-                        "Extended FCN", "" + extendedFreeChoiceNet(sourceDataLayer),
-                        "Simple Net", "" + simpleNet(sourceDataLayer),
-                        "Extended SN", "" + extendedSimpleNet(sourceDataLayer)
-                }, 2, false, true, false, true);*/
+                s += ResultsHTMLPane.makeTable(new String[]{"&nbsp&emsp Types of Petri net &emsp&nbsp", "&emsp&emsp&emsp",
+                        "State Machine", "" + stateMachine(root.getDocument().getPetriNet()),
+                        "Marked Graph", "" + markedGraph(root.getDocument().getPetriNet()),
+                        "Free Choice Net", "" + freeChoiceNet(root.getDocument().getPetriNet()),
+                        "Extended FCN", "" + extendedFreeChoiceNet(root.getDocument().getPetriNet()),
+                        "Simple Net", "" + simpleNet(root.getDocument().getPetriNet()),
+                        "Extended SN", "" + extendedSimpleNet(root.getDocument().getPetriNet())
+                }, 2, false, true, false, true);
 
                 /*
                  * Bounded/safe/deadlock
                  */
-
-                s += "<h3>State Machine: </h3>"+stateMachine(root.getDocument().getPetriNet());
-                s += "<h3>Marked Graph: </h3>"+markedGraph(root.getDocument().getPetriNet());
-                s += "<h3>Free Choice Net: </h3>"+freeChoiceNet(root.getDocument().getPetriNet());
-
 
                 results.setEnabled(true);
 
@@ -176,8 +169,6 @@ public class ClassificationAction extends AbstractAction
             results.setText(s);
 
         }
-
-
     };
 
 
@@ -250,76 +241,35 @@ public class ClassificationAction extends AbstractAction
     /**
      * Extended free choice net detection
      *
-     * @param pnmlData
      * @return true iff no places' outputs go to the same transition, unless both places outputs are identical
-     *         EFC-net iff &forall; p, p&prime; &isin; P: p &#x2260; p&prime; &#x21d2; (p&bull;&#x2229;p&prime;&bull; = 0 or p&bull; = p&prime;&bull;)
-     *         <pre>
-     *         P - T
-     *         P - T       Yes (no common outputs)
-     *           \
-     *             T
-     *
-     *         P - T
-     *           /
-     *         P - T       No (common outputs, outputs not identical)
-     *
-     *         P - T
-     *           X
-     *         P - T       Yes (common outputs identical) *** only addition to normal free choice net
-     *
-     *         P - T       Yes (common outputs identical)
-     *           /
-     *         P
-     *         </pre>
-     * @author Maxim Gready after James D Bloom
      */
     protected boolean extendedFreeChoiceNet(PetriNet petriNet)
     {
-
-        petriNet.getBackwardsIMatrix();
 
         ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
 
         for (Node transition: sortedTransitions) {
 
             Set<Node> inputPlaces = transition.getInputNodes();
+            Set<Node> previousOutputs = null;
 
             if(inputPlaces.size() > 1){
 
                 for(Node place: inputPlaces){
 
-                    int nodeCount = place.getOutputNodes().size();
-
-                    if(nodeCount > 1){
-
-                        for(int i=0; i<nodeCount; i++){
-                            place.getOutputNodes().toArray(new Node[nodeCount]);
+                    if(previousOutputs != null){
+                        if(!previousOutputs.containsAll(place.getOutputNodes())){
+                            return false;
                         }
-
-                        return false;
                     }
+                    else {
+                        previousOutputs = place.getOutputNodes();
+                    }
+
                 }
             }
-
-
         }
 
-        /*int[] fps1, fps2; // forwards place sets for p and p'
-
-
-
-        for(int placeNo = 0; placeNo < placeCount; placeNo++)
-        {
-            for(int placeDashNo = placeNo + 1; placeDashNo < placeCount; placeDashNo++)
-            {
-                fps1 = forwardsPlaceSet(pnmlData, placeNo);
-                fps2 = forwardsPlaceSet(pnmlData, placeDashNo);
-                if(intersectionBetweenSets(fps1, fps2) && !Arrays.equals(fps1, fps2))
-                {
-                    return false;
-                }
-            }
-        }*/
         return true;
     }
 
@@ -382,301 +332,44 @@ public class ClassificationAction extends AbstractAction
     /**
      * Extended simple net (ESPL-net) detection
      *
-     * @param pnmlData
      * @return true iff no places' outputs go to the same transition, unless one of the places' outputs is a subset of or equal to the other's
-     *         ESPL-net iff &forall; p, p&prime; &isin; P: p &#x2260; p&prime; &#x21d2; (p&bull;&#x2229;p&prime;&bull; = 0 or p&bull; &#x2286; p&prime;&bull; or p&prime;&bull; &#x2286; p&bull;)
-     *         <pre>
-     *         P - T
-     *         P - T       Yes (no common outputs)
-     *           \
-     *             T
-     *
-     *         P - T
-     *           /
-     *         P - T       Yes (common outputs, first place's outputs is subset of second)
-     *
-     *         P - T
-     *           X
-     *         P - T       Yes (common outputs, identical)
-     *
-     *         P - T       Yes (common outputs, identical)
-     *           /
-     *         P
-     *
-     *         P - T
-     *           \
-     *             T       false (common outputs, neither is subset of other)
-     *           /
-     *         P - T
-     *
-     *             T
-     *           /
-     *         P - T       true (common outputs, second's is subset of first's)
-     *           X
-     *         P - T
-     *         </pre>
-     * @author Maxim Gready after James D Bloom
      */
-    boolean extendedSimpleNet(PetriNetView pnmlData)
+    boolean extendedSimpleNet(PetriNet petriNet)
     {
-        int placeCount = pnmlData.numberOfPlaces();
 
-        for(int placeNo = 0; placeNo < placeCount; placeNo++)
-        {
-            for(int placeDashNo = 0; placeDashNo < placeCount; placeDashNo++)
-            {
-                if(placeDashNo != placeNo)
-                {
-                    int[] placeSet = forwardsPlaceSet(pnmlData, placeNo);
-                    int[] placeDashSet = forwardsPlaceSet(pnmlData, placeDashNo);
-                    if(intersectionBetweenSets(placeSet, placeDashSet) &&
-                            (!isSubset(placeSet, placeDashSet)))
-                    {
+        ArrayList<Node> sortedTransitions = petriNet.getSortedTransitions();
+
+        for (Node transition: sortedTransitions) {
+
+            Set<Node> inputPlaces = transition.getInputNodes();
+            ArrayList<Set<Node>> placesOutputs = new ArrayList<>();
+
+            if(inputPlaces.size() > 1){
+
+                for(Node place: inputPlaces){
+                    placesOutputs.add(place.getOutputNodes());
+                }
+
+
+                int largest = 0;
+                int index = 0;
+
+                for(int i=0; i<placesOutputs.size(); i++){
+                    if(placesOutputs.get(i).size() > largest){
+                        largest = placesOutputs.get(i).size();
+                        index = i;
+                    }
+                }
+
+                for (Set<Node> placesOutput : placesOutputs) {
+                    if (!placesOutputs.get(index).containsAll(placesOutput)) {
                         return false;
                     }
                 }
-            }
-        }
-        return true;
-    }
 
-    /**
-     * Counts inputs to given place
-     *
-     * @param pnmlData
-     * @param PlaceNo
-     * @return number of arcs leading to the given place number; -1 on error
-     */
-    private int countPlaceInputs(PetriNetView pnmlData, int PlaceNo)
-    {
-
-        int[][] backwards = pnmlData.getActiveTokenView().getForwardsIncidenceMatrix(
-                pnmlData.getArcsArrayList(),
-                pnmlData.getTransitionsArrayList(), pnmlData.getPlacesArrayList());
-        // The forwards incidence matrix is like this:
-        // | 0 1 |     P0 ->- T0 ->- P1
-        // | 1 0 |       `-<- T1 -<-'
-        // where rows are place numbers and columns are transition numbers.
-        // The number is the weight of the arc from the corresponding transition
-        // to the corresponding place.
-        // It can also be considered the backwards incidence matrix for the place.
-        int count = 0;
-
-        if(PlaceNo < backwards.length)
-        {
-            for(int TransitionNo = 0; TransitionNo < backwards[PlaceNo].length; TransitionNo++)
-            {
-                if(backwards[PlaceNo][TransitionNo] != 0)
-                {
-                    count++;
-                }
-            }
-        }
-        else
-        {
-            return -1;
-        }
-        return count;
-    }
-
-    // Counts outputs from given place
-    // @return number of arcs leading from the given place number; -1 on error
-    private int countPlaceOutputs(PetriNetView pnmlData, int PlaceNo)
-    {
-        int[][] forwards = pnmlData.getActiveTokenView().getBackwardsIncidenceMatrix(
-                pnmlData.getArcsArrayList(),
-                pnmlData.getTransitionsArrayList(), pnmlData.getPlacesArrayList()); // transition backwards = place forwards
-        int count = 0;
-
-        if(PlaceNo >= forwards.length)
-        {
-            return -1;
-        }
-
-        for(int TransitionNo = 0; TransitionNo < forwards[PlaceNo].length; TransitionNo++)
-        {
-            if(forwards[PlaceNo][TransitionNo] != 0)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    // Counts inputs to given transition
-    // @return number of arcs leading to the given transition number; -1 on error
-    private int countTransitionInputs(PetriNetView pnmlData, int TransitionNo)
-    {
-        int[][] backwards = pnmlData.getActiveTokenView().getBackwardsIncidenceMatrix(pnmlData.getArcsArrayList(),
-                pnmlData.getTransitionsArrayList(), pnmlData.getPlacesArrayList());
-        int count = 0;
-
-        if((backwards.length < 1) || (TransitionNo >= backwards[0].length))
-        {
-            return -1;
-        }
-        for(int[] backward : backwards)
-        {
-            if(backward[TransitionNo] != 0)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Counts outputs from given transition
-     *
-     * @param pnmlData
-     * @param TransitionNo
-     * @return number of arcs leading from the given transition number; -1 on error
-     */
-    private int countTransitionOutputs(PetriNetView pnmlData, int TransitionNo)
-    {
-        int[][] forwards = pnmlData.getActiveTokenView().getForwardsIncidenceMatrix(pnmlData.getArcsArrayList(),
-                pnmlData.getTransitionsArrayList(), pnmlData.getPlacesArrayList());
-        int count = 0;
-
-        if((forwards.length < 1) || (TransitionNo >= forwards[0].length))
-        {
-            return -1;
-        }
-
-        for(int[] forward : forwards)
-        {
-            if(forward[TransitionNo] != 0)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    // returns array of ints set to indices of transitions output to by given place
-    private int[] forwardsPlaceSet(PetriNetView pnmlData, int PlaceNo)
-    {
-        int[][] forwards = pnmlData.getActiveTokenView().getBackwardsIncidenceMatrix(pnmlData.getArcsArrayList(),
-                pnmlData.getTransitionsArrayList(), pnmlData.getPlacesArrayList());
-        ArrayList postsetArrayList = new ArrayList();
-
-        for(int TransitionNo = 0; TransitionNo < forwards[PlaceNo].length; TransitionNo++)
-        {
-            if(forwards[PlaceNo][TransitionNo] != 0)
-            {
-                postsetArrayList.add(new Integer(TransitionNo));
             }
         }
 
-        int[] postset = new int[postsetArrayList.size()];
-
-        for(int postsetPosition = 0; postsetPosition < postset.length; postsetPosition++)
-        {
-            postset[postsetPosition] =
-                    ((Integer) postsetArrayList.get(postsetPosition)).intValue();
-        }
-
-        return postset;
-    }
-
-    boolean intersectionBetweenSets(int[] setOne, int[] setTwo)
-    {
-        for(int aSetOne : setOne)
-        {
-            for(int twoPosition = 0; twoPosition < setTwo.length; twoPosition++)
-            {
-                if(aSetOne == setTwo[twoPosition])
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    // returns true if either array is a subset of the other
-    private static boolean isSubset(int[] A, int[] B)
-    {
-        boolean isSubsetOf = false;
-
-        // first you must eliminate all dublicate values from the sets, so run
-        // through each set and replace all dublicates with an inpossible (flag)
-        // value, e.g. -1
-        int[] AA = reduce(A);
-        int[] BB = reduce(B);
-
-        // then look for the set with smaller cardinality being subset of the set
-        // with greater cardinality
-        // make sure 1st agument has smaller cardinality than 2nd
-        if(cardinality(AA) < cardinality(BB))
-        {
-            isSubsetOf = findSubset(AA, BB);
-        }
-        else
-        {
-            isSubsetOf = findSubset(BB, AA);
-        }
-        return isSubsetOf;
-    }
-
-    // eliminate all duplicate values from the set, so run through the set
-    // and replace all duplicates with an inpossible (flag) value, e.g. -1
-    private static int[] reduce(int[] X)
-    {
-
-        for(int i = 0; i < X.length; i++)
-        {
-            for(int j = 0; j < i; j++)
-            { // check values before current index
-                if(X[i] == X[j])
-                {// value already exists in the set
-                    X[i] = -1; // flag dublicate
-                    break;  // and break the inner loop
-                }
-            }
-        }
-        return X;
-    }
-
-    // determine set cardinality (number of distinct values)
-    private static int cardinality(int[] X)
-    {
-        int c = 0; // cardinality
-
-        for(int aX : X)
-        {
-            if(aX != -1)
-            {
-                c++;
-            }
-        }
-        return c;
-    }
-
-    // A has smaller cardinality than B, so only A can be subset of B and not the opposite
-    private static boolean findSubset(int[] A, int[] B)
-    {
-        boolean elementExists;
-
-        // loop through A and see if each of its elements is contained in B
-        // if at least one is not contained, then it is not a subset. watch for flags -1
-        for(int aA : A)
-        {
-            elementExists = false;
-            for(int j = 0; j < B.length; j++)
-            {
-                if(aA == B[j] && aA != -1)
-                { // ith element of A exists in B
-                    elementExists = true;
-                    break;
-                }
-            }
-            // test for particular ith element of A in all of B
-            if(!elementExists)
-            {
-                return false;
-            }
-        }
         return true;
     }
 
