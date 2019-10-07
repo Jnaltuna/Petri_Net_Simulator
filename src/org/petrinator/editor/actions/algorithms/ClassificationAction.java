@@ -136,10 +136,6 @@ public class ClassificationAction extends AbstractAction
                         "Extended SN", "" + extendedSimpleNet(root.getDocument().getPetriNet())
                 }, 2, false, true, false, true);
 
-                /*
-                 * Bounded/safe/deadlock
-                 */
-
                 results.setEnabled(true);
 
             }
@@ -276,54 +272,28 @@ public class ClassificationAction extends AbstractAction
     /**
      * Simple net (SPL-net) detection
      *
-     * @param pnmlData
      * @return true iff no places' outputs go to the same transition, unless one of the places only has one output
-     *         SPL-net iff &forall; p, p&prime; &isin; P: p &#x2260; p&prime; &#x21d2; (p&bull;&#x2229;p&prime;&bull; = 0 or |p&bull;| &#8804; 1 or |p&prime;&bull;| &#8804; 1)
-     *         <pre>
-     *         P - T
-     *         P - T       true (no common outputs)
-     *           \
-     *             T
-     *
-     *         P - T
-     *           /         true (common outputs, both only have one)
-     *         P
-     *
-     *         P - T
-     *           /         true (common outputs, one place has only one)
-     *         P - T
-     *
-     *         P - T
-     *           X         false (common outputs, neither has only one)
-     *         P - T
-     *
-     *         P - T
-     *           \
-     *             T       false (common outputs, neither has only one)
-     *           /
-     *         P - T
-     *         </pre>
-     * @author Maxim Gready after James D Bloom
      */
-    boolean simpleNet(PetriNetView pnmlData)
+    boolean simpleNet(PetriNet petriNet)
     {
-        int placeCount = pnmlData.numberOfPlaces();
+        int placeCount = petriNet.getSortedPlaces().size();
+        ArrayList<Node> places = petriNet.getSortedPlaces();
+        ArrayList<Node> transitions = petriNet.getSortedTransitions();
 
-        for(int placeNo = 0; placeNo < placeCount; placeNo++)
-        {
-            for(int placeDashNo = 0; placeDashNo < placeCount; placeDashNo++)
+        for(Node trans : transitions){
+            boolean t_simple = false;
+            Set<Node> inputs = trans.getInputNodes();
+            if(inputs.size() == 1) //en el caso que la transicion tenga una sola entrada, es una simpleNet
             {
-                if(placeDashNo != placeNo)
-                {
-                    int[] placeSet = forwardsPlaceSet(pnmlData, placeNo);
-                    int[] placeDashSet = forwardsPlaceSet(pnmlData, placeDashNo);
-                    if(intersectionBetweenSets(placeSet, placeDashSet) &&
-                            (countPlaceOutputs(pnmlData, placeNo) > 1) &&
-                            (countPlaceOutputs(pnmlData, placeDashNo) > 1))
-                    {
-                        return false;
-                    }
-                }
+                t_simple = true;
+            }
+            for(Node n : inputs){
+                int outputs = n.getOutputNodes().size();
+                if(outputs == 1)
+                    t_simple = true;
+            }
+            if(!t_simple){
+                return false;
             }
         }
         return true;
