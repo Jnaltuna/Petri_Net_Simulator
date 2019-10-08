@@ -22,26 +22,19 @@ package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.editor.Root;
 import org.petrinator.editor.filechooser.*;
+import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
-import pipe.gui.ApplicationSettings;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.EscapableDialog;
-import pipe.gui.widgets.PetriNetChooserPanel;
 import pipe.gui.widgets.ResultsHTMLPane;
-import pipe.utilities.Expander;
 import pipe.utilities.math.Matrix;
-import pipe.utilities.writers.PNMLWriter;
-import pipe.views.MarkingView;
-import pipe.views.PetriNetView;
-import pipe.views.PlaceView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 
 /**
  * @author Joaquin Felici <joaquinfelici at gmail.com>
@@ -49,8 +42,8 @@ import java.util.LinkedList;
  */
 public class InvariantAction extends AbstractAction
 {
-    Root root;
-    private PetriNetView _pnmlData; // A reference to the Petri Net to be analysed
+    private Root root;
+    //private PetriNetView _pnmlData; // A reference to the Petri Net to be analysed
     private Matrix _incidenceMatrix;
     private Matrix _PInvariants;
     private ResultsHTMLPane results;
@@ -80,15 +73,6 @@ public class InvariantAction extends AbstractAction
         chooser.setCurrentDirectory(root.getCurrentDirectory());
         chooser.setDialogTitle("Save as...");
 
-        File file = new File("tmp/" + "tmp" + "." + "pnml");
-        FileType chosenFileType = (FileType) chooser.getFileFilter();
-        try {
-            chosenFileType.save(root.getDocument(), file);
-        } catch (FileTypeException e1) {
-            e1.printStackTrace();
-        }
-        this._pnmlData = new PetriNetView("tmp/tmp.pnml");
-
         /*
          * Show initial pane
          */
@@ -109,16 +93,9 @@ public class InvariantAction extends AbstractAction
 
         public void actionPerformed(ActionEvent arg0)
         {
-            PetriNetView sourceDataLayer = new PetriNetView("tmp/tmp.pnml");
-
+            //PetriNetView sourceDataLayer = new PetriNetView("tmp/tmp.pnml");
+            _incidenceMatrix = new Matrix(root.getDocument().getPetriNet().getIncidenceMatrix());
             String s = "<h2>Petri Net Invariant Analysis</h2>";
-
-            if(sourceDataLayer == null)
-            {
-                JOptionPane.showMessageDialog(null, "Please, choose a source net",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
 
             if(!root.getDocument().getPetriNet().getRootSubnet().hasPlaces() || !root.getDocument().getPetriNet().getRootSubnet().hasTransitions())
             {
@@ -131,7 +108,7 @@ public class InvariantAction extends AbstractAction
 
                     //PNMLWriter.saveTemporaryFile(sourceDataLayer,this.getClass().getName());
 
-                    s += analyse(sourceDataLayer);
+                    s += analyse();
                     results.setEnabled(true);
                 }
                 catch(OutOfMemoryError oome)
@@ -163,28 +140,14 @@ public class InvariantAction extends AbstractAction
      * this. The method calls have been changed to pass the current markup matrix
      * as the parameter for invariant analysis.
      *
-     * @param pnmlData Petri net to be analyzed
      * @author Nadeem Akharware
      * @return html information to write to panel
      */
-    private String analyse(PetriNetView pnmlData)
+    private String analyse()
     {
         Date start_time = new Date(); // start timer for program execution
         // extract data from PN object
-        int[][] array = pnmlData.getActiveTokenView().getIncidenceMatrix(
-                pnmlData.getArcsArrayList(), pnmlData.getTransitionsArrayList(),
-                pnmlData.getPlacesArrayList());
-        if(array.length == 0)
-        {
-            return "";
-        }
-        _incidenceMatrix = new Matrix(array);
-        LinkedList<MarkingView>[] markings = pnmlData.getCurrentMarkingVector();
-        int[] currentMarking = new int[markings.length];
-        for(int i = 0; i < markings.length; i++)
-        {
-            currentMarking[i] = markings[i].getFirst().getCurrentMarking();
-        }
+        int[] currentMarking = root.getDocument().getPetriNet().getInitialMarking().getMarkingAsArray()[Marking.CURRENT].clone();
 
         String output = findNetInvariants(currentMarking); // Nadeem 26/05/2005
 
@@ -201,7 +164,7 @@ public class InvariantAction extends AbstractAction
      *         Invariants or "None" in place of one of the matrices if it does
      *         not exist.
      */
-    String findNetInvariants(int[] M)
+    private String findNetInvariants(int[] M)
     {
         return reportTInvariants(M) + "<br>" + reportPInvariants(M) + "<br>";
     }
@@ -213,12 +176,12 @@ public class InvariantAction extends AbstractAction
      * @return A string containing the resulting matrix of P Invariants,
      *         the P equations and some analysis
      */
-    String reportPInvariants(int[] M)
+    private String reportPInvariants(int[] M)
     {
         _PInvariants = findVectors(_incidenceMatrix.transpose());
         String result = "<h3>P-Invariants</h3>";
-        result += ResultsHTMLPane.makeTable(
-                _PInvariants, _pnmlData.places(), false, true, true, false);
+        result += makeTable(
+                _PInvariants, root.getDocument().getPetriNet().getSortedPlacesNames(), false, true, true, false);
 
         if(_PInvariants.isCovered())
         {
@@ -240,13 +203,13 @@ public class InvariantAction extends AbstractAction
      * @return A string containing the resulting matrix of T Invariants and
      *         some analysis of it
      */
-    String reportTInvariants(int[] M)
+    private String reportTInvariants(int[] M)
     {
         Matrix TInvariants = findVectors(_incidenceMatrix);
 
         String result = "<h3>T-Invariants</h3>";
-        result += ResultsHTMLPane.makeTable(
-                TInvariants, _pnmlData.getTransitionViews(), false, true, true, false);
+        result += makeTable(
+                TInvariants, root.getDocument().getPetriNet().getSortedTransitionsNames(), false, true, true, false);
 
         if(TInvariants.isCovered())
         {
@@ -264,10 +227,11 @@ public class InvariantAction extends AbstractAction
 
     //<Marc>
     /* It returns a PNMatrix containing the place invariants of the sourceDataLayer net.
-    * @param sourceDataLayer A _dataLayer type object with all the information about
-    *                        the petri net.
-    * @return a PNMatrix where each column contains a place invariant.
-    */
+     * @param sourceDataLayer A _dataLayer type object with all the information about
+     *                        the petri net.
+     * @return a PNMatrix where each column contains a place invariant.
+     */
+    /*
     public Matrix getPInvariants(PetriNetView sourceDataLayer)
     {
         int[][] array = sourceDataLayer.getActiveTokenView()
@@ -288,13 +252,14 @@ public class InvariantAction extends AbstractAction
         }
 
         return findVectors(_incidenceMatrix.transpose());
-    }
+    }*/
 
     /* It returns a PNMatrix containing the transition invariants of the sourceDataLayer net.
-    * @param sourceDataLayer A _dataLayer type object with all the information about
-    *                        the petri net.
-    * @return a PNMatrix where each column contains a transition invariant.
-    */
+     * @param sourceDataLayer A _dataLayer type object with all the information about
+     *                        the petri net.
+     * @return a PNMatrix where each column contains a transition invariant.
+     */
+    /*
     public Matrix getTInvariants(PetriNetView sourceDataLayer)
     {
         int[][] array = sourceDataLayer.getActiveTokenView().getIncidenceMatrix(
@@ -314,7 +279,7 @@ public class InvariantAction extends AbstractAction
         }
 
         return findVectors(_incidenceMatrix);
-    }
+    }*/
     //</Marc>
 
     /**
@@ -324,9 +289,9 @@ public class InvariantAction extends AbstractAction
      * @return A string containing the resulting P equations,
      *         empty string if the equations do not exist.
      */
-    String findPEquations(int[] currentMarking)
+    private String findPEquations(int[] currentMarking)
     {
-        PlaceView[] placeViewArray = _pnmlData.places();
+        ArrayList<String> placeNames = root.getDocument().getPetriNet().getSortedPlacesNames();
         String eq = "<h3>P-Invariant equations</h3>";
         int m = _PInvariants.getRowDimension();
         int n = _PInvariants.getColumnDimension();
@@ -355,7 +320,7 @@ public class InvariantAction extends AbstractAction
                 }
                 if(a > 0)
                 {
-                    eq += "M(" + placeViewArray[j].getName() + ") + "; // Nadeem 28/05/2005
+                    eq += "M(" + placeNames.get(j) + ") + "; // Nadeem 28/05/2005
                 }
             }
             // replace the last occurance of "+ "
@@ -375,7 +340,7 @@ public class InvariantAction extends AbstractAction
      * @param c The matrix to transform.
      * @return A matrix containing the vectors.
      */
-    public Matrix findVectors(Matrix c)
+    private Matrix findVectors(Matrix c)
     {
         /*
        | Tests Invariant Analysis IModule
@@ -632,16 +597,12 @@ public class InvariantAction extends AbstractAction
     private int effectiveSetLength(int[] pSet)
     {
         int effectiveLength = 0; // number of non-zero elements
-        int setLength = pSet.length;
+        //int setLength = pSet.length;
 
-        for(int i = 0; i < setLength; i++)
-        {
-            if(pSet[i] != 0)
-            {
+        for (int value : pSet) {
+            if (value != 0) {
                 effectiveLength++;
-            }
-            else
-            {
+            } else {
                 return effectiveLength;
             }
         }
@@ -700,9 +661,7 @@ public class InvariantAction extends AbstractAction
     private void resetArray(int[] a)
     {
         for(int i = 0; i < a.length; i++)
-        {
             a[i] = 0;
-        }
     }
 
     /**
@@ -749,5 +708,46 @@ public class InvariantAction extends AbstractAction
             }
         }
         return true;
+    }
+
+    //TODO view if we should update the ResultsHTMLPane class or keep here
+    private static String makeTable(Matrix matrix, ArrayList<String> name, boolean showLines, boolean doShading, boolean columnHeaders, boolean rowHeaders) {
+        int cols = name.size();
+        int[] k = matrix.getColumnPackedCopy();
+        StringBuilder s = new StringBuilder();
+        s.append("<table border=").append(showLines ? 1 : 0).append(" cellspacing=2>");
+        s.append("<tr").append(doShading ? " class= odd>" : ">");
+
+        int j;
+        for(j = 0; j < cols; ++j) {
+            if (j == 0 && rowHeaders) {
+                s.append("<td class=empty> </td>");
+            }
+
+            s.append("<td class=").append(columnHeaders ? "colhead>" : "cell>").append(name.get(j)).append("</td>");
+        }
+
+        s.append("</tr>");
+        j = 0;
+
+        for(int i = 0; i < k.length; ++i) {
+            if (j == 0) {
+                s.append("<tr").append(doShading ? " class=" + (i / cols % 2 == 1 ? "odd>" : "even>") : ">");
+            }
+
+            if (j == 0 && rowHeaders) {
+                s.append("<td class=empty></td>");
+            }
+
+            s.append("<td class=cell>").append(k[i]).append("</td>");
+            ++j;
+            if (j == cols) {
+                s.append("</tr>");
+                j = 0;
+            }
+        }
+
+        s.append("</table>");
+        return s.toString();
     }
 }
