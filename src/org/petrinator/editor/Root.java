@@ -329,6 +329,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private Action matrixAction;
 
     private Action stopSimulation;
+    private Action restartNet;
 
     //per application
     private Action openSubnet;
@@ -475,6 +476,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private JToolBar toolBar = new JToolBar();
     private JMenuBar menuBar = new JMenuBar();
     private JButton stopButton = new JButton();
+    private JButton restartButton = new JButton();
 
     private void setupFrameIcons() {
         List<Image> icons = new LinkedList<Image>();
@@ -538,6 +540,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         Action selectTool_TokenAction = new TokenSelectToolAction(this);
 
         stopSimulation = new StopSimulationAction(this);
+        restartNet = new RestartNetAction(this);
 
         saveSubnetAs = new SaveSubnetAsAction(this);
         replaceSubnet = new ReplaceSubnetAction(this);
@@ -598,6 +601,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         toolBar.add(simulateNet);
 
         stopButton = toolBar.add(stopSimulation);
+        restartButton = toolBar.add(restartNet);
 
         toolBar.add(graphMultiplePlacesAction);
         toolBar.addSeparator();
