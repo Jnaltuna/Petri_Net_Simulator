@@ -545,6 +545,35 @@ public class Marking {
 
     }
 
+    /**
+     * Changes initial marking map taking the tokens from the current marking
+     */
+    public void updateInitialMarking(){
+
+        Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
+
+        for(Place p : allPlaces){
+
+            mapinit.put(p,map.get(p));
+
+        }
+
+    }
+
+    /**
+     * Resets the marking of the PetriNet to the state in initial marking
+     */
+    public void resetMarking(){
+
+        Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
+
+        for(Place p : allPlaces){
+
+            map.put(p,mapinit.get(p));
+
+        }
+    }
+
 
 
 }
