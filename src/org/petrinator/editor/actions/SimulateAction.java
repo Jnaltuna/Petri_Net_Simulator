@@ -178,6 +178,7 @@ public class SimulateAction extends AbstractAction
 
         //setEnabled(false);
         root.disableWhileSimulating();
+        root.getDocument().getPetriNet().getInitialMarking().updateInitialMarking();
 
         /*
          * Run a single thread to fire the transitions graphically
