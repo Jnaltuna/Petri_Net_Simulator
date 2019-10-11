@@ -279,15 +279,19 @@ public class SimulateAction extends AbstractAction
                     e1.printStackTrace();
                 }
                 // System.out.println(""); // Need at least one instruction in while, otherwise it will explode
-
-                if(checkAllAre(petri.getEnabledTransitions(),false))   // We need to check if the net is blocked and no more transitions can be fored
+                //TODO check logic
+                if(petri.isBlockedPetriNet() && !petri.anyWaiting())   // We need to check if the net is blocked and no more transitions can be fored
                 {
                     blocked = true;
                     simTime = monitor.getTimeElapsed();
                     JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + ((ConcreteObserver) observer).getEvents().size() + " transitions were fired.");
+
+                    System.out.println(" > Monitor blocked");
+                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
+
                     break;
                 }
-                else if(blockedMonitor(threads, petri))
+                /*else if(blockedMonitor(threads, petri))
                 {
                     blocked = true;
                     simTime = monitor.getTimeElapsed();
@@ -297,7 +301,7 @@ public class SimulateAction extends AbstractAction
                     System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
 
                     break;
-                }
+                }*/
             }
         }
 
@@ -364,8 +368,8 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
-                        //Thread.sleep(10);
-                        Thread.sleep(new Random().nextInt(50)); // Random value between 0 and 50 ms
+                        Thread.sleep(1);
+                        //Thread.sleep(new Random().nextInt(50)); // Random value between 0 and 50 ms
                         m.fireTransition(id);
                     } catch (IllegalTransitionFiringError | IllegalArgumentException | PetriNetException e) {
                         e.printStackTrace();
@@ -513,6 +517,7 @@ public class SimulateAction extends AbstractAction
 
     static boolean blockedMonitor(List<Thread> threads, RootPetriNet p)
     {
+
         for(Thread t: threads)
         {
             if((t.getState() != Thread.State.WAITING) || p.anyWaiting())
