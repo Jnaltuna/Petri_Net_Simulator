@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
+import org.petrinator.editor.actions.algorithms.reachability.CRTree;
 
 import org.graphstream.graph.*;
 

@@ -601,6 +601,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         toolBar.add(simulateNet);
 
         stopButton = toolBar.add(stopSimulation);
+
         restartButton = toolBar.add(restartNet);
 
         toolBar.add(graphMultiplePlacesAction);

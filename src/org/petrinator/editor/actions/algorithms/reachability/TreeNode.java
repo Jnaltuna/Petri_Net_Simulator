@@ -1,4 +1,4 @@
-package org.petrinator.editor.actions.algorithms.newReachability;
+package org.petrinator.editor.actions.algorithms.reachability;
 
 import java.util.ArrayList;
 import java.util.Arrays;
