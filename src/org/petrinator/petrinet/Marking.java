@@ -551,7 +551,6 @@ public class Marking {
     public void updateInitialMarking(){
 
         Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
-
         for(Place p : allPlaces){
 
             mapinit.put(p,map.get(p));

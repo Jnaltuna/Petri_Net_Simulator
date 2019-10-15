@@ -50,6 +50,7 @@ public class AddPlaceCommand implements Command {
         createdPlace.setCenter(x, y);
         petriNet.getNodeSimpleIdGenerator().setUniqueId(createdPlace);
         petriNet.getNodeLabelGenerator().setLabelToNewlyCreatedNode(createdPlace);
+        petriNet.getInitialMarking().setTokens(createdPlace,0);
         subnet.addElement(createdPlace);
     }
 
