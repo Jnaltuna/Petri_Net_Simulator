@@ -564,6 +564,9 @@ public class Marking {
      */
     public void resetMarking(){
 
+        if(mapinit.isEmpty())
+            return;
+
         Set<Place> allPlaces = petriNet.getRootSubnet().getPlaces();
 
         for(Place p : allPlaces){
