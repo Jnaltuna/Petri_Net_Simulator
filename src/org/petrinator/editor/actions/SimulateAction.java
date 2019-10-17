@@ -334,8 +334,8 @@ public class SimulateAction extends AbstractAction
             simTime = monitor.getSimulationTime();
         }
 
-        JOptionPane.showMessageDialog(root.getParentFrame(), "Tiempo de simulacion: " + simTime + " ms");
-        //TODO ver si hace falta dejar o si ponemos que se cierre solo
+        if(simTime != -1)
+            JOptionPane.showMessageDialog(root.getParentFrame(), "Tiempo de simulacion: " + simTime + " ms");
 
         /*
          * We fire the net graphically
