@@ -230,12 +230,14 @@ public class SimulateAction extends AbstractAction
 		 /*
 		  * Subscribe to all transitions
 		  */
-        Observer<String> observer = new ConcreteObserver(root);
+        /*Observer<String> observer = new ConcreteObserver(root);
         for(int i = 0; i < petri.getTransitions().length; i++)
         {
             MTransition t = petri.getTransitions()[i];
+
+            //TODO: SACAR ESTOO
             Subscription subscription = monitor.subscribeToTransition(t, observer);
-        }
+        }*/
 
 		 /*
 		  * Create one thread per transition, start them all to try and fire them.
