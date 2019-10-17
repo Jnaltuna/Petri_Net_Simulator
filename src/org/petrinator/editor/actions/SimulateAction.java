@@ -223,21 +223,21 @@ public class SimulateAction extends AbstractAction
 
         TransitionsPolicy policy = new FirstInLinePolicy();
         PetriMonitor monitor = new PetriMonitor(petri, policy, numberOfTransitions);
-        monitor.simulationRunning = true;
+        PetriMonitor.simulationRunning = true;
 
         petri.initializePetriNet();
 
 		 /*
 		  * Subscribe to all transitions
 		  */
-        /*Observer<String> observer = new ConcreteObserver(root);
+        Observer<String> observer = new ConcreteObserver(root);
         for(int i = 0; i < petri.getTransitions().length; i++)
         {
             MTransition t = petri.getTransitions()[i];
 
             //TODO: SACAR ESTOO
             Subscription subscription = monitor.subscribeToTransition(t, observer);
-        }*/
+        }
 
 		 /*
 		  * Create one thread per transition, start them all to try and fire them.
@@ -271,7 +271,8 @@ public class SimulateAction extends AbstractAction
             //for(int i= 0; i<petri.getEnabledTransitions().length; i++)
             //    System.out.print(petri.getEnabledTransitions()[i]);
 
-            if(((ConcreteObserver) observer).getEvents().size() >= numberOfTransitions)  // If there have been N events already
+            //if(((ConcreteObserver) observer).getEvents().size() >= numberOfTransitions)  // If there have been N events already
+            if(!PetriMonitor.simulationRunning)
                 break;
             else
             {
@@ -308,7 +309,7 @@ public class SimulateAction extends AbstractAction
             }
         }
 
-        monitor.simulationRunning = false;
+        //monitor.simulationRunning = false;
         System.out.println(" > Simulation started");
         dialog.show(false);
 
