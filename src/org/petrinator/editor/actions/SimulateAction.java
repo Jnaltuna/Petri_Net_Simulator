@@ -23,7 +23,6 @@ import org.petrinator.editor.Root;
 import org.petrinator.editor.filechooser.FileChooserDialog;
 import org.petrinator.editor.filechooser.FileType;
 import org.petrinator.editor.filechooser.FileTypeException;
-import org.petrinator.monitor.ConcreteObserver;
 import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
 import org.petrinator.editor.commands.FireTransitionCommand;
@@ -37,11 +36,9 @@ import org.unc.lac.javapetriconcurrencymonitor.monitor.PetriMonitor;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.policies.FirstInLinePolicy;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.policies.TransitionsPolicy;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.RootPetriNet;
-import org.unc.lac.javapetriconcurrencymonitor.petrinets.components.MTransition;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.factory.PetriNetFactory;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.factory.PetriNetFactory.petriNetType;
-import rx.Observer;
-import rx.Subscription;
+
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -135,7 +132,6 @@ public class SimulateAction extends AbstractAction
             myPanel.add(new JLabel("Time between transition [ms]:  "));
             myPanel.add(new JLabel ("    "));
             myPanel.add(time,"wrap");
-            //myPanel.add(new JLabel("ms"));
         }
 
         myPanel.add(new JLabel("Skip graphic simulation: "));
@@ -228,18 +224,6 @@ public class SimulateAction extends AbstractAction
         petri.initializePetriNet();
 
 		 /*
-		  * Subscribe to all transitions
-		  */
-        Observer<String> observer = new ConcreteObserver(root);
-        for(int i = 0; i < petri.getTransitions().length; i++)
-        {
-            MTransition t = petri.getTransitions()[i];
-
-            //TODO: SACAR ESTOO
-            Subscription subscription = monitor.subscribeToTransition(t, observer);
-        }
-
-		 /*
 		  * Create one thread per transition, start them all to try and fire them.
 		  */
         List<Thread> threads = new ArrayList<Thread>();
@@ -266,12 +250,7 @@ public class SimulateAction extends AbstractAction
 		  */
         while(true)
         {
-            //System.out.println(((ConcreteObserver) observer).getEvents().size() + " | Tread " + threads.get(0).getId() + " " +  threads.get(0).getState() + " | Tread " + threads.get(1).getId() + " " + threads.get(1).getState() + "\n");
 
-            //for(int i= 0; i<petri.getEnabledTransitions().length; i++)
-            //    System.out.print(petri.getEnabledTransitions()[i]);
-
-            //if(((ConcreteObserver) observer).getEvents().size() >= numberOfTransitions)  // If there have been N events already
             if(!PetriMonitor.simulationRunning)
                 break;
             else
@@ -282,16 +261,15 @@ public class SimulateAction extends AbstractAction
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
-                // System.out.println(""); // Need at least one instruction in while, otherwise it will explode
-                //TODO check logic
+
                 if(petri.isBlockedPetriNet() && !petri.anyWaiting())   // We need to check if the net is blocked and no more transitions can be fored
                 {
                     blocked = true;
                     simTime = monitor.getTimeElapsed();
-                    JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + ((ConcreteObserver) observer).getEvents().size() + " transitions were fired.");
+                    JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + monitor.getListOfEvents().size() + " transitions were fired.");
 
                     System.out.println(" > Monitor blocked");
-                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
+                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", monitor.getListOfEvents().size());
 
                     break;
                 }
@@ -347,12 +325,11 @@ public class SimulateAction extends AbstractAction
             place.clearValues();
         }
         analyzePlaces(timeBetweenTransitions);
-        fireGraphically(((ConcreteObserver) observer).getEvents(), timeBetweenTransitions, numberOfTransitions, skipGraphicalFire);
+        fireGraphically(monitor.getListOfEvents(), timeBetweenTransitions, numberOfTransitions, skipGraphicalFire);
         new SelectionSelectToolAction(root).actionPerformed(e);
 
         running = false;
         System.out.println(" > Simulation ended");
-        //setEnabled(true);
         root.enableAfterStop();
     }
 
@@ -373,7 +350,6 @@ public class SimulateAction extends AbstractAction
                     try
                     {
                         Thread.sleep(1);
-                        //Thread.sleep(new Random().nextInt(50)); // Random value between 0 and 50 ms
                         m.fireTransition(id);
                     } catch (IllegalTransitionFiringError | IllegalArgumentException | PetriNetException e) {
                         e.printStackTrace();
@@ -392,17 +368,10 @@ public class SimulateAction extends AbstractAction
      * @param timeBetweenTransitions milliseconds to wait between events performed
      * @return
      */
-    void fireGraphically(List<String> list, int timeBetweenTransitions, int numberOfTransitions,boolean skipGraphicalFire)
-    {
-        /*
-         * If we wanna keep track of the current iteration, we need to do it with a separate variable,
-         * because the list usually has EQUAL objects (such as two equal strings that indicate that the
-         * same transition was fired twice), and the method indexOf(element) returns the index of the
-         * first occurrence in the list (and as the strings are equal, the  objects are equal), so
-         * we might get the index of the first event that fired this transition, not the current one.
-         */
+    void fireGraphically(ArrayList<String[]> listOfEvents, int timeBetweenTransitions, int numberOfTransitions, boolean skipGraphicalFire){
+
         int i = 0;
-        for(String event : list)
+        for(String[] event : listOfEvents)
         {
             /*
              * Check if stop button has been pressed
@@ -411,34 +380,24 @@ public class SimulateAction extends AbstractAction
             {
                 stop = false;
                 setEnabled(true);
-                list.clear();
+                listOfEvents.clear();
                 System.out.println(" > Simulation stopped by user");
                 return;
             }
 
-            System.out.println(event);
-            List<String> transitionInfo = Arrays.asList(event.split(","));
-            String transitionId = transitionInfo.get(2);
-            transitionId = transitionId.replace("\"", "");
-            transitionId = transitionId.replace("id:", "");
-            transitionId = transitionId.replace("}", "");
+            System.out.println(Arrays.toString(event));
 
             double time = 0;
             try
             {
-                String _time  = transitionInfo.get(3);
-                _time = _time.replace("\"", "");
-                _time = _time.replace("time:", "");
-                _time = _time.replace("}", "");
-                time = Double.parseDouble(_time) * 1000;
+                time = Double.parseDouble(event[PetriMonitor.TIME]) * 1000;
             }
             catch (ArrayIndexOutOfBoundsException e) {} // The transition is not timed, so no time to retrieve. No biggy.
 
 
-            Transition transition = root.getDocument().petriNet.getRootSubnet().getTransition(transitionId);
+            Transition transition = root.getDocument().petriNet.getRootSubnet().getTransition(event[PetriMonitor.TID]);
             Marking marking = root.getDocument().petriNet.getInitialMarking();
 
-            //System.out.println(transition.getLabel() + " was fired!");
             if(!skipGraphicalFire)
                 root.getEventList().addEvent((transition.getLabel() + " was fired!"));
 
@@ -452,7 +411,7 @@ public class SimulateAction extends AbstractAction
 
                     try {
                         System.out.println("Sleeping " + (int) time);
-                        Thread.currentThread().sleep((int) time);
+                        Thread.sleep((int) time);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -482,7 +441,7 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
-                        Thread.currentThread().sleep(timeBetweenTransitions);
+                        Thread.sleep(timeBetweenTransitions);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -491,7 +450,7 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
-                        Thread.currentThread().sleep(50);
+                        Thread.sleep(50);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -501,6 +460,7 @@ public class SimulateAction extends AbstractAction
         if(skipGraphicalFire){
             root.refreshAll();
         }
+
     }
 
     /*
