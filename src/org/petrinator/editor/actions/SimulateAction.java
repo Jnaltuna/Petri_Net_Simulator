@@ -251,6 +251,7 @@ public class SimulateAction extends AbstractAction
         while(true)
         {
 
+
             if(!PetriMonitor.simulationRunning)
                 break;
             else
@@ -266,24 +267,17 @@ public class SimulateAction extends AbstractAction
                 {
                     blocked = true;
                     simTime = monitor.getTimeElapsed();
-                    JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + monitor.getListOfEvents().size() + " transitions were fired.");
+
+                    if(monitor.getListOfEvents().size() == 0)
+                        JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked.\n\nMake sure that at least one fired\n transition comes before the automatic ones.\n\n" + monitor.getListOfEvents().size() + " transitions were fired.");
+                    else
+                        JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + monitor.getListOfEvents().size() + " transitions were fired.");
 
                     System.out.println(" > Monitor blocked");
                     System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", monitor.getListOfEvents().size());
 
                     break;
                 }
-                /*else if(blockedMonitor(threads, petri))
-                {
-                    blocked = true;
-                    simTime = monitor.getTimeElapsed();
-                    JOptionPane.showMessageDialog(root.getParentFrame(), " \n The net is blocked. Make sure that at least one \n fired transition comes before the automatic ones.      \n ");
-
-                    System.out.println(" > Monitor blocked");
-                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
-
-                    break;
-                }*/
             }
         }
 
