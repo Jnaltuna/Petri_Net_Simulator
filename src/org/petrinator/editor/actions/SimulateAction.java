@@ -37,6 +37,7 @@ import org.unc.lac.javapetriconcurrencymonitor.exceptions.PetriNetException;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.PetriMonitor;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.policies.FirstInLinePolicy;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.policies.TransitionsPolicy;
+import org.unc.lac.javapetriconcurrencymonitor.petrinets.CudaPetriNet;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.RootPetriNet;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.factory.PetriNetFactory;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.factory.PetriNetFactory.petriNetType;
@@ -203,7 +204,7 @@ public class SimulateAction extends AbstractAction
                 cudaServer = serverCheck.isSelected();
 
                 if(cudaServer){
-                    serverIP = String.format("%s:%s", ipTF.getText(), portTF.getText());
+                    serverIP = String.format("http://%s:%s", ipTF.getText(), portTF.getText());
                 }
 
                 if(_transitions < numberOfTransitions || _time < timeBetweenTransitions){
@@ -266,7 +267,14 @@ public class SimulateAction extends AbstractAction
 
         try
         {  // The exception tell us if there's two places or transitions with the same name
-            petri = factory.makePetriNet(petriNetType.PLACE_TRANSITION);
+            if(cudaServer) {
+                petri = factory.makePetriNet(petriNetType.CUDA);
+                ((CudaPetriNet) petri).initializeCuda(serverIP);
+
+            }
+            else{
+                petri = factory.makePetriNet(petriNetType.PLACE_TRANSITION);
+            }
         } catch (DuplicatedNameError e)
         {
             JOptionPane.showMessageDialog(null, "Two places or transitions cannot have the same label");
