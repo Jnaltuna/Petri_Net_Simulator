@@ -269,7 +269,7 @@ public class SimulateAction extends AbstractAction
         {  // The exception tell us if there's two places or transitions with the same name
             if(cudaServer) {
                 petri = factory.makePetriNet(petriNetType.CUDA);
-                ((CudaPetriNet) petri).initializeCuda(serverIP);
+                boolean init = ((CudaPetriNet) petri).initializeCuda(serverIP);
 
             }
             else{
