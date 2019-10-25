@@ -266,7 +266,8 @@ public class SimulateAction extends AbstractAction
 
         try
         {  // The exception tell us if there's two places or transitions with the same name
-            petri = factory.makePetriNet(petriNetType.PLACE_TRANSITION);
+            //petri = factory.makePetriNet(petriNetType.PLACE_TRANSITION);
+            petri = factory.makePetriNet(petriNetType.CUDA);
         } catch (DuplicatedNameError e)
         {
             JOptionPane.showMessageDialog(null, "Two places or transitions cannot have the same label");
