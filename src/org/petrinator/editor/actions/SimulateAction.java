@@ -273,7 +273,6 @@ public class SimulateAction extends AbstractAction
                 petri = factory.makePetriNet(petriNetType.CUDA);
                 boolean init = ((CudaPetriNet) petri).initializeCuda(serverIP);
                 if(!init){
-                    JOptionPane.showMessageDialog(null, "Connection to server failed");
                     return;
                 }
 
