@@ -246,6 +246,7 @@ public class SimulateAction extends AbstractAction
             public void run()
             {
                 runInMonitor(number, time, skip, cuda);
+                root.enableAfterStop();
             }
         });
         t.start();
@@ -270,6 +271,10 @@ public class SimulateAction extends AbstractAction
             if(cudaServer) {
                 petri = factory.makePetriNet(petriNetType.CUDA);
                 boolean init = ((CudaPetriNet) petri).initializeCuda(serverIP);
+                if(!init){
+                    JOptionPane.showMessageDialog(null, "Connection to server failed");
+                    return;
+                }
 
             }
             else{
@@ -316,7 +321,6 @@ public class SimulateAction extends AbstractAction
 		  */
         while(true)
         {
-
 
             if(!PetriMonitor.simulationRunning)
                 break;
@@ -390,7 +394,7 @@ public class SimulateAction extends AbstractAction
 
         running = false;
         System.out.println(" > Simulation ended");
-        root.enableAfterStop();
+        //root.enableAfterStop();
     }
 
     /*
