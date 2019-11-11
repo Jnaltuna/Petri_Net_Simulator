@@ -85,7 +85,7 @@ public class DocumentImporter {
 
         document.petriNet.getNodeSimpleIdGenerator().fixFutureUniqueIds();
         document.petriNet.getNodeSimpleIdGenerator().ensureNumberIds();
-        document.petriNet.getNodeLabelGenerator().fixFutureUniqueLabels();
+        //document.petriNet.getNodeLabelGenerator().fixFutureUniqueLabels();
 
         for (XmlRole xmlRole : xmlDocument.roles) {
             Role role = new Role();

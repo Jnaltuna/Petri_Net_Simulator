@@ -51,7 +51,7 @@ public class ReplaceSubnetCommand implements Command {
         this.petriNet = petriNet;
         this.subnet = subnet;
         Subnet clonedSubnet = ElementCloner.getClone(storedSubnet, petriNet);
-        petriNet.getNodeLabelGenerator().setLabelsToReplacedSubnet(clonedSubnet);
+        //petriNet.getNodeLabelGenerator().setLabelsToReplacedSubnet(clonedSubnet);
         this.storedSubnet = clonedSubnet;
 
     }

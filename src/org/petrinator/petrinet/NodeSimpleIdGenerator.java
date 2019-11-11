@@ -16,9 +16,6 @@
  */
 package org.petrinator.petrinet;
 
-import java.util.Set;
-
-
 public class NodeSimpleIdGenerator extends NodeIdGenerator{
 
     private PetriNet petriNet;

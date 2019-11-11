@@ -16,12 +16,8 @@
  */
 package org.petrinator.petrinet;
 
-/**
- *
- * @author Martin Riesz <riesz.martin at gmail.com>
- */
+
 public class NodeIdGenerator {
-    //TODO estaban static, ver si hay algun error al sacarlo
     private int nextUniquePlaceNumber = 1;
     private int nextUniqueTransitionNumber = 1;
     private int nextUniqueSubnetNumber = 1;

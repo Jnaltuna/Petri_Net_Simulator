@@ -21,7 +21,7 @@ public class PasteCommand implements Command {
         this.subnet = currentSubnet;
         this.elements = elements;
         this.petriNet = petriNet;
-        petriNet.getNodeLabelGenerator().setLabelsToPastedContent(elements);
+        //petriNet.getNodeLabelGenerator().setLabelsToPastedContent(elements);
 
         Point translation = calculateTranslatioToCenter(elements, currentSubnet);
         for (Element element : elements)

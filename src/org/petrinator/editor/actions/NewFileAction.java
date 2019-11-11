@@ -57,7 +57,7 @@ public class NewFileAction extends AbstractAction {
             root.getDocument().roles.clear();
             root.getDocument().petriNet.getNodeSimpleIdGenerator().fixFutureUniqueIds();
             root.getDocument().petriNet.getNodeSimpleIdGenerator().ensureNumberIds();
-            root.getDocument().petriNet.getNodeLabelGenerator().fixFutureUniqueLabels();
+            //root.getDocument().petriNet.getNodeLabelGenerator().fixFutureUniqueLabels();
             root.setClickedElement(null);
             root.refreshAll();
             root.getUndoManager().eraseAll();
