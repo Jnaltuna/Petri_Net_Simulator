@@ -65,6 +65,8 @@ public class SimulateAction extends AbstractAction
     public static List<Double> instants = new ArrayList<Double>();
     private boolean running = false;
     private String serverIP = "";
+    private String defaultIP = "localhost";
+    private String defaultPort = "8080";
 
     public SimulateAction(Root root, List<FileType> fileTypes) {
         this.root = root;
@@ -171,8 +173,8 @@ public class SimulateAction extends AbstractAction
 
         timeTF.setText("1000");
         numberTF.setText("10");
-        ipTF.setText("localhost");
-        portTF.setText("8080");
+        ipTF.setText(defaultIP);
+        portTF.setText(defaultPort);
 
         serverCheck.addActionListener(actionEvent -> {
             if(serverCheck.isSelected()){
@@ -205,6 +207,8 @@ public class SimulateAction extends AbstractAction
 
                 if(cudaServer){
                     serverIP = String.format("http://%s:%s", ipTF.getText(), portTF.getText());
+                    defaultIP = ipTF.getText();
+                    defaultPort=portTF.getText();
                 }
 
                 if(_transitions < numberOfTransitions || _time < timeBetweenTransitions){

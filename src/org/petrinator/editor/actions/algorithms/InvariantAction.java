@@ -76,7 +76,7 @@ public class InvariantAction extends AbstractAction
         /*
          * Show initial pane
          */
-        EscapableDialog guiDialog = new EscapableDialog(root.getParentFrame(), "Minimal siphons and traps", true);
+        EscapableDialog guiDialog = new EscapableDialog(root.getParentFrame(), "Invariant analysis", true);
         Container contentPane = guiDialog.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         //sourceFilePanel = new PetriNetChooserPanel("Source net", null);

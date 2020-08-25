@@ -13,7 +13,7 @@ public class SaveMarkingAction extends AbstractAction {
     public SaveMarkingAction(Root root){
         this.root = root;
         putValue(NAME, "Save Marking");
-        putValue(SHORT_DESCRIPTION, "Save actual marking");
+        putValue(SHORT_DESCRIPTION, "Save current marking");
         putValue(SMALL_ICON, GraphicsTools.getIcon("pneditor/savemarking.gif"));
 
     }

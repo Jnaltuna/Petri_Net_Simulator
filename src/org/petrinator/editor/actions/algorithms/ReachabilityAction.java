@@ -134,7 +134,10 @@ public class ReachabilityAction extends AbstractAction
             // Disables the calculate button
             calculateButton.setButtonsEnabled(false);
 
-            String log = "<h2>Reachability/Coverability Graph Information</h2>";
+            String log = "<p></p><h2>Reachability/Coverability Graph Information</h2>";
+
+            log += "<h3> Number of places: "+root.getDocument().getPetriNet().getSortedPlaces().size() +"</h3>";
+            log += "<h3> Number of transitions: "+root.getDocument().getPetriNet().getSortedTransitions().size() +"</h3>";
 
             //TODO check tree size
             try {

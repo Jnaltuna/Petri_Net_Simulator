@@ -12,7 +12,7 @@ public class CRTree {
     private static final int NAN = -1;
 
     private boolean bounded = true;
-    private boolean safe = false;
+    private boolean safe = true;
 
     private boolean deadlock = false;
     private ArrayList<Integer> spDeadlock;
