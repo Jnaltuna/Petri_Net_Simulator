@@ -21,7 +21,6 @@ import java.util.Set;
 
 public class NodeSimpleIdGenerator extends NodeIdGenerator{
 
-    //private int nextUniqueId = 1; //rootSubnet has already id == 0
     private PetriNet petriNet;
 
     public NodeSimpleIdGenerator(PetriNet petriNet) {
@@ -33,25 +32,7 @@ public class NodeSimpleIdGenerator extends NodeIdGenerator{
     }
 
     public void fixFutureUniqueIds() {
-
         super.fixFutureUniqueIds(petriNet.getRootSubnet());
-
-        int maxId = 0;
-
-        Set<Node> allNodes = petriNet.getRootSubnet().getNodesRecursively();
-        allNodes.add(petriNet.getRootSubnet());
-
-        for (Node node : allNodes) {
-            try {
-                int id = Integer.parseInt(node.getId());
-                if (id > maxId) {
-                    maxId = id;
-                }
-            } catch (NumberFormatException ex) {
-                //do nothing
-            }
-        }
-        //nextUniqueId = maxId + 1;
     }
 
     public void ensureNumberIds() {

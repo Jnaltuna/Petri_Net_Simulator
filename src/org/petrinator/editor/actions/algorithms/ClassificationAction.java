@@ -21,12 +21,11 @@
 package org.petrinator.editor.actions.algorithms;
 
 import org.petrinator.editor.Root;
-import org.petrinator.editor.actions.algorithms.newReachability.CRTree;
+import org.petrinator.editor.actions.algorithms.reachability.CRTree;
 import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
 import pipe.gui.widgets.ButtonBar;
 import pipe.gui.widgets.ResultsHTMLPane;
-import pipe.views.PetriNetView;
 
 import javax.swing.*;
 import java.awt.*;

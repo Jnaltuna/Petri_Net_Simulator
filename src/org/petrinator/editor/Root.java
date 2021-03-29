@@ -84,7 +84,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
 
     public Root(String[] args)
     {
-    	PNEditor.setRoot(this);
+        PNEditor.setRoot(this);
 
         loadPreferences();
         selection.setSelectionChangedListener(this);
@@ -330,6 +330,8 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
 
     private Action stopSimulation;
     private Action restartNet;
+    private Action saveMarking;
+    private Action reloadFile;
 
     //per application
     private Action openSubnet;
@@ -395,7 +397,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         delete.setEnabled(isDeletable);
         setArcMultiplicity.setEnabled(isArc);
         setArcInhibitory.setEnabled(isPtoT);
-        setArcReset.setEnabled(isPtoT); //TODO
+        setArcReset.setEnabled(isPtoT);
         setArcReader.setEnabled(isPtoT);
         //setArcReset.setEnabled(false);
         setTokens.setEnabled(isPlaceNode);
@@ -477,6 +479,8 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     private JMenuBar menuBar = new JMenuBar();
     private JButton stopButton = new JButton();
     private JButton restartButton = new JButton();
+    private JButton saveMarkingButton = new JButton();
+    private JButton reloadFileButton = new JButton();
 
     private void setupFrameIcons() {
         List<Image> icons = new LinkedList<Image>();
@@ -541,6 +545,8 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
 
         stopSimulation = new StopSimulationAction(this);
         restartNet = new RestartNetAction(this);
+        saveMarking = new SaveMarkingAction(this);
+        reloadFile = new ReloadFileAction(this, openSaveFiletypes);
 
         saveSubnetAs = new SaveSubnetAsAction(this);
         replaceSubnet = new ReplaceSubnetAction(this);
@@ -601,7 +607,12 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
         toolBar.add(simulateNet);
 
         stopButton = toolBar.add(stopSimulation);
+
         restartButton = toolBar.add(restartNet);
+
+        saveMarkingButton = toolBar.add(saveMarking);
+
+        reloadFileButton = toolBar.add(reloadFile);
 
         toolBar.add(graphMultiplePlacesAction);
         toolBar.addSeparator();
@@ -878,6 +889,7 @@ public class Root implements WindowListener, ListSelectionListener, SelectionCha
     public DrawingBoard getDrawingBoard() {
         return drawingBoard;
     }
+
 
 
 }

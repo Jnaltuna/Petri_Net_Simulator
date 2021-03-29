@@ -20,6 +20,7 @@
 
 package org.petrinator.editor.actions.algorithms;
 
+import com.google.gson.JsonElement;
 import org.petrinator.editor.Root;
 
 import org.petrinator.petrinet.Document;
@@ -27,6 +28,7 @@ import org.petrinator.petrinet.Transition;
 import org.petrinator.petrinet.Marking;
 import org.petrinator.util.GraphicsTools;
 import pipe.gui.widgets.ButtonBar;
+import pipe.gui.widgets.FileBrowser;
 import pipe.gui.widgets.ResultsHTMLPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,8 +37,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Paths;
 import java.util.*;
-
+import com.google.gson.Gson;
 
 public class MatricesAction extends AbstractAction
 {
@@ -78,6 +83,7 @@ public class MatricesAction extends AbstractAction
         results = new ResultsHTMLPane("");
         contentPane.add(results);
 
+        contentPane.add(new ButtonBar("Save as JSON", new ExportListener(), guiDialog.getRootPane()));
         contentPane.add(new ButtonBar("Calculate", new CalculateListener(), guiDialog.getRootPane()));
 
     }
@@ -96,6 +102,44 @@ public class MatricesAction extends AbstractAction
         guiDialog.setLocationRelativeTo(root.getParentFrame());
         guiDialog.setVisible(true);
 
+    }
+
+    private class ExportListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            if(!root.getDocument().getPetriNet().getRootSubnet().isValid()) {
+                JOptionPane.showMessageDialog(null, "Invalid Net!", "Error", JOptionPane.ERROR_MESSAGE, null);
+                return;
+            }
+
+            Map<String, Object> matrices = new HashMap<>();
+
+            Gson gson = new Gson();
+
+            matrices.put("I-", root.getDocument().getPetriNet().getBackwardsIMatrix());
+            matrices.put("I+", root.getDocument().getPetriNet().getForwardIMatrix());
+            matrices.put("Incidencia", root.getDocument().getPetriNet().getIncidenceMatrix());
+            matrices.put("Inhibicion", root.getDocument().getPetriNet().getInhibitionMatrix());
+            matrices.put("Marcado", root.getDocument().getPetriNet().getInitialMarking().getMarkingAsArray()[Marking.CURRENT]);
+
+            String json = gson.toJson(matrices);
+
+            try {
+                FileBrowser fileBrowser = new FileBrowser("JSON file", "json", Paths.get(".").toAbsolutePath().normalize().toString());
+                String destFN = fileBrowser.saveFile();
+                if (!destFN.toLowerCase().endsWith(".json")) {
+                    destFN = destFN + ".json";
+                }
+
+                FileWriter writer = new FileWriter(new File(destFN));
+                writer.write(json);
+                writer.close();
+            } catch (Exception var6) {
+                System.out.println("Error saving JSON to file");
+            }
+        }
     }
 
     /**

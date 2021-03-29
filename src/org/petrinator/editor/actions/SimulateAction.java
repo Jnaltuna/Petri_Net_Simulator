@@ -23,11 +23,12 @@ import org.petrinator.editor.Root;
 import org.petrinator.editor.filechooser.FileChooserDialog;
 import org.petrinator.editor.filechooser.FileType;
 import org.petrinator.editor.filechooser.FileTypeException;
-import org.petrinator.monitor.ConcreteObserver;
 import org.petrinator.petrinet.*;
 import org.petrinator.util.GraphicsTools;
 import org.petrinator.editor.commands.FireTransitionCommand;
 import org.petrinator.auxiliar.*;
+
+import java.awt.event.*;
 import java.util.*;
 
 import org.unc.lac.javapetriconcurrencymonitor.errors.DuplicatedNameError;
@@ -36,15 +37,13 @@ import org.unc.lac.javapetriconcurrencymonitor.exceptions.PetriNetException;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.PetriMonitor;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.policies.FirstInLinePolicy;
 import org.unc.lac.javapetriconcurrencymonitor.monitor.policies.TransitionsPolicy;
+import org.unc.lac.javapetriconcurrencymonitor.petrinets.CudaPetriNet;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.RootPetriNet;
-import org.unc.lac.javapetriconcurrencymonitor.petrinets.components.MTransition;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.factory.PetriNetFactory;
 import org.unc.lac.javapetriconcurrencymonitor.petrinets.factory.PetriNetFactory.petriNetType;
-import rx.Observer;
-import rx.Subscription;
+
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.List;
 
@@ -65,6 +64,9 @@ public class SimulateAction extends AbstractAction
     ActionEvent e;
     public static List<Double> instants = new ArrayList<Double>();
     private boolean running = false;
+    private String serverIP = "";
+    private String defaultIP = "localhost";
+    private String defaultPort = "8080";
 
     public SimulateAction(Root root, List<FileType> fileTypes) {
         this.root = root;
@@ -119,41 +121,95 @@ public class SimulateAction extends AbstractAction
         int numberOfTransitions = 1;
         int timeBetweenTransitions = 10;
         boolean skipGraphicalFire = false;
+        boolean cudaServer = false;
 
-        JTextField number = new JTextField(8);
-        JTextField time = new JTextField(8);
-        JCheckBox skip = new JCheckBox();
+        JTextField numberTF = new JTextField(8);
+        JTextField timeTF = new JTextField(8);
+        JCheckBox skipCheck = new JCheckBox();
+        JCheckBox serverCheck = new JCheckBox();
+        JTextField ipTF = new JTextField(16);
+        JTextField portTF = new JTextField(6);
 
         JPanel myPanel = new JPanel();
         myPanel.setLayout(new MigLayout());
+
         myPanel.add(new JLabel("Number of transitions:  "));
         myPanel.add(new JLabel ("    "));
-        myPanel.add(number,"wrap");
+        myPanel.add(numberTF,"wrap");
 
         if(!root.getDocument().petriNet.getRootSubnet().anyStochastic())
         {
             myPanel.add(new JLabel("Time between transition [ms]:  "));
             myPanel.add(new JLabel ("    "));
-            myPanel.add(time,"wrap");
-            //myPanel.add(new JLabel("ms"));
+            myPanel.add(timeTF,"wrap");
         }
+
+        myPanel.add(new JLabel("\n"), "wrap");
 
         myPanel.add(new JLabel("Skip graphic simulation: "));
         myPanel.add(new JLabel ("    "));
-        myPanel.add(skip);
+        myPanel.add(skipCheck, "wrap");
 
-        time.setText("1000");
-        number.setText("10");
+        myPanel.add(new JLabel("\n"), "wrap");
 
-        int result = JOptionPane.showConfirmDialog(root.getParentFrame(), myPanel, "Simulation time", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, GraphicsTools.getIcon("pneditor/play32.png"));
+        myPanel.add(new JLabel("\nExcecute simulation in a remote server: "));
+        myPanel.add(new JLabel ("    "));
+        myPanel.add(serverCheck, "wrap");
+
+        JLabel ipLabel = new JLabel("Server IP: ");
+        JLabel portLabel = new JLabel("Port: ");
+
+        myPanel.add(ipLabel);
+        myPanel.add(new JLabel ("    "));
+        myPanel.add(ipTF,"wrap");
+        myPanel.add(portLabel);
+        myPanel.add(new JLabel ("    "));
+        myPanel.add(portTF, "wrap");
+
+        ipTF.setVisible(false);
+        ipLabel.setVisible(false);
+        portTF.setVisible(false);
+        portLabel.setVisible(false);
+
+        timeTF.setText("1000");
+        numberTF.setText("10");
+        ipTF.setText(defaultIP);
+        portTF.setText(defaultPort);
+
+        serverCheck.addActionListener(actionEvent -> {
+            if(serverCheck.isSelected()){
+                ipTF.setVisible(true);
+                ipLabel.setVisible(true);
+                portTF.setVisible(true);
+                portLabel.setVisible(true);
+            }
+            else {
+                ipTF.setVisible(false);
+                ipLabel.setVisible(false);
+                portTF.setVisible(false);
+                portLabel.setVisible(false);
+            }
+        });
+
+        int result = JOptionPane.CANCEL_OPTION;
+
+        result = JOptionPane.showConfirmDialog(root.getParentFrame(), myPanel, "Simulation time", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, GraphicsTools.getIcon("pneditor/play32.png"));
         if (result == JOptionPane.OK_OPTION)
         {
+
             try
             {
-                int _transitions = Integer.parseInt(number.getText());
-                int _time = Integer.parseInt(time.getText());
+                int _transitions = Integer.parseInt(numberTF.getText());
+                int _time = Integer.parseInt(timeTF.getText());
 
-                skipGraphicalFire = skip.isSelected();
+                skipGraphicalFire = skipCheck.isSelected();
+                cudaServer = serverCheck.isSelected();
+
+                if(cudaServer){
+                    serverIP = String.format("http://%s:%s", ipTF.getText(), portTF.getText());
+                    defaultIP = ipTF.getText();
+                    defaultPort=portTF.getText();
+                }
 
                 if(_transitions < numberOfTransitions || _time < timeBetweenTransitions){
                     throw new NumberFormatException();
@@ -172,25 +228,29 @@ public class SimulateAction extends AbstractAction
                 return; // Don't execute further code
             }
         }
-        else if(result == JOptionPane.CANCEL_OPTION){
+        else {
             return;
         }
 
-        //setEnabled(false);
+
         root.disableWhileSimulating();
         root.getDocument().getPetriNet().getInitialMarking().updateInitialMarking();
 
         /*
          * Run a single thread to fire the transitions graphically
          */
-        final boolean c = skipGraphicalFire;
-        final int a = numberOfTransitions; final int b= timeBetweenTransitions;
+        final boolean skip = skipGraphicalFire;
+        final boolean cuda = cudaServer;
+        final int number = numberOfTransitions;
+        final int time = timeBetweenTransitions;
+
         Thread t = new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                runInMonitor(a, b, c);
+                runInMonitor(number, time, skip, cuda);
+                root.enableAfterStop();
             }
         });
         t.start();
@@ -202,7 +262,7 @@ public class SimulateAction extends AbstractAction
      * @detail After getting all the firings the user set, it creates a thread that
      * will "fire" the transitions within our editor every x millis.
      */
-    public void runInMonitor(int numberOfTransitions, int timeBetweenTransitions, boolean skipGraphicalFire)
+    private void runInMonitor(int numberOfTransitions, int timeBetweenTransitions, boolean skipGraphicalFire, boolean cudaServer)
     {
         /*
          * Create monitor, petri net, and all related variables.
@@ -212,7 +272,19 @@ public class SimulateAction extends AbstractAction
 
         try
         {  // The exception tell us if there's two places or transitions with the same name
-            petri = factory.makePetriNet(petriNetType.PLACE_TRANSITION);
+
+            if(cudaServer) {
+                petri = factory.makePetriNet(petriNetType.CUDA);
+                boolean init = ((CudaPetriNet) petri).initializeCuda(serverIP);
+                if(!init){
+                    return;
+                }
+
+            }
+            else{
+                petri = factory.makePetriNet(petriNetType.PLACE_TRANSITION);
+            }
+
         } catch (DuplicatedNameError e)
         {
             JOptionPane.showMessageDialog(null, "Two places or transitions cannot have the same label");
@@ -223,19 +295,9 @@ public class SimulateAction extends AbstractAction
 
         TransitionsPolicy policy = new FirstInLinePolicy();
         PetriMonitor monitor = new PetriMonitor(petri, policy, numberOfTransitions);
-        monitor.simulationRunning = true;
+        PetriMonitor.simulationRunning = true;
 
         petri.initializePetriNet();
-
-		 /*
-		  * Subscribe to all transitions
-		  */
-        Observer<String> observer = new ConcreteObserver(root);
-        for(int i = 0; i < petri.getTransitions().length; i++)
-        {
-            MTransition t = petri.getTransitions()[i];
-            Subscription subscription = monitor.subscribeToTransition(t, observer);
-        }
 
 		 /*
 		  * Create one thread per transition, start them all to try and fire them.
@@ -264,12 +326,8 @@ public class SimulateAction extends AbstractAction
 		  */
         while(true)
         {
-            //System.out.println(((ConcreteObserver) observer).getEvents().size() + " | Tread " + threads.get(0).getId() + " " +  threads.get(0).getState() + " | Tread " + threads.get(1).getId() + " " + threads.get(1).getState() + "\n");
 
-            //for(int i= 0; i<petri.getEnabledTransitions().length; i++)
-            //    System.out.print(petri.getEnabledTransitions()[i]);
-
-            if(((ConcreteObserver) observer).getEvents().size() >= numberOfTransitions)  // If there have been N events already
+            if(!PetriMonitor.simulationRunning)
                 break;
             else
             {
@@ -279,34 +337,26 @@ public class SimulateAction extends AbstractAction
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
-                // System.out.println(""); // Need at least one instruction in while, otherwise it will explode
-                //TODO check logic
+
                 if(petri.isBlockedPetriNet() && !petri.anyWaiting())   // We need to check if the net is blocked and no more transitions can be fored
                 {
                     blocked = true;
                     simTime = monitor.getTimeElapsed();
-                    JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + ((ConcreteObserver) observer).getEvents().size() + " transitions were fired.");
+
+                    if(monitor.getListOfEvents().size() == 0)
+                        JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked.\n\nMake sure that at least one fired\n transition comes before the automatic ones.\n\n" + monitor.getListOfEvents().size() + " transitions were fired.");
+                    else
+                        JOptionPane.showMessageDialog(root.getParentFrame(), "The net is blocked, " + monitor.getListOfEvents().size() + " transitions were fired.");
 
                     System.out.println(" > Monitor blocked");
-                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
+                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", monitor.getListOfEvents().size());
 
                     break;
                 }
-                /*else if(blockedMonitor(threads, petri))
-                {
-                    blocked = true;
-                    simTime = monitor.getTimeElapsed();
-                    JOptionPane.showMessageDialog(root.getParentFrame(), " \n The net is blocked. Make sure that at least one \n fired transition comes before the automatic ones.      \n ");
-
-                    System.out.println(" > Monitor blocked");
-                    System.out.printf("Transiciones disparadas antes de bloquearse: %d\n", ((ConcreteObserver) observer).getEvents().size());
-
-                    break;
-                }*/
             }
         }
 
-        monitor.simulationRunning = false;
+        //monitor.simulationRunning = false;
         System.out.println(" > Simulation started");
         dialog.show(false);
 
@@ -331,8 +381,8 @@ public class SimulateAction extends AbstractAction
             simTime = monitor.getSimulationTime();
         }
 
-        JOptionPane.showMessageDialog(root.getParentFrame(), "Tiempo de simulacion: " + simTime + " ms");
-        //TODO ver si hace falta dejar o si ponemos que se cierre solo
+        if(simTime != -1)
+            JOptionPane.showMessageDialog(root.getParentFrame(), "Tiempo de simulacion: " + simTime + " ms");
 
         /*
          * We fire the net graphically
@@ -344,13 +394,12 @@ public class SimulateAction extends AbstractAction
             place.clearValues();
         }
         analyzePlaces(timeBetweenTransitions);
-        fireGraphically(((ConcreteObserver) observer).getEvents(), timeBetweenTransitions, numberOfTransitions, skipGraphicalFire);
+        fireGraphically(monitor.getListOfEvents(), timeBetweenTransitions, numberOfTransitions, skipGraphicalFire);
         new SelectionSelectToolAction(root).actionPerformed(e);
 
         running = false;
         System.out.println(" > Simulation ended");
-        //setEnabled(true);
-        root.enableAfterStop();
+        //root.enableAfterStop();
     }
 
     /*
@@ -370,11 +419,8 @@ public class SimulateAction extends AbstractAction
                     try
                     {
                         Thread.sleep(1);
-                        //Thread.sleep(new Random().nextInt(50)); // Random value between 0 and 50 ms
                         m.fireTransition(id);
-                    } catch (IllegalTransitionFiringError | IllegalArgumentException | PetriNetException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
+                    } catch (IllegalTransitionFiringError | IllegalArgumentException | PetriNetException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
@@ -389,17 +435,10 @@ public class SimulateAction extends AbstractAction
      * @param timeBetweenTransitions milliseconds to wait between events performed
      * @return
      */
-    void fireGraphically(List<String> list, int timeBetweenTransitions, int numberOfTransitions,boolean skipGraphicalFire)
-    {
-        /*
-         * If we wanna keep track of the current iteration, we need to do it with a separate variable,
-         * because the list usually has EQUAL objects (such as two equal strings that indicate that the
-         * same transition was fired twice), and the method indexOf(element) returns the index of the
-         * first occurrence in the list (and as the strings are equal, the  objects are equal), so
-         * we might get the index of the first event that fired this transition, not the current one.
-         */
+    void fireGraphically(ArrayList<String[]> listOfEvents, int timeBetweenTransitions, int numberOfTransitions, boolean skipGraphicalFire){
+
         int i = 0;
-        for(String event : list)
+        for(String[] event : listOfEvents)
         {
             /*
              * Check if stop button has been pressed
@@ -408,34 +447,24 @@ public class SimulateAction extends AbstractAction
             {
                 stop = false;
                 setEnabled(true);
-                list.clear();
+                listOfEvents.clear();
                 System.out.println(" > Simulation stopped by user");
                 return;
             }
 
-            System.out.println(event);
-            List<String> transitionInfo = Arrays.asList(event.split(","));
-            String transitionId = transitionInfo.get(2);
-            transitionId = transitionId.replace("\"", "");
-            transitionId = transitionId.replace("id:", "");
-            transitionId = transitionId.replace("}", "");
+            System.out.println(Arrays.toString(event));
 
             double time = 0;
             try
             {
-                String _time  = transitionInfo.get(3);
-                _time = _time.replace("\"", "");
-                _time = _time.replace("time:", "");
-                _time = _time.replace("}", "");
-                time = Double.parseDouble(_time) * 1000;
+                time = Double.parseDouble(event[PetriMonitor.TIME]) * 1000;
             }
             catch (ArrayIndexOutOfBoundsException e) {} // The transition is not timed, so no time to retrieve. No biggy.
 
 
-            Transition transition = root.getDocument().petriNet.getRootSubnet().getTransition(transitionId);
+            Transition transition = root.getDocument().petriNet.getRootSubnet().getTransition(event[PetriMonitor.TID]);
             Marking marking = root.getDocument().petriNet.getInitialMarking();
 
-            //System.out.println(transition.getLabel() + " was fired!");
             if(!skipGraphicalFire)
                 root.getEventList().addEvent((transition.getLabel() + " was fired!"));
 
@@ -449,7 +478,7 @@ public class SimulateAction extends AbstractAction
 
                     try {
                         System.out.println("Sleeping " + (int) time);
-                        Thread.currentThread().sleep((int) time);
+                        Thread.sleep((int) time);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -479,7 +508,7 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
-                        Thread.currentThread().sleep(timeBetweenTransitions);
+                        Thread.sleep(timeBetweenTransitions);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -488,7 +517,7 @@ public class SimulateAction extends AbstractAction
                 {
                     try
                     {
-                        Thread.currentThread().sleep(50);
+                        Thread.sleep(50);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -498,33 +527,7 @@ public class SimulateAction extends AbstractAction
         if(skipGraphicalFire){
             root.refreshAll();
         }
-    }
 
-    /*
-    * @brief Checks if all booleans in array are either true or false
-    * @param array that contains all booleans
-    * @param value the value that we want all the booleans to have
-    * @returns true if all match, false otherwise
-    */
-    static boolean checkAllAre(boolean[] array, boolean value)
-    {
-        for(int i = 0; i < array.length; i++)
-        {
-            if(array[i] != value)
-                return false;
-        }
-        return true;
-    }
-
-    static boolean blockedMonitor(List<Thread> threads, RootPetriNet p)
-    {
-
-        for(Thread t: threads)
-        {
-            if((t.getState() != Thread.State.WAITING) || p.anyWaiting())
-                return false;
-        }
-        return true;
     }
 
     public void countDown(Transition t)
@@ -540,12 +543,10 @@ public class SimulateAction extends AbstractAction
                     try
                     {
                         root.repaintCanvas();
-                        Thread.currentThread().sleep(5);
+                        Thread.sleep(5);
                         t.setTime((int) (t.getTime()-(System.currentTimeMillis()-begin)));
                         begin = System.currentTimeMillis();
-                    } catch (IllegalTransitionFiringError | IllegalArgumentException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
+                    } catch (IllegalTransitionFiringError | IllegalArgumentException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
