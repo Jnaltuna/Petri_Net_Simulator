@@ -22,3 +22,4 @@ out/artifacts/petrinator_jar/tmp/GSPN_Analysis.html
 
 .idea/
 target/
+!pom.xml
