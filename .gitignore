@@ -19,3 +19,6 @@ out/artifacts/petrinator_jar/tmp/GSPN_Analysis.html
 
 # Project exclude paths
 /out/
+
+.idea/
+target/
