@@ -14,6 +14,11 @@
 !*.html
 !*.xsl
 !lib/*
+!repo/*
+!*.jar
+!*.pom
+!*.xml
+
 out/artifacts/petrinator_jar/tmp/GSPN_Analysis.html
 !out/artifacts/petrinator_jar/petrinator.jar
 
